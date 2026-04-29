@@ -7,7 +7,7 @@ import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-manage-groups',
-  imports: [CommonModule, FormsModule, RouterLink, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule],
   templateUrl: './manage-groups.html',
   styleUrl: './manage-groups.css',
 })

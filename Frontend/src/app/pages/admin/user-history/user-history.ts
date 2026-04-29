@@ -20,9 +20,9 @@ export class UserHistoryComponent implements OnInit {
   toast = signal<{ message: string; type: 'success' | 'error' } | null>(null);
 
   levels = [
-    { value: 'beginner', label: 'Beginner' },
-    { value: 'intermediate', label: 'Intermediate' },
-    { value: 'advanced', label: 'Advanced' },
+    { value: 'beginner', label: 'Fresher' },
+    { value: 'intermediate', label: 'Intern' },
+    { value: 'advanced', label: 'Intermediate' },
     { value: 'expert', label: 'Expert' }
   ];
 

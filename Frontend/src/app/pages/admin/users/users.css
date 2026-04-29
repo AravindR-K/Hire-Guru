@@ -20,6 +20,7 @@ color: var(--text-secondary);
   margin: 0;
 }
 
+
 .filter-tabs {
   display: flex;
   gap: 8px;

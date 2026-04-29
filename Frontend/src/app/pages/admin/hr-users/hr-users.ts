@@ -8,7 +8,7 @@ import { QuizService } from '../../../services/quiz.service';
 @Component({
   selector: 'app-hr-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './hr-users.html',
   styleUrl: './hr-users.css'
 })
