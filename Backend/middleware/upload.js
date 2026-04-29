@@ -21,13 +21,23 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-    'application/vnd.ms-excel' // .xls
+    'application/vnd.ms-excel', // .xls
+    'application/pdf', // .pdf
+    'application/msword', // .doc
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // .docx
   ];
   
-  if (allowedTypes.includes(file.mimetype) || file.originalname.endsWith('.xlsx') || file.originalname.endsWith('.xls')) {
+  if (
+    allowedTypes.includes(file.mimetype) || 
+    file.originalname.endsWith('.xlsx') || 
+    file.originalname.endsWith('.xls') ||
+    file.originalname.endsWith('.pdf') ||
+    file.originalname.endsWith('.doc') ||
+    file.originalname.endsWith('.docx')
+  ) {
     cb(null, true);
   } else {
-    cb(new Error('Only Excel files (.xlsx, .xls) are allowed'), false);
+    cb(new Error('Only Excel, PDF, and Word files are allowed'), false);
   }
 };
 

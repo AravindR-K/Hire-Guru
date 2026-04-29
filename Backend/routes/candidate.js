@@ -4,6 +4,9 @@ const Quiz = require('../models/Quiz');
 const Question = require('../models/Question');
 const Submission = require('../models/Submission');
 const { protect, authorize } = require('../middleware/auth');
+const upload = require('../middleware/upload');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 
 // All candidate routes require authentication + candidate role
@@ -269,21 +272,41 @@ router.get('/profile', async (req, res) => {
 });
 
 // @route   PUT /api/candidate/profile
-// @desc    Update candidate profile (topics of interest)
+// @desc    Update candidate profile (name, email, phone, resume, topics of interest)
 // @access  Candidate
-router.put('/profile', async (req, res) => {
+router.put('/profile', upload.single('resume'), async (req, res) => {
   try {
-    const { topicsOfInterest } = req.body;
+    const { name, email, phoneNumber, topicsOfInterest } = req.body;
     
-    if (topicsOfInterest && !Array.isArray(topicsOfInterest)) {
-      return res.status(400).json({ message: 'Topics of interest must be an array' });
-    }
-
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: 'User not found' });
     
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+    
     if (topicsOfInterest) {
-      user.topicsOfInterest = topicsOfInterest;
+      try {
+        // If sent as FormData, it will be a JSON string
+        const parsedTopics = typeof topicsOfInterest === 'string' ? JSON.parse(topicsOfInterest) : topicsOfInterest;
+        if (Array.isArray(parsedTopics)) {
+          user.topicsOfInterest = parsedTopics;
+        }
+      } catch (e) {
+        return res.status(400).json({ message: 'Invalid format for topics of interest' });
+      }
+    }
+    
+    // Handle resume upload
+    if (req.file) {
+      // If there's an old resume, delete it from the file system
+      if (user.resume) {
+        const oldResumePath = path.join(__dirname, '..', 'uploads', path.basename(user.resume));
+        if (fs.existsSync(oldResumePath)) {
+          fs.unlinkSync(oldResumePath);
+        }
+      }
+      user.resume = `/uploads/${req.file.filename}`;
     }
     
     await user.save();
@@ -294,10 +317,43 @@ router.put('/profile', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        phoneNumber: user.phoneNumber,
+        resume: user.resume,
         level: user.level,
         topicsOfInterest: user.topicsOfInterest
       }
     });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   DELETE /api/candidate/profile/resume
+// @desc    Delete candidate resume
+// @access  Candidate
+router.delete('/profile/resume', async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    if (user.resume) {
+      const resumePath = path.join(__dirname, '..', 'uploads', path.basename(user.resume));
+      if (fs.existsSync(resumePath)) {
+        fs.unlinkSync(resumePath);
+      }
+      user.resume = '';
+      await user.save();
+    }
+    
+    res.json({ message: 'Resume deleted successfully', user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      resume: user.resume,
+      level: user.level,
+      topicsOfInterest: user.topicsOfInterest
+    } });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

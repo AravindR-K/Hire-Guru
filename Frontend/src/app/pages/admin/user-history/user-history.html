@@ -16,7 +16,25 @@
             <div class="student-avatar">{{ user().name?.charAt(0) }}</div>
             <div class="student-info">
               <h1>{{ user().name }}</h1>
-              <p>{{ user().email }}</p>
+              <div class="student-contact-info">
+                <span class="contact-item">
+                  <span class="material-symbols-rounded">mail</span> {{ user().email }}
+                </span>
+                @if (user().phoneNumber) {
+                  <span class="contact-item">
+                    <span class="material-symbols-rounded">call</span> {{ user().phoneNumber }}
+                  </span>
+                }
+              </div>
+              
+              @if (user().resume) {
+                <div class="student-resume-info">
+                  <a [href]="getResumeUrl(user().resume)" target="_blank" class="resume-badge">
+                    <span class="material-symbols-rounded">description</span>
+                    View Resume
+                  </a>
+                </div>
+              }
             </div>
           </div>
 

@@ -183,6 +183,10 @@
       return this.http.put(`${this.candidateUrl}/profile`, data);
     }
 
+    deleteCandidateResume(): Observable<any> {
+      return this.http.delete(`${this.candidateUrl}/profile/resume`);
+    }
+
     getResultDetails(submissionId: string): Observable<any> {
       return this.http.get(`${this.candidateUrl}/results/${submissionId}`);
     }

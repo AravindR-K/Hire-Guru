@@ -95,4 +95,9 @@ export class UserHistoryComponent implements OnInit {
   logout(): void {
     this.authService.logout();
   }
+
+  getResumeUrl(resumePath: string): string {
+    if (!resumePath) return '';
+    return `http://localhost:5000${resumePath}`;
+  }
 }

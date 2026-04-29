@@ -343,4 +343,47 @@
 .evaluation-summary button:hover {
   background-color: #dc2626;
   color: white;
-  }
+}
+
+/* Additional Styles for Contact Info & Resume */
+.student-contact-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 6px;
+}
+.contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.contact-item .material-symbols-rounded {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+.student-resume-info {
+  margin-top: 14px;
+}
+.resume-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.resume-badge:hover {
+  background: #667eea;
+  color: #fff;
+}
+.resume-badge .material-symbols-rounded {
+  font-size: 18px;
+}

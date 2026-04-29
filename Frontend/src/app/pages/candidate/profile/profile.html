@@ -3,11 +3,43 @@
     <div class="loading-center"><div class="spinner spinner-lg"></div><p class="loading-text">Loading profile...</p></div>
   } @else if (user()) {
     <div class="profile-header card card-padding">
-      <div class="profile-avatar">{{ user().name?.charAt(0)?.toUpperCase() }}</div>
-      <div class="profile-info">
-        <h1>{{ user().name }}</h1>
-        <p class="profile-email">{{ user().email }}</p>
-        <p class="profile-joined">Member since {{ user().createdAt | date:'mediumDate' }}</p>
+      <div class="profile-header-main">
+        <div class="profile-avatar">{{ user().name?.charAt(0)?.toUpperCase() }}</div>
+        <div class="profile-info">
+          <h1>{{ user().name }}</h1>
+          <p class="profile-email">
+            <span class="material-symbols-rounded">mail</span>
+            {{ user().email }}
+          </p>
+          @if (user().phoneNumber) {
+            <p class="profile-phone">
+              <span class="material-symbols-rounded">call</span>
+              {{ user().phoneNumber }}
+            </p>
+          }
+          <p class="profile-joined">Member since {{ user().createdAt | date:'mediumDate' }}</p>
+          
+          <!-- Resume Display -->
+          @if (user().resume) {
+            <div class="resume-display">
+              <a [href]="getResumeUrl()" target="_blank" class="resume-link">
+                <span class="material-symbols-rounded">description</span>
+                View Resume
+              </a>
+              <button class="btn btn-ghost btn-icon-only remove-resume-btn" (click)="deleteResume()" title="Remove Resume">
+                <span class="material-symbols-rounded">delete</span>
+              </button>
+            </div>
+          } @else {
+            <p class="no-resume-text">No resume uploaded</p>
+          }
+        </div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn btn-primary" (click)="openEditProfile()">
+          <span class="material-symbols-rounded">edit</span>
+          Update Profile
+        </button>
       </div>
     </div>
 
@@ -121,3 +153,50 @@
     </div>
   }
 </div>
+
+<!-- Edit Profile Modal -->
+@if (isEditingProfile()) {
+  <div class="modal-overlay" (click)="closeEditProfile()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Update Profile</h2>
+        <button class="icon-btn" (click)="closeEditProfile()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input class="form-input" [(ngModel)]="editName" placeholder="Enter full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" [(ngModel)]="editEmail" placeholder="Enter email address" type="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-input" [(ngModel)]="editPhone" placeholder="Enter phone number" type="tel">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Upload New Resume (PDF, DOC)</label>
+          <div class="file-upload-wrap">
+            <input type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx" class="form-input file-input">
+          </div>
+          @if (user()?.resume) {
+            <small class="form-hint">Uploading a new resume will replace your existing one.</small>
+          }
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeEditProfile()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveProfile()" [disabled]="isSavingProfile()">
+          @if (isSavingProfile()) {
+            <span class="spinner spinner-sm"></span> Saving...
+          } @else {
+            Save Changes
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

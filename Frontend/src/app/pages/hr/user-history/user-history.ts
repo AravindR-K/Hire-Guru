@@ -94,4 +94,9 @@ export class HRUserHistoryComponent {
   logout(): void {
     this.authService.logout();
   }
+
+  getResumeUrl(resumePath: string): string {
+    if (!resumePath) return '';
+    return `http://localhost:5000${resumePath}`;
+  }
 }
