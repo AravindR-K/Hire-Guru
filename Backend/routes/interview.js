@@ -27,13 +27,9 @@ router.post('/', authorize('admin', 'hr', 'pm'), async (req, res) => {
       return res.status(400).json({ message: 'Candidate and position are required' });
     }
 
-    // Validate candidate exists and is a candidate
+    // Validate candidate exists
     const candidate = await User.findById(candidateId);
     if (!candidate) return res.status(404).json({ message: 'Candidate not found' });
-
-    // Validate interviewer exists
-    const interviewer = await User.findById(interviewerId);
-    if (!interviewer) return res.status(404).json({ message: 'Interviewer not found' });
 
     // Build quiz array if quiz IDs provided
     let quizzes = [];
