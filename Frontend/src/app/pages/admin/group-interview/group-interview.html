@@ -1,1 +1,478 @@
-<p>group-interview works!</p>
+<div class="page-container animate-fade-in">
+  <div class="content-wrapper">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h1>Group Interviews</h1>
+        <p class="page-subtitle">Create and manage batch interview sessions for candidate groups</p>
+      </div>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <span class="material-symbols-rounded">group_add</span>
+        Create Group Interview
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="mini-stat">
+        <span class="mini-stat-value">{{ stats().total }}</span>
+        <span class="mini-stat-label">Total</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-value orange">{{ stats().pending }}</span>
+        <span class="mini-stat-label">In Progress</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-value blue">{{ stats().completed }}</span>
+        <span class="mini-stat-label">Completed</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-value green">{{ stats().accepted }}</span>
+        <span class="mini-stat-label">Accepted</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-value red">{{ stats().rejected }}</span>
+        <span class="mini-stat-label">Rejected</span>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <select class="filter-select" [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()">
+        <option value="">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="quiz_phase">Quiz Phase</option>
+        <option value="coding_phase">Coding Phase</option>
+        <option value="evaluation">Evaluation</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+
+    <!-- Interview Group List -->
+    @if (loading()) {
+      <div class="loading-center"><div class="spinner spinner-lg"></div><p>Loading interviews...</p></div>
+    } @else if (groupedList().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-rounded">groups</span>
+        <h3>No group interviews found</h3>
+        <p>Create your first group interview session to get started</p>
+      </div>
+    } @else {
+      <div class="interview-list">
+        @for (g of groupedList(); track g.groupId) {
+          <div class="interview-card card card-padding" (click)="openDetail(g)">
+            <div class="iv-card-top">
+              <div class="iv-group-info">
+                <div class="iv-group-avatar">
+                  <span class="material-symbols-rounded">groups</span>
+                </div>
+                <div>
+                  <h3 class="iv-name">{{ g.groupId }}</h3>
+                  <p class="iv-email">{{ g.members.length }} candidate{{ g.members.length !== 1 ? 's' : '' }} · {{ g.position }}</p>
+                </div>
+              </div>
+              <div class="iv-badges">
+                <span class="badge badge-group">Group</span>
+                @if (completedCount(g.members) === g.members.length && g.members.length > 0) {
+                  <span class="badge badge-success">All Done</span>
+                } @else {
+                  <span class="badge badge-warning">In Progress</span>
+                }
+              </div>
+            </div>
+
+            <div class="iv-card-meta">
+              <span class="meta-item"><span class="material-symbols-rounded">work</span> {{ g.position }}</span>
+              @if (g.techStack) {
+                <span class="meta-item"><span class="material-symbols-rounded">code</span> {{ g.techStack }}</span>
+              }
+              <span class="meta-item"><span class="material-symbols-rounded">calendar_today</span> {{ g.dateOfInterview | date:'mediumDate' }}</span>
+              @if (g.assignedInterviewers?.length > 0) {
+                <span class="meta-item"><span class="material-symbols-rounded">person</span> {{ g.assignedInterviewers[0]?.name }}</span>
+              }
+            </div>
+
+            <!-- Candidate progress chips -->
+            <div class="candidate-chips">
+              @for (m of g.members; track m._id) {
+                <span class="candidate-chip" [ngClass]="getStatusClass(m.status)" [title]="m.candidateId?.name + ' — ' + formatStatus(m.status)">
+                  {{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}
+                </span>
+              }
+            </div>
+
+            <div class="iv-card-bottom">
+              <span class="status-summary">{{ groupStatusSummary(g.members) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     CREATE GROUP INTERVIEW MODAL
+═══════════════════════════════════════════════════════════ -->
+@if (showCreateModal()) {
+  <div class="modal-overlay" (click)="closeCreateModal()">
+    <div class="modal-container modal-xl" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>Create Group Interview</h2>
+        <button class="icon-btn" (click)="closeCreateModal()"><span class="material-symbols-rounded">close</span></button>
+      </div>
+
+      @if (successMsg()) {
+        <div class="success-banner">
+          <span class="material-symbols-rounded">check_circle</span>
+          {{ successMsg() }}
+          <button class="btn btn-outline btn-sm" (click)="closeCreateModal()">Close</button>
+        </div>
+      } @else {
+        <div class="modal-body">
+
+          <!-- Staff assignment -->
+          <div class="section-title">
+            <span class="material-symbols-rounded">badge</span> Staff Assignment
+          </div>
+          <div class="form-row three-col">
+            <div class="form-group">
+              <label class="form-label">Interviewers</label>
+              <div class="checklist-box">
+                @for (i of interviewers(); track i._id) {
+                  <label class="check-item">
+                    <input type="checkbox" [value]="i._id"
+                      (change)="toggleSelection($event, newGroupInterview.assignedInterviewers)">
+                    <span>{{ i.name }}</span>
+                  </label>
+                }
+                @if (interviewers().length === 0) { <p class="text-muted">No interviewers found</p> }
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">HR Personnel</label>
+              <div class="checklist-box">
+                @for (h of hrs(); track h._id) {
+                  <label class="check-item">
+                    <input type="checkbox" [value]="h._id"
+                      (change)="toggleSelection($event, newGroupInterview.assignedHRs)">
+                    <span>{{ h.name }}</span>
+                  </label>
+                }
+                @if (hrs().length === 0) { <p class="text-muted">No HR found</p> }
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Project Managers</label>
+              <div class="checklist-box">
+                @for (p of pms(); track p._id) {
+                  <label class="check-item">
+                    <input type="checkbox" [value]="p._id"
+                      (change)="toggleSelection($event, newGroupInterview.assignedPMs)">
+                    <span>{{ p.name }}</span>
+                  </label>
+                }
+                @if (pms().length === 0) { <p class="text-muted">No PMs found</p> }
+              </div>
+            </div>
+          </div>
+
+          <!-- Group + Position -->
+          <div class="section-title">
+            <span class="material-symbols-rounded">groups</span> Group & Position
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Group *</label>
+              <select class="form-input" [(ngModel)]="newGroupInterview.groupName" (ngModelChange)="onGroupChange()">
+                <option value="">Select group</option>
+                @for (g of groups(); track g) {
+                  <option [value]="g">{{ g }}</option>
+                }
+              </select>
+              @if (groupMembers().length > 0) {
+                <span class="field-hint">
+                  <span class="material-symbols-rounded">person</span>
+                  {{ groupMembers().length }} candidate{{ groupMembers().length !== 1 ? 's' : '' }} in this group
+                </span>
+              }
+            </div>
+            <div class="form-group">
+              <label class="form-label">Position *</label>
+              <input class="form-input" [(ngModel)]="newGroupInterview.position" placeholder="e.g., MEAN Stack Developer">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Source</label>
+              <input class="form-input" [(ngModel)]="newGroupInterview.source" placeholder="e.g., LinkedIn, Campus">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date of Interview</label>
+              <input class="form-input" type="date" [(ngModel)]="newGroupInterview.dateOfInterview">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Tech Stack</label>
+              <input class="form-input" [(ngModel)]="newGroupInterview.techStack" placeholder="e.g., MERN, Java, Python">
+            </div>
+          </div>
+
+          <!-- Quiz Configuration -->
+          <div class="section-title">
+            <span class="material-symbols-rounded">quiz</span> Quiz Configuration
+            @if (quizSets.length > 0) {
+              <button class="btn btn-outline btn-sm" style="margin-left: auto;" (click)="addMoreSet()">
+                <span class="material-symbols-rounded">add</span> Add Set
+              </button>
+            }
+          </div>
+
+          @if (quizSets.length === 0 && !showQuizSetup) {
+            <div class="quiz-empty-hint">
+              <span class="material-symbols-rounded">quiz</span>
+              <p>No quiz sets configured yet.</p>
+              <button class="btn btn-primary" (click)="showQuizSetup = true">
+                <span class="material-symbols-rounded">add</span> Add Quiz
+              </button>
+            </div>
+          }
+
+          @if (showQuizSetup) {
+            <div class="quiz-setup-prompt">
+              <span class="material-symbols-rounded">help_outline</span>
+              <span>How many quiz sets?</span>
+              <input type="number" min="1" max="10" class="sets-count-input"
+                [(ngModel)]="pendingSetsCount" placeholder="e.g. 2">
+              <button class="btn btn-primary btn-sm" (click)="confirmSetsCount()">Confirm</button>
+              <button class="btn btn-outline btn-sm" (click)="showQuizSetup = false">Cancel</button>
+            </div>
+          }
+
+          <!-- Quiz Sets -->
+          @for (set of quizSets; track $index; let si = $index) {
+            <div class="quiz-set-block">
+              <div class="quiz-set-header">
+                <div class="quiz-set-title">
+                  <span class="set-badge">Set {{ si + 1 }}</span>
+                  @if (isSingleQuizSet(set)) {
+                    <span class="set-note">📌 Assigned to all candidates</span>
+                  } @else if (isMultiQuizSet(set)) {
+                    <span class="set-note">🎯 {{ validEntries(set).length }} quizzes · {{ set.mode === 'random' ? '🎲 Random' : 'Direct' }} assignment</span>
+                  }
+                </div>
+                <button class="icon-btn danger" (click)="removeQuizSet(si)">
+                  <span class="material-symbols-rounded">delete</span>
+                </button>
+              </div>
+
+              <!-- Quiz entries in this set -->
+              @for (entry of set.quizEntries; track $index; let ei = $index) {
+                <div class="quiz-entry-row">
+                  <select class="form-input" [(ngModel)]="entry.quizId">
+                    <option value="">— Select quiz —</option>
+                    @for (q of getAvailableQuizzes(si, ei); track q._id) {
+                      <option [value]="q._id">{{ q.title }}</option>
+                    }
+                  </select>
+                  <button class="icon-btn" (click)="removeQuizEntry(si, ei)">
+                    <span class="material-symbols-rounded">remove_circle_outline</span>
+                  </button>
+                </div>
+              }
+
+              <button class="btn btn-ghost btn-sm" (click)="addQuizToSet(si)">
+                <span class="material-symbols-rounded">add</span> Add quiz to Set {{ si + 1 }}
+              </button>
+
+              <!-- Assignment mode — only shown when multiple quizzes -->
+              @if (isMultiQuizSet(set)) {
+                <div class="assignment-mode-row">
+                  <span class="mode-label">Assignment Mode:</span>
+                  <div class="mode-toggle">
+                    <button class="mode-btn" [class.active]="set.mode === 'random'" (click)="set.mode = 'random'">
+                      <span class="material-symbols-rounded">shuffle</span> Random
+                    </button>
+                    <button class="mode-btn" [class.active]="set.mode === 'direct'" (click)="set.mode = 'direct'">
+                      <span class="material-symbols-rounded">assignment_ind</span> Direct
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Direct assignment table -->
+                @if (set.mode === 'direct') {
+                  @if (groupMembers().length === 0) {
+                    <p class="text-muted" style="font-size:13px; margin-top:8px;">
+                      ⚠️ Select a group above to assign quizzes to individual candidates.
+                    </p>
+                  } @else {
+                    <div class="direct-assignment-table">
+                      <div class="da-header">
+                        <span>Candidate</span>
+                        <span>Assigned Quiz (Set {{ si + 1 }})</span>
+                      </div>
+                      @for (member of groupMembers(); track member._id) {
+                        <div class="da-row">
+                          <div class="da-candidate">
+                            <div class="da-avatar">{{ member.name.charAt(0).toUpperCase() }}</div>
+                            <span>{{ member.name }}</span>
+                          </div>
+                          <select class="form-input" [(ngModel)]="set.directAssignments[member._id]">
+                            <option value="">— Select —</option>
+                            @for (entry of validEntries(set); track entry.quizId) {
+                              <option [value]="entry.quizId">{{ getQuizTitle(entry.quizId) }}</option>
+                            }
+                          </select>
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              }
+            </div>
+          }
+
+        </div><!-- /modal-body -->
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeCreateModal()">Cancel</button>
+          <button class="btn btn-primary"
+            (click)="createGroupInterview()"
+            [disabled]="isSubmitting() || !newGroupInterview.groupName || !newGroupInterview.position">
+            @if (isSubmitting()) {
+              <span class="spinner spinner-sm"></span> Creating...
+            } @else {
+              <span class="material-symbols-rounded">rocket_launch</span> Create Group Interview
+            }
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     DETAIL MODAL — All candidates in a group session
+═══════════════════════════════════════════════════════════ -->
+@if (showDetailModal() && selectedGroup()) {
+  <div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal-container modal-xl" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <div>
+          <h2>{{ selectedGroup().groupId }}</h2>
+          <span style="font-size:13px; color:var(--text-muted)">
+            {{ selectedGroup().position }} · {{ selectedGroup().members.length }} candidates
+          </span>
+        </div>
+        <button class="icon-btn" (click)="closeDetail()"><span class="material-symbols-rounded">close</span></button>
+      </div>
+
+      <div class="modal-body detail-body">
+
+        <!-- Session meta -->
+        <div class="detail-section">
+          <h3 class="detail-section-title">Session Info</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Position</span>
+              <span class="detail-value">{{ selectedGroup().position }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Tech Stack</span>
+              <span class="detail-value">{{ selectedGroup().techStack || '—' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Source</span>
+              <span class="detail-value">{{ selectedGroup().source || '—' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Interview Date</span>
+              <span class="detail-value">{{ selectedGroup().dateOfInterview | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Candidate rows -->
+        <div class="detail-section">
+          <h3 class="detail-section-title">Candidates</h3>
+          <div class="candidate-detail-list">
+            @for (m of selectedGroup().members; track m._id) {
+              <div class="candidate-row">
+                <div class="candidate-row-left">
+                  <div class="iv-avatar small">{{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}</div>
+                  <div>
+                    <div class="cr-name">{{ m.candidateId?.name }}</div>
+                    <div class="cr-email">{{ m.candidateId?.email }}</div>
+                  </div>
+                </div>
+                <div class="candidate-row-mid">
+                  <!-- Progress steps mini -->
+                  <div class="progress-steps mini">
+                    <div class="step" [class.done]="['quiz_phase','coding_phase','evaluation','completed'].includes(m.status)">
+                      <span class="step-dot"></span><span class="step-label">Created</span>
+                    </div>
+                    <div class="step-line" [class.done]="['quiz_phase','coding_phase','evaluation','completed'].includes(m.status)"></div>
+                    <div class="step" [class.active]="m.status==='quiz_phase'" [class.done]="['coding_phase','evaluation','completed'].includes(m.status)">
+                      <span class="step-dot"></span><span class="step-label">Quiz</span>
+                    </div>
+                    <div class="step-line" [class.done]="['coding_phase','evaluation','completed'].includes(m.status)"></div>
+                    <div class="step" [class.active]="m.status==='coding_phase'" [class.done]="['evaluation','completed'].includes(m.status)">
+                      <span class="step-dot"></span><span class="step-label">Coding</span>
+                    </div>
+                    <div class="step-line" [class.done]="['evaluation','completed'].includes(m.status)"></div>
+                    <div class="step" [class.active]="m.status==='evaluation'" [class.done]="m.status==='completed'">
+                      <span class="step-dot"></span><span class="step-label">Evaluate</span>
+                    </div>
+                    <div class="step-line" [class.done]="m.status==='completed'"></div>
+                    <div class="step" [class.active]="m.status==='completed'" [class.done]="m.status==='completed'">
+                      <span class="step-dot"></span><span class="step-label">Done</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="candidate-row-right">
+                  <span class="badge" [ngClass]="getStatusClass(m.status)">{{ formatStatus(m.status) }}</span>
+                  @if (m.finalDecision !== 'pending') {
+                    <span class="badge" [ngClass]="getDecisionClass(m.finalDecision)">{{ formatDecision(m.finalDecision) }}</span>
+                  }
+                  <!-- Quiz scores -->
+                  @if (m.quizzes?.length > 0) {
+                    <div class="quiz-scores-inline">
+                      @for (q of m.quizzes; track q.quizId) {
+                        <span class="quiz-score-chip" [class.completed]="q.completed">
+                          {{ q.title }}: {{ q.completed ? q.score + '/' + q.totalMarks : 'Pending' }}
+                        </span>
+                      }
+                    </div>
+                  }
+                  <!-- Decision buttons (admin) -->
+                  @if (authService.getUserRole() === 'admin' && m.status !== 'completed') {
+                    <div class="mini-decision-btns">
+                      <button class="mini-btn success" (click)="setDecision(m._id, 'accepted'); $event.stopPropagation()">Accept</button>
+                      <button class="mini-btn danger"  (click)="setDecision(m._id, 'rejected'); $event.stopPropagation()">Reject</button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        @if (authService.getUserRole() === 'admin') {
+          <button class="btn btn-danger btn-sm" (click)="deleteGroupInterview(selectedGroup().groupId)">
+            Delete All Interviews
+          </button>
+        }
+        <button class="btn btn-outline" (click)="closeDetail()">Close</button>
+      </div>
+
+    </div>
+  </div>
+}

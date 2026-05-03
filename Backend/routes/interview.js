@@ -179,6 +179,119 @@ router.get('/candidates', authorize('admin', 'hr', 'pm'), async (req, res) => {
 });
 
 // ============================================================
+// @route   GET /api/interview/group-members
+// @desc    Get candidates belonging to a specific group
+// @access  Admin, HR, PM
+// ============================================================
+router.get('/group-members', authorize('admin', 'hr', 'pm'), async (req, res) => {
+  try {
+    const { group } = req.query;
+    if (!group) return res.status(400).json({ message: 'Group name is required' });
+    const candidates = await User.find({ role: 'candidate', group })
+      .select('name email phoneNumber group')
+      .sort({ name: 1 });
+    res.json({ candidates });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// ============================================================
+// @route   POST /api/interview/group
+// @desc    Create group interviews for all candidates in a group
+//          quizSets: [{ quizEntries: [{ quizId }], mode: 'random'|'direct',
+//                       directAssignments: { candidateId: quizId } }]
+// @access  Admin, HR, PM
+// ============================================================
+router.post('/group', authorize('admin', 'hr', 'pm'), async (req, res) => {
+  try {
+    const {
+      groupName, assignedInterviewers, assignedHRs, assignedPMs,
+      position, techStack, source, dateOfInterview, quizSets
+    } = req.body;
+
+    if (!groupName || !position) {
+      return res.status(400).json({ message: 'Group and position are required' });
+    }
+
+    const candidates = await User.find({ role: 'candidate', group: groupName }).sort({ name: 1 });
+    if (candidates.length === 0) {
+      return res.status(400).json({ message: 'No candidates found in this group' });
+    }
+
+    const mainInterviewerId =
+      assignedInterviewers && assignedInterviewers.length > 0 ? assignedInterviewers[0] : null;
+
+    const createdInterviews = [];
+
+    for (const candidate of candidates) {
+      let quizzes = [];
+
+      if (quizSets && quizSets.length > 0) {
+        for (const set of quizSets) {
+          const validEntries = (set.quizEntries || []).filter(e => e.quizId);
+          if (validEntries.length === 0) continue;
+
+          let assignedQuizId = null;
+
+          if (validEntries.length === 1) {
+            // Only one quiz in this set — assign to everyone
+            assignedQuizId = validEntries[0].quizId;
+          } else if (set.mode === 'direct' && set.directAssignments) {
+            assignedQuizId = set.directAssignments[candidate._id.toString()] || null;
+          } else {
+            // Random: pick a random quiz from the set
+            const pick = validEntries[Math.floor(Math.random() * validEntries.length)];
+            assignedQuizId = pick.quizId;
+          }
+
+          if (assignedQuizId) {
+            const quizDoc = await Quiz.findById(assignedQuizId).select('title totalQuestions');
+            if (quizDoc) {
+              quizzes.push({
+                quizId: quizDoc._id,
+                title: quizDoc.title,
+                score: null,
+                totalMarks: quizDoc.totalQuestions,
+                percentage: null,
+                completed: false
+              });
+            }
+          }
+        }
+      }
+
+      const interview = await Interview.create({
+        candidateId: candidate._id,
+        interviewerId: mainInterviewerId,
+        assignedInterviewers: assignedInterviewers || [],
+        assignedHRs: assignedHRs || [],
+        assignedPMs: assignedPMs || [],
+        position,
+        techStack: techStack || '',
+        source: source || '',
+        dateOfInterview: dateOfInterview || new Date(),
+        quizzes,
+        status: quizzes.length > 0 ? 'quiz_phase' : 'pending',
+        type: 'group',
+        groupId: groupName,
+        createdBy: req.user._id
+      });
+
+      createdInterviews.push(interview._id);
+    }
+
+    res.status(201).json({
+      message: `Group interview created for ${candidates.length} candidate(s)`,
+      count: candidates.length,
+      interviewIds: createdInterviews
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// ============================================================
 // @route   GET /api/interview/:id
 // @desc    Get interview detail
 // @access  Admin, HR, PM, Interviewer

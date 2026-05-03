@@ -291,4 +291,12 @@
     getInterviewCandidates(): Observable<any> {
       return this.http.get(`${this.interviewUrl}/candidates`);
     }
+
+    getGroupMembers(groupName: string): Observable<any> {
+      return this.http.get(`${this.interviewUrl}/group-members?group=${encodeURIComponent(groupName)}`);
+    }
+
+    createGroupInterview(data: any): Observable<any> {
+      return this.http.post(`${this.interviewUrl}/group`, data);
+    }
   }
