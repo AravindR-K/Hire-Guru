@@ -1,9 +1,14 @@
 <div class="page-container animate-fade-in split-view" cdkDropListGroup>
   
   <div class="main-workspace">
-    <div class="page-header">
-      <h1>Manage Groups</h1>
-      <p class="page-subtitle">Create organizational groups and effortlessly drag-and-drop candidates into them.</p>
+    <div class="page-header" style="display: flex; align-items: center; gap: 16px;">
+      <button class="icon-btn" (click)="goBack()" style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px; border-radius: 12px; cursor: pointer; color: var(--text-primary); transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='var(--bg-card)'">
+        <span class="material-symbols-rounded">arrow_back</span>
+      </button>
+      <div>
+        <h1 style="margin: 0; font-size: 24px;">Manage Groups</h1>
+        <p class="page-subtitle" style="margin: 4px 0 0;">Create organizational groups and effortlessly drag-and-drop candidates into them.</p>
+      </div>
     </div>
 
     @if (error()) {

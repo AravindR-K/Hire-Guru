@@ -42,6 +42,7 @@ export class LayoutComponent {
           { icon: 'group', label: 'Users', route: '/admin/users' },
           { icon: 'quiz', label: 'Quizzes', route: '/admin/quizzes' },
           { icon: 'add_circle', label: 'Create Quiz', route: '/admin/create-quiz' },
+          { icon: 'person', label: 'Profile', route: '/admin/profile' },
         ];
       case 'hr':
         return [
@@ -49,6 +50,20 @@ export class LayoutComponent {
           { icon: 'quiz', label: 'My Quizzes', route: '/hr/quizzes' },
           { icon: 'add_circle', label: 'Create Quiz', route: '/hr/create-quiz' },
           { icon: 'people', label: 'Candidates', route: '/hr/users' },
+          { icon: 'work', label: 'Interviews', route: '/hr/individual-interview' },
+          { icon: 'person', label: 'Profile', route: '/hr/profile' },
+        ];
+      case 'pm':
+        return [
+          { icon: 'dashboard', label: 'Dashboard', route: '/pm/dashboard' },
+          { icon: 'work', label: 'Interviews', route: '/pm/interviews' },
+          { icon: 'person', label: 'Profile', route: '/pm/profile' },
+        ];
+      case 'interviewer':
+        return [
+          { icon: 'dashboard', label: 'Dashboard', route: '/interviewer/dashboard' },
+          { icon: 'assignment_ind', label: 'My Interviews', route: '/interviewer/interviews' },
+          { icon: 'person', label: 'Profile', route: '/interviewer/profile' },
         ];
       case 'candidate':
         return [
@@ -66,6 +81,8 @@ export class LayoutComponent {
       case 'admin': return { label: 'Admin', class: 'role-admin' };
       case 'hr': return { label: 'HR', class: 'role-hr' };
       case 'candidate': return { label: 'Candidate', class: 'role-candidate' };
+      case 'pm': return { label: 'PM', class: 'role-pm' };
+      case 'interviewer': return { label: 'Interviewer', class: 'role-interviewer' };
       default: return { label: '', class: '' };
     }
   });
@@ -107,7 +124,7 @@ export class LayoutComponent {
   getUsersRoute(): string {
     return this.authService.getUserRole() === 'hr' ? '/hr/users' : '/admin/users';
   }
-  
+
   getManageGroupsRoute(): string {
     return this.authService.getUserRole() === 'hr' ? '/hr/manage-groups' : '/admin/manage-groups';
   }

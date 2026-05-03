@@ -1,7 +1,12 @@
 <div class="page-container animate-fade-in">
-  <div class="page-header">
-    <h1>HR Users</h1>
-    <p class="page-subtitle">Manage HR Staff platform access and identity</p>
+  <div class="page-header" style="display: flex; align-items: center; gap: 16px;">
+    <button class="icon-btn" (click)="goBack()" style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px; border-radius: 12px; cursor: pointer; color: var(--text-primary); transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='var(--bg-card)'">
+      <span class="material-symbols-rounded">arrow_back</span>
+    </button>
+    <div>
+      <h1 style="margin: 0; font-size: 24px;">{{ getRoleDisplay() }}s</h1>
+      <p class="page-subtitle" style="margin: 4px 0 0;">Manage {{ getRoleDisplay() }} platform access and identity</p>
+    </div>
   </div>
 
   @if (error()) {
@@ -12,7 +17,7 @@
   }
 
   <div class="card card-padding form-card" style="margin-bottom: 40px;">
-    <h2 class="section-title">Add HR User</h2>
+    <h2 class="section-title">Add {{ getRoleDisplay() }}</h2>
     <form (ngSubmit)="createHRUser()" class="group-form">
       <div class="form-group row-align">
         <div class="input-container">
@@ -32,14 +37,14 @@
           @if (creating()) {
             <span class="spinner"></span>
           } @else {
-            <span class="material-symbols-rounded">person_add</span> Add HR
+            <span class="material-symbols-rounded">person_add</span> Add {{ getRoleDisplay() }}
           }
         </button>
       </div>
     </form>
   </div>
 
-  <h2 class="section-title">Existing HR Users</h2>
+  <h2 class="section-title">Existing {{ getRoleDisplay() }}s</h2>
   @if (loading()) {
     <div class="loading-state">
       <div class="loader"></div>
@@ -47,8 +52,8 @@
   } @else if (hrUsers().length === 0) {
     <div class="empty-state">
       <span class="material-symbols-rounded empty-icon">manage_accounts</span>
-      <h3>No HR users available</h3>
-      <p>Add your first HR user above</p>
+      <h3>No {{ getRoleDisplay() }}s available</h3>
+      <p>Add your first {{ getRoleDisplay() }} above</p>
     </div>
   } @else {
     <div class="groups-grid">

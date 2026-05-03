@@ -1,4 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { Location } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
@@ -16,7 +17,11 @@ export class AdminUsersComponent implements OnInit {
   loading = signal<boolean>(true);
   showAll = signal<boolean>(true);
 
-  constructor(public authService: AuthService, private quizService: QuizService) {}
+  constructor(public authService: AuthService, private quizService: QuizService, private location: Location) {}
+
+  goBack(): void {
+    this.location.back();
+  }
 
   ngOnInit(): void {
     this.loadUsers();

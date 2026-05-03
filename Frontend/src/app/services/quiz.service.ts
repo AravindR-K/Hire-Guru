@@ -27,8 +27,8 @@
       return this.http.get(`${this.getBaseUrl()}/users/logged-in`);
     }
 
-    createHRUser(data: { name: string; email: string; password: string }): Observable<any> {
-      return this.http.post(`${this.adminUrl}/users/create-hr`, data); // Only admin can create HR
+    createStaffUser(data: { name: string; email: string; password: string; role: string }): Observable<any> {
+      return this.http.post(`${this.adminUrl}/users/create-staff`, data); // Only admin can create staff
     }
 
     deleteUser(userId: string): Observable<any> {
@@ -40,11 +40,11 @@
     }
 
     getUserHistory(userId: string): Observable<any> {
-      // In HR route it is /candidates/:userId/history but let's check backend hr.js
-      // Wait, hr.js has /candidates/:userId/history and /candidates instead of /users for HR?
-      // No, hr.js has /users, /users/logged-in, /users/:userId, etc.
-      // Wait, let's verify.
       return this.http.get(`${this.getBaseUrl()}/users/${userId}/history`);
+    }
+
+    getUserInterviews(userId: string): Observable<any> {
+      return this.http.get(`${this.adminUrl}/users/${userId}/interviews`);
     }
 
     updateUserLevel(userId: string, level: string, role: string = 'admin'): Observable<any> {
@@ -167,6 +167,10 @@
       return this.http.get(`${this.candidateUrl}/quizzes`);
     }
 
+    getCandidateInterviews(): Observable<any> {
+      return this.http.get(`${this.candidateUrl}/interviews`);
+    }
+
     getQuizForTaking(quizId: string): Observable<any> {
       return this.http.get(`${this.candidateUrl}/quiz/${quizId}`);
     }
@@ -189,6 +193,12 @@
 
     getResultDetails(submissionId: string): Observable<any> {
       return this.http.get(`${this.candidateUrl}/results/${submissionId}`);
+    }
+
+    uploadCandidateCodingSubmission(interviewId: string, file: File): Observable<any> {
+      const formData = new FormData();
+      formData.append('codingZip', file);
+      return this.http.post(`${this.candidateUrl}/interview/${interviewId}/coding`, formData);
     }
 
     // ========== GENERIC GROUP MANAGEMENT ==========
@@ -222,5 +232,63 @@
 
     assignUserGroup(userId: string, groupName: string): Observable<any> {
       return this.http.put(`${this.getBaseUrl()}/users/${userId}/group`, { group: groupName });
+    }
+
+    // ========== INTERVIEW ENDPOINTS ==========
+    private interviewUrl = 'http://localhost:5000/api/interview';
+
+    getInterviews(params?: any): Observable<any> {
+      let url = this.interviewUrl;
+      if (params) {
+        const query = Object.entries(params).filter(([,v]) => v).map(([k,v]) => `${k}=${v}`).join('&');
+        if (query) url += `?${query}`;
+      }
+      return this.http.get(url);
+    }
+
+    getInterviewStats(): Observable<any> {
+      return this.http.get(`${this.interviewUrl}/stats`);
+    }
+
+    getInterviewById(id: string): Observable<any> {
+      return this.http.get(`${this.interviewUrl}/${id}`);
+    }
+
+    createInterview(data: any): Observable<any> {
+      return this.http.post(this.interviewUrl, data);
+    }
+
+    updateInterview(id: string, data: any): Observable<any> {
+      return this.http.put(`${this.interviewUrl}/${id}`, data);
+    }
+
+    submitEvaluation(id: string, data: any): Observable<any> {
+      return this.http.put(`${this.interviewUrl}/${id}/evaluate`, data);
+    }
+
+    setInterviewDecision(id: string, decision: string): Observable<any> {
+      return this.http.put(`${this.interviewUrl}/${id}/decision`, { decision });
+    }
+
+    uploadCodingSubmission(id: string, file: File): Observable<any> {
+      const formData = new FormData();
+      formData.append('codingZip', file);
+      return this.http.post(`${this.interviewUrl}/${id}/coding-submission`, formData);
+    }
+
+    validateCodingRound(id: string): Observable<any> {
+      return this.http.put(`${this.interviewUrl}/${id}/validate-coding`, {});
+    }
+
+    deleteInterview(id: string): Observable<any> {
+      return this.http.delete(`${this.interviewUrl}/${id}`);
+    }
+
+    getInterviewers(): Observable<any> {
+      return this.http.get(`${this.interviewUrl}/interviewers`);
+    }
+
+    getInterviewCandidates(): Observable<any> {
+      return this.http.get(`${this.interviewUrl}/candidates`);
     }
   }

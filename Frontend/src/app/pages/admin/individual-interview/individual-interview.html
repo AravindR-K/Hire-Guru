@@ -1,0 +1,494 @@
+<div class="page-container animate-fade-in">
+  <div class="content-wrapper">
+    <div class="page-header">
+      <div>
+        <h1>Individual Interviews</h1>
+        <p class="page-subtitle">Manage one-on-one candidate interview evaluations</p>
+      </div>
+      <button class="btn btn-primary" (click)="openCreateModal()">
+        <span class="material-symbols-rounded">add</span>
+        New Interview
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="mini-stat">
+        <span class="mini-stat-value">{{ stats().total }}</span>
+        <span class="mini-stat-label">Total</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-value orange">{{ stats().pending }}</span>
+        <span class="mini-stat-label">In Progress</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-value blue">{{ stats().completed }}</span>
+        <span class="mini-stat-label">Completed</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-value green">{{ stats().accepted }}</span>
+        <span class="mini-stat-label">Accepted</span>
+      </div>
+      <div class="mini-stat">
+        <span class="mini-stat-value red">{{ stats().rejected }}</span>
+        <span class="mini-stat-label">Rejected</span>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <select class="filter-select" [(ngModel)]="filterStatus" (ngModelChange)="onFilterChange()">
+        <option value="">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="quiz_phase">Quiz Phase</option>
+        <option value="coding_phase">Coding Phase</option>
+        <option value="evaluation">Evaluation</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+
+    <!-- Interview List -->
+    @if (loading()) {
+      <div class="loading-center"><div class="spinner spinner-lg"></div><p>Loading interviews...</p></div>
+    } @else if (interviews().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-rounded">work_off</span>
+        <h3>No interviews found</h3>
+        <p>Create your first interview to get started</p>
+      </div>
+    } @else {
+      <div class="interview-list">
+        @for (iv of interviews(); track iv._id) {
+          <div class="interview-card card card-padding" (click)="openDetail(iv)">
+            <div class="iv-card-top">
+              <div class="iv-candidate">
+                <div class="iv-avatar">{{ iv.candidateId?.name?.charAt(0)?.toUpperCase() }}</div>
+                <div>
+                  <h3 class="iv-name">{{ iv.candidateId?.name }}</h3>
+                  <p class="iv-email">{{ iv.candidateId?.email }}</p>
+                </div>
+              </div>
+              <div class="iv-badges">
+                <span class="badge" [ngClass]="getStatusClass(iv.status)">{{ formatStatus(iv.status) }}</span>
+                @if (iv.finalDecision !== 'pending') {
+                  <span class="badge" [ngClass]="getDecisionClass(iv.finalDecision)">{{ formatDecision(iv.finalDecision) }}</span>
+                }
+              </div>
+            </div>
+            <div class="iv-card-meta">
+              <span class="meta-item"><span class="material-symbols-rounded">work</span> {{ iv.position }}</span>
+              @if (iv.techStack) {
+                <span class="meta-item"><span class="material-symbols-rounded">code</span> {{ iv.techStack }}</span>
+              }
+              <span class="meta-item"><span class="material-symbols-rounded">person</span> {{ iv.interviewerId?.name }}</span>
+              <span class="meta-item"><span class="material-symbols-rounded">calendar_today</span> {{ iv.dateOfInterview | date:'mediumDate' }}</span>
+            </div>
+            <div class="iv-card-progress">
+              <div class="progress-steps">
+                <div class="step" [class.active]="iv.status === 'pending'" [class.done]="['quiz_phase','coding_phase','evaluation','completed'].includes(iv.status)">
+                  <span class="step-dot"></span><span class="step-label">Created</span>
+                </div>
+                <div class="step-line" [class.done]="['quiz_phase','coding_phase','evaluation','completed'].includes(iv.status)"></div>
+                <div class="step" [class.active]="iv.status === 'quiz_phase'" [class.done]="['coding_phase','evaluation','completed'].includes(iv.status)">
+                  <span class="step-dot"></span><span class="step-label">Quiz</span>
+                </div>
+                <div class="step-line" [class.done]="['coding_phase','evaluation','completed'].includes(iv.status)"></div>
+                <div class="step" [class.active]="iv.status === 'coding_phase'" [class.done]="['evaluation','completed'].includes(iv.status)">
+                  <span class="step-dot"></span><span class="step-label">Coding</span>
+                </div>
+                <div class="step-line" [class.done]="['evaluation','completed'].includes(iv.status)"></div>
+                <div class="step" [class.active]="iv.status === 'evaluation'" [class.done]="iv.status === 'completed'">
+                  <span class="step-dot"></span><span class="step-label">Evaluate</span>
+                </div>
+                <div class="step-line" [class.done]="iv.status === 'completed'"></div>
+                <div class="step" [class.active]="iv.status === 'completed'" [class.done]="iv.status === 'completed'">
+                  <span class="step-dot"></span><span class="step-label">Done</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Create Interview Modal -->
+@if (showCreateModal()) {
+  <div class="modal-overlay" (click)="closeCreateModal()">
+    <div class="modal-container modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Create Individual Interview</h2>
+        <button class="icon-btn" (click)="closeCreateModal()"><span class="material-symbols-rounded">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Candidate *</label>
+            <select class="form-input" [(ngModel)]="newInterview.candidateId">
+              <option value="">Select candidate</option>
+              @for (c of candidates(); track c._id) {
+                <option [value]="c._id">{{ c.name }} ({{ c.email }})</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Interviewers</label>
+            <div class="quiz-select-grid" style="max-height: 120px; overflow-y: auto;">
+              @for (i of interviewers(); track i._id) {
+                <label class="quiz-select-item" style="cursor: pointer;">
+                  <input type="checkbox" [value]="i._id" (change)="toggleSelection($event, newInterview.assignedInterviewers)" style="margin-right: 8px;"> {{ i.name }}
+                </label>
+              }
+              @if (interviewers().length === 0) { <p class="text-muted" style="font-size: 12px;">No interviewers found</p> }
+            </div>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Project Managers</label>
+            <div class="quiz-select-grid" style="max-height: 120px; overflow-y: auto;">
+              @for (p of pms(); track p._id) {
+                <label class="quiz-select-item" style="cursor: pointer;">
+                  <input type="checkbox" [value]="p._id" (change)="toggleSelection($event, newInterview.assignedPMs)" style="margin-right: 8px;"> {{ p.name }}
+                </label>
+              }
+              @if (pms().length === 0) { <p class="text-muted" style="font-size: 12px;">No PMs found</p> }
+            </div>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">HRs</label>
+            <div class="quiz-select-grid" style="max-height: 120px; overflow-y: auto;">
+              @for (h of hrs(); track h._id) {
+                <label class="quiz-select-item" style="cursor: pointer;">
+                  <input type="checkbox" [value]="h._id" (change)="toggleSelection($event, newInterview.assignedHRs)" style="margin-right: 8px;"> {{ h.name }}
+                </label>
+              }
+              @if (hrs().length === 0) { <p class="text-muted" style="font-size: 12px;">No HRs found</p> }
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Position *</label>
+            <input class="form-input" [(ngModel)]="newInterview.position" placeholder="e.g., Software Intern">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tech Stack</label>
+            <input class="form-input" [(ngModel)]="newInterview.techStack" placeholder="e.g., React, Node.js">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Source</label>
+            <input class="form-input" [(ngModel)]="newInterview.source" placeholder="e.g., LinkedIn, Campus">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Interview</label>
+            <input class="form-input" type="date" [(ngModel)]="newInterview.dateOfInterview">
+          </div>
+        </div>
+
+        <!-- Quiz Selection -->
+        <div class="form-group">
+          <label class="form-label">Assign Quizzes (optional)</label>
+          <div class="quiz-select-grid">
+            @for (q of quizzes(); track q._id) {
+              <div class="quiz-select-item" [class.selected]="isQuizSelected(q._id)" (click)="toggleQuizSelection(q._id)">
+                <span class="material-symbols-rounded">{{ isQuizSelected(q._id) ? 'check_box' : 'check_box_outline_blank' }}</span>
+                <span>{{ q.title }}</span>
+              </div>
+            }
+            @if (quizzes().length === 0) {
+              <p class="text-muted">No quizzes available</p>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="createInterview()" [disabled]="isSubmitting() || !newInterview.candidateId || !newInterview.position">
+          @if (isSubmitting()) { <span class="spinner spinner-sm"></span> Creating... } @else { Create Interview }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Interview Detail Modal -->
+@if (showDetailModal() && selectedInterview()) {
+  <div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal-container modal-xl" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h2>Interview Detail</h2>
+          <span class="badge" [ngClass]="getStatusClass(selectedInterview().status)">{{ formatStatus(selectedInterview().status) }}</span>
+          @if (selectedInterview().finalDecision !== 'pending') {
+            <span class="badge" [ngClass]="getDecisionClass(selectedInterview().finalDecision)" style="margin-left:8px">{{ formatDecision(selectedInterview().finalDecision) }}</span>
+          }
+        </div>
+        <button class="icon-btn" (click)="closeDetail()"><span class="material-symbols-rounded">close</span></button>
+      </div>
+
+      <div class="modal-body detail-body">
+        <!-- Candidate Info -->
+        <div class="detail-section">
+          <h3 class="detail-section-title">Candidate Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Name</span>
+              <span class="detail-value">{{ selectedInterview().candidateId?.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Email</span>
+              <span class="detail-value">{{ selectedInterview().candidateId?.email }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Position</span>
+              <span class="detail-value">{{ selectedInterview().position }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Tech Stack</span>
+              <span class="detail-value">{{ selectedInterview().techStack || '—' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Source</span>
+              <span class="detail-value">{{ selectedInterview().source || '—' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Interviewer</span>
+              <span class="detail-value">{{ selectedInterview().interviewerId?.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Date of Interview</span>
+              <span class="detail-value">{{ selectedInterview().dateOfInterview | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Results -->
+        @if (selectedInterview().quizzes?.length > 0) {
+          <div class="detail-section">
+            <h3 class="detail-section-title">Quiz Results</h3>
+            <div class="quiz-results-grid">
+              @for (q of selectedInterview().quizzes; track q.quizId) {
+                <div class="quiz-result-card">
+                  <div class="qr-title">{{ q.title }}</div>
+                  @if (q.completed) {
+                    <div class="qr-score">{{ q.score }}/{{ q.totalMarks }} ({{ q.percentage }}%)</div>
+                  } @else {
+                    <div class="qr-pending">Not Taken</div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Coding Round Submission -->
+        <div class="detail-section">
+          <h3 class="detail-section-title">Coding Challenge Submission</h3>
+          @if (selectedInterview().codingRound?.zipFile) {
+            <div class="eval-card" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span class="material-symbols-rounded" style="color: var(--accent-primary); vertical-align: middle; margin-right: 8px; font-size: 24px;">folder_zip</span>
+                <strong>Submitted on:</strong> {{ selectedInterview().codingRound.submittedAt | date:'medium' }}
+              </div>
+              <div style="display: flex; gap: 12px; align-items: center;">
+                @if (selectedInterview().codingRound.validated) {
+                  <span class="badge badge-success">Validated by {{ selectedInterview().codingRound.validatedBy?.name || 'Reviewer' }}</span>
+                }
+                <a [href]="'http://localhost:5000' + selectedInterview().codingRound.zipFile" target="_blank" class="btn btn-primary" style="padding: 6px 12px; font-size: 14px; border-radius: 6px;">
+                  <span class="material-symbols-rounded" style="font-size: 18px; margin-right: 4px;">download</span> Download
+                </a>
+              </div>
+            </div>
+          } @else {
+            <div class="quiz-results-grid">
+              <div class="quiz-result-card" style="border: 1px dashed var(--border-color); background: var(--bg-body);">
+                <div class="qr-title">Coding Challenge</div>
+                <div class="qr-pending">Not Submitted</div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Evaluations -->
+        <div class="detail-section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 class="detail-section-title" style="margin: 0;">Evaluations</h3>
+            @if (allEvaluationsDone()) {
+              <button class="btn btn-primary" (click)="downloadEvaluationPdf()">
+                @if (isPdfGenerating()) { <span class="spinner spinner-sm"></span> Generating... } @else { <span class="material-symbols-rounded">download</span> Download PDF }
+              </button>
+            }
+          </div>
+          @if (selectedInterview().evaluations?.length > 0) {
+            <div class="eval-list">
+              @for (ev of selectedInterview().evaluations; track ev._id) {
+                <div class="eval-card">
+                  <div class="eval-header">
+                    <div class="eval-evaluator">
+                      <strong>{{ ev.evaluatorId?.name }}</strong>
+                      <span class="eval-role badge badge-muted">{{ ev.evaluatorRole | uppercase }}</span>
+                    </div>
+                    <span class="badge" [ngClass]="getDecisionClass(ev.recommendation)">{{ formatDecision(ev.recommendation) }}</span>
+                  </div>
+                  @if (ev.comments) {
+                    <p class="eval-comments">"{{ ev.comments }}"</p>
+                  }
+                  <span class="eval-date">{{ ev.date | date:'medium' }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-muted">No evaluations yet</p>
+          }
+
+          <!-- Add evaluation form -->
+          @if (!hasUserEvaluated() && selectedInterview().status !== 'completed') {
+            <div class="eval-form">
+              <h4>Add Your Evaluation</h4>
+              <div class="form-group">
+                <label class="form-label">Comments</label>
+                <textarea class="form-input form-textarea" [(ngModel)]="evalComment" placeholder="Enter your comments..." rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Recommendation *</label>
+                <select class="form-input" [(ngModel)]="evalRecommendation">
+                  <option value="">Select recommendation</option>
+                  <option value="offer">Offer / Hire as Intern</option>
+                  <option value="on_hold">On Hold</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="2nd_round">2nd Round</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" (click)="submitEvaluation()" [disabled]="!evalRecommendation() || isSubmitting()">
+                Submit Evaluation
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Final Decision (admin only) -->
+        @if (authService.getUserRole() === 'admin' && selectedInterview().status !== 'completed') {
+          <div class="detail-section decision-section">
+            <h3 class="detail-section-title">Final Decision</h3>
+            <div class="decision-buttons">
+              <button class="btn btn-success" (click)="setDecision('accepted')">
+                <span class="material-symbols-rounded">check_circle</span> Accept
+              </button>
+              <button class="btn btn-warning" (click)="setDecision('on_hold')">
+                <span class="material-symbols-rounded">pause_circle</span> On Hold
+              </button>
+              <button class="btn btn-danger" (click)="setDecision('rejected')">
+                <span class="material-symbols-rounded">cancel</span> Reject
+              </button>
+              <button class="btn btn-outline" (click)="setDecision('2nd_round')">
+                <span class="material-symbols-rounded">replay</span> 2nd Round
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        @if (authService.getUserRole() === 'admin') {
+          <button class="btn btn-danger btn-sm" (click)="deleteInterview(selectedInterview()._id)">Delete Interview</button>
+        }
+        <button class="btn btn-outline" (click)="closeDetail()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Print Template for Evaluation PDF -->
+@if (selectedInterview()) {
+<div class="print-container">
+  <div class="print-header">
+    <div class="print-header-left">
+      <h2 style="margin: 0; font-size: 20px;">Intern Interview Evaluation Form</h2>
+    </div>
+    <div class="print-header-right" style="text-align: right;">
+      <span style="color: #0078d4; font-weight: bold; font-size: 24px;">IDEAL</span><br>
+      <span style="font-size: 10px; color: #555;">TECH LABS</span>
+    </div>
+  </div>
+
+  <table class="print-table" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold; width: 25%;">Candidate Name:</td>
+      <td style="border: 1px solid #000; padding: 8px; width: 25%;">{{ selectedInterview().candidateId?.name }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold; width: 25%;">Date of Interview:</td>
+      <td style="border: 1px solid #000; padding: 8px; width: 25%;">{{ selectedInterview().dateOfInterview | date:'mediumDate' }}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Position:</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedInterview().position }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Source</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedInterview().source || '—' }}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Tech Stack:</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedInterview().techStack || '—' }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Interviewer(s):</td>
+      <td style="border: 1px solid #000; padding: 8px;">
+        @if (selectedInterview().assignedInterviewers?.length) {
+          @for (i of selectedInterview().assignedInterviewers; track i._id; let last = $last) {
+            {{ i.name }}{{ !last ? ', ' : '' }}
+          }
+        } @else {
+          {{ selectedInterview().interviewerId?.name || '—' }}
+        }
+      </td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">General Aptitude Test QP Set</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedInterview().quizzes?.[0]?.title || '—' }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">General Aptitude Test Score</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedInterview().quizzes?.[0]?.completed ? selectedInterview().quizzes[0].score + '/' + selectedInterview().quizzes[0].totalMarks : 'Not Taken' }}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Technical MCQ Test QP Set</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedInterview().quizzes?.[1]?.title || '—' }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Technical MCQ Test Score</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedInterview().quizzes?.[1]?.completed ? selectedInterview().quizzes[1].score + '/' + selectedInterview().quizzes[1].totalMarks : 'Not Taken' }}</td>
+    </tr>
+  </table>
+
+  <!-- Render evaluations -->
+  @for (ev of selectedInterview().evaluations; track ev._id) {
+    <div class="print-eval-block" style="margin-bottom: 30px; page-break-inside: avoid;">
+      <div class="print-eval-title" style="font-weight: bold; margin-bottom: 10px;">
+        {{ ev.evaluatorRole === 'hr' ? 'HR' : ev.evaluatorRole === 'pm' ? 'Project Manager' : 'Interviewer' }}'s Comments ({{ ev.evaluatorId?.name }}):
+      </div>
+      <div class="print-comments" style="min-height: 80px; margin-bottom: 15px;">
+        {{ ev.comments || 'No comments provided.' }}
+      </div>
+      
+      <div class="print-recommendation" style="margin-bottom: 20px;">
+        <strong style="margin-right: 15px;">Recommendation:</strong>
+        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ ev.recommendation === 'offer' ? '☑' : '☐' }}</span> Offer/Hire as Intern</span>
+        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ ev.recommendation === 'on_hold' ? '☑' : '☐' }}</span> On Hold</span>
+        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ ev.recommendation === 'rejected' ? '☑' : '☐' }}</span> Rejected</span>
+        <span><span style="font-size: 16px;">{{ ev.recommendation === '2nd_round' ? '☑' : '☐' }}</span> 2nd Round</span>
+      </div>
+
+      <div class="print-signature-row" style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div class="print-signature" style="display: flex; align-items: flex-end;">
+          <strong>Evaluator's Signature:</strong>
+          @if (ev.evaluatorId?.signature) {
+            <img [src]="'http://localhost:5000' + ev.evaluatorId.signature" style="max-height: 40px; margin-left: 10px;">
+          } @else {
+            <span style="border-bottom: 1px solid #000; display: inline-block; width: 150px; margin-left: 10px;"></span>
+          }
+        </div>
+        <div class="print-date" style="display: flex; align-items: flex-end;">
+          <strong>Date:</strong>
+          <span style="border-bottom: 1px solid #000; display: inline-block; width: 120px; margin-left: 10px; text-align: center;">{{ ev.date | date:'shortDate' }}</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+}

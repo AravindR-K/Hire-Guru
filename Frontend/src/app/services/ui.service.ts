@@ -5,4 +5,5 @@ import { Injectable, signal } from '@angular/core';
 })
 export class UiService {
   showManageUsersPopup = signal<boolean>(false);
+  showInterviewPopup = signal<boolean>(false);
 }

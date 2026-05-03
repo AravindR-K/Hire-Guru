@@ -99,3 +99,39 @@ export const guestGuard: CanActivateFn = () => {
 
   return true;
 };
+
+// Project Manager only
+export const pmGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isLoggedIn()) {
+    router.navigate(['/login']);
+    return false;
+  }
+
+  if (authService.getUserRole() !== 'pm') {
+    router.navigate([authService.getDashboardRoute()]);
+    return false;
+  }
+
+  return true;
+};
+
+// Interviewer only
+export const interviewerGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isLoggedIn()) {
+    router.navigate(['/login']);
+    return false;
+  }
+
+  if (authService.getUserRole() !== 'interviewer') {
+    router.navigate([authService.getDashboardRoute()]);
+    return false;
+  }
+
+  return true;
+};

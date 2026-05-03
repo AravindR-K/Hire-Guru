@@ -56,6 +56,7 @@
   app.use('/api/admin', require('./routes/admin'));
   app.use('/api/hr', require('./routes/hr'));
   app.use('/api/candidate', require('./routes/candidate'));
+  app.use('/api/interview', require('./routes/interview'));
   // Keep backward compatibility for old student endpoints
   app.use('/api/student', require('./routes/candidate'));
 

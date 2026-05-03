@@ -24,7 +24,14 @@ const fileFilter = (req, file, cb) => {
     'application/vnd.ms-excel', // .xls
     'application/pdf', // .pdf
     'application/msword', // .doc
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document' // .docx
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/zip', // .zip
+    'application/x-zip-compressed', // .zip (Windows)
+    'application/x-rar-compressed', // .rar
+    'application/octet-stream', // generic binary (fallback for zip)
+    'image/png',
+    'image/jpeg',
+    'image/jpg'
   ];
   
   if (
@@ -33,11 +40,16 @@ const fileFilter = (req, file, cb) => {
     file.originalname.endsWith('.xls') ||
     file.originalname.endsWith('.pdf') ||
     file.originalname.endsWith('.doc') ||
-    file.originalname.endsWith('.docx')
+    file.originalname.endsWith('.docx') ||
+    file.originalname.endsWith('.zip') ||
+    file.originalname.endsWith('.rar') ||
+    file.originalname.endsWith('.png') ||
+    file.originalname.endsWith('.jpg') ||
+    file.originalname.endsWith('.jpeg')
   ) {
     cb(null, true);
   } else {
-    cb(new Error('Only Excel, PDF, and Word files are allowed'), false);
+    cb(new Error('Only Excel, PDF, Word, ZIP/RAR, and Image files are allowed'), false);
   }
 };
 
@@ -45,7 +57,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+    fileSize: 25 * 1024 * 1024 // 25MB limit (for coding round zips)
   }
 });
 

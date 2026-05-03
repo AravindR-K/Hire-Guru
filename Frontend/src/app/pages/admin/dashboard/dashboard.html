@@ -8,135 +8,143 @@
   </div>
 
   @if (loading()) {
-    <div class="loading-center">
-      <div class="spinner spinner-lg"></div>
-      <p class="loading-text">Loading statistics...</p>
-    </div>
+  <div class="loading-center">
+    <div class="spinner spinner-lg"></div>
+    <p class="loading-text">Loading statistics...</p>
+  </div>
   } @else if (stats()) {
-    <!-- Stats Cards -->
-    <div class="stats-grid stagger-children">
-      <div class="stat-card">
-        <div class="stat-icon-wrap blue">
-          <span class="material-symbols-rounded">group</span>
-        </div>
-        <div class="stat-body">
-          <span class="stat-value">{{ stats().totalUsers }}</span>
-          <span class="stat-label">Candidates</span>
-        </div>
+  <!-- Stats Cards -->
+  <div class="stats-grid stagger-children">
+    <div class="stat-card">
+      <div class="stat-icon-wrap blue">
+        <span class="material-symbols-rounded">group</span>
       </div>
-
-      <div class="stat-card">
-        <div class="stat-icon-wrap purple">
-          <span class="material-symbols-rounded">badge</span>
-        </div>
-        <div class="stat-body">
-          <span class="stat-value">{{ stats().totalHR }}</span>
-          <span class="stat-label">HR Users</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon-wrap green">
-          <span class="material-symbols-rounded">quiz</span>
-        </div>
-        <div class="stat-body">
-          <span class="stat-value">{{ stats().totalQuizzes }}</span>
-          <span class="stat-label">Quizzes</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon-wrap orange">
-          <span class="material-symbols-rounded">assignment_turned_in</span>
-        </div>
-        <div class="stat-body">
-          <span class="stat-value">{{ stats().totalSubmissions }}</span>
-          <span class="stat-label">Submissions</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon-wrap teal">
-          <span class="material-symbols-rounded">circle</span>
-        </div>
-        <div class="stat-body">
-          <span class="stat-value">{{ stats().onlineUsers }}</span>
-          <span class="stat-label">Online Now</span>
-        </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ stats().totalUsers }}</span>
+        <span class="stat-label">Candidates</span>
       </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="section">
-      <h2 class="section-title">Quick Actions</h2>
-      <div class="actions-grid">
-        <a (click)="openUsersPopup()" class="action-card card card-hover card-padding" style="cursor: pointer;">
-          <span class="material-symbols-rounded action-icon">group</span>
-          <div class="action-info">
-            <h3>Manage Users</h3>
-            <p>View candidates, HR users, and online status</p>
-          </div>
-          <span class="material-symbols-rounded action-arrow">arrow_forward</span>
-        </a>
-
-        <a routerLink="/admin/quizzes" class="action-card card card-hover card-padding">
-          <span class="material-symbols-rounded action-icon">quiz</span>
-          <div class="action-info">
-            <h3>Manage Quizzes</h3>
-            <p>View, edit, assign, and delete quizzes</p>
-          </div>
-          <span class="material-symbols-rounded action-arrow">arrow_forward</span>
-        </a>
-
-        <a routerLink="/admin/create-quiz" class="action-card card card-hover card-padding">
-          <span class="material-symbols-rounded action-icon">add_circle</span>
-          <div class="action-info">
-            <h3>Create Quiz</h3>
-            <p>Upload Excel or generate with AI</p>
-          </div>
-          <span class="material-symbols-rounded action-arrow">arrow_forward</span>
-        </a>
+    <div class="stat-card">
+      <div class="stat-icon-wrap purple">
+        <span class="material-symbols-rounded">badge</span>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ stats().totalHR }}</span>
+        <span class="stat-label">HR Users</span>
       </div>
     </div>
 
-    <!-- Recent Submissions -->
-    @if (recentSubmissions().length > 0) {
-      <div class="section">
-        <h2 class="section-title">Recent Submissions</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Candidate</th>
-                <th>Quiz</th>
-                <th>Score</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (sub of recentSubmissions(); track sub._id) {
-                <tr>
-                  <td>
-                    <div class="user-cell">
-                      <span class="user-cell-name">{{ sub.studentId?.name }}</span>
-                      <span class="user-cell-email">{{ sub.studentId?.email }}</span>
-                    </div>
-                  </td>
-                  <td>{{ sub.quizId?.title }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="{
+    <div class="stat-card">
+      <div class="stat-icon-wrap green">
+        <span class="material-symbols-rounded">quiz</span>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ stats().totalQuizzes }}</span>
+        <span class="stat-label">Quizzes</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon-wrap orange">
+        <span class="material-symbols-rounded">assignment_turned_in</span>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ stats().totalSubmissions }}</span>
+        <span class="stat-label">Submissions</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon-wrap teal">
+        <span class="material-symbols-rounded">circle</span>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ stats().onlineUsers }}</span>
+        <span class="stat-label">Online Now</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section">
+    <h2 class="section-title">Quick Actions</h2>
+    <div class="actions-grid">
+      <a (click)="openInterviewPopup()" class="action-card card card-hover card-padding" style="cursor: pointer;">
+        <span class="material-symbols-rounded action-icon">groups</span>
+        <div class="action-info">
+          <h3>Interviews</h3>
+          <p>Manage group and individual interview evaluations</p>
+        </div>
+        <span class="material-symbols-rounded action-arrow">arrow_forward</span>
+      </a>
+      <a (click)="openUsersPopup()" class="action-card card card-hover card-padding" style="cursor: pointer;">
+        <span class="material-symbols-rounded action-icon">group</span>
+        <div class="action-info">
+          <h3>Manage Users</h3>
+          <p>View candidates, HR users, and online status</p>
+        </div>
+        <span class="material-symbols-rounded action-arrow">arrow_forward</span>
+      </a>
+
+      <a routerLink="/admin/quizzes" class="action-card card card-hover card-padding">
+        <span class="material-symbols-rounded action-icon">quiz</span>
+        <div class="action-info">
+          <h3>Manage Quizzes</h3>
+          <p>View, edit, assign, and delete quizzes</p>
+        </div>
+        <span class="material-symbols-rounded action-arrow">arrow_forward</span>
+      </a>
+
+      <a routerLink="/admin/create-quiz" class="action-card card card-hover card-padding">
+        <span class="material-symbols-rounded action-icon">add_circle</span>
+        <div class="action-info">
+          <h3>Create Quiz</h3>
+          <p>Upload Excel or generate with AI</p>
+        </div>
+        <span class="material-symbols-rounded action-arrow">arrow_forward</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Recent Submissions -->
+  @if (recentSubmissions().length > 0) {
+  <div class="section">
+    <h2 class="section-title">Recent Submissions</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Quiz</th>
+            <th>Score</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (sub of recentSubmissions(); track sub._id) {
+          <tr>
+            <td>
+              <div class="user-cell">
+                <span class="user-cell-name">{{ sub.studentId?.name }}</span>
+                <span class="user-cell-email">{{ sub.studentId?.email }}</span>
+              </div>
+            </td>
+            <td>{{ sub.quizId?.title }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
                       'badge-success': sub.percentage >= 70,
                       'badge-warning': sub.percentage >= 40 && sub.percentage < 70,
                       'badge-danger': sub.percentage < 40
                     }">{{ sub.percentage }}%</span>
-                  </td>
-                  <td class="text-muted">{{ sub.submittedAt | date:'short' }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-    }
+            </td>
+            <td class="text-muted">{{ sub.submittedAt | date:'short' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
   }
 </div>

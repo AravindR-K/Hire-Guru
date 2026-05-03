@@ -7,7 +7,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'admin' | 'hr' | 'candidate';
+  role: 'admin' | 'hr' | 'candidate' | 'pm' | 'interviewer';
   group?: string;
 }
 
@@ -50,6 +50,18 @@ export class AuthService {
   login(email: string, password: string): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { email, password })
       .pipe(tap(res => this.handleAuth(res)));
+  }
+
+  getMe(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me`);
+  }
+
+  uploadSignature(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}/signature`, formData);
+  }
+
+  updateProfile(formData: FormData): Observable<any> {
+    return this.http.put(`${this.apiUrl}/profile`, formData);
   }
 
   logout(): void {
@@ -95,6 +107,8 @@ export class AuthService {
       case 'admin': return '/admin/dashboard';
       case 'hr': return '/hr/dashboard';
       case 'candidate': return '/candidate/dashboard';
+      case 'pm': return '/pm/dashboard';
+      case 'interviewer': return '/interviewer/dashboard';
       default: return '/login';
     }
   }

@@ -1,15 +1,27 @@
 <div class="page-container animate-fade-in">
   <div class="content-wrapper">
+
+    <!-- Breadcrumb -->
     <div class="breadcrumb">
-      <a routerLink="/admin/users">← Back to Users</a>
+      @if (selectedInterview()) {
+        <button class="breadcrumb-btn" (click)="goBackToList()">
+          <span class="material-symbols-rounded">arrow_back</span> Back to Interviews
+        </button>
+      } @else {
+        <a routerLink="/admin/users" class="breadcrumb-link">
+          <span class="material-symbols-rounded">arrow_back</span> Back to Users
+        </a>
+      }
     </div>
 
-    @if (loading()) {
+    @if (loadingInterviews()) {
       <div class="loading-state">
         <div class="loader"></div>
-        <p>Loading history...</p>
+        <p>Loading candidate data...</p>
       </div>
     } @else {
+
+      <!-- ========== CANDIDATE HEADER CARD ========== -->
       @if (user()) {
         <div class="student-header">
           <div class="student-profile">
@@ -26,7 +38,6 @@
                   </span>
                 }
               </div>
-              
               @if (user().resume) {
                 <div class="student-resume-info">
                   <a [href]="getResumeUrl(user().resume)" target="_blank" class="resume-badge">
@@ -54,55 +65,205 @@
         </div>
       }
 
-      <h2 class="section-title">Test History</h2>
+      <!-- ========== INTERVIEW LIST VIEW ========== -->
+      @if (!selectedInterview()) {
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="material-symbols-rounded section-icon">work_history</span>
+            Interview History
+          </h2>
+          <span class="interview-count-badge">{{ interviews().length }} Interview{{ interviews().length !== 1 ? 's' : '' }}</span>
+        </div>
 
-      @if (submissions().length === 0) {
-        <div class="empty-state">
-          <span class="empty-icon">📋</span>
-          <h3>No tests taken yet</h3>
-          <p>This student hasn't taken any quizzes.</p>
-        </div>
-      } @else {
-        <div class="history-table-wrap">
-          <table class="history-table">
-            <thead>
-              <tr>
-                <th>Quiz Name</th>
-                <th>Topic</th>
-                <th>Candidate's comfort Level</th>
-                <th>Score</th>
-                <th>Percentage</th>
-                <th>Time Taken</th>
-                <th>Date</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (sub of submissions(); track sub._id) {
+        @if (interviews().length === 0) {
+          <div class="empty-state">
+            <span class="material-symbols-rounded empty-icon">event_busy</span>
+            <h3>No interviews found</h3>
+            <p>This candidate hasn't been assigned any interviews yet.</p>
+          </div>
+        } @else {
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
                 <tr>
-                  <td class="quiz-name">{{ sub.quizId?.title || 'Deleted Quiz' }}</td>
-                  <td>{{ sub.quizId?.category || 'N/A'   }}</td>
-                  <td>{{ getComfortLevel(sub.quizId?.category) }}</td>
-                  <td><span class="score-badge">{{ sub.score }}/{{ sub.totalMarks }}</span></td>
-                  <td>
-                    <div class="percent-bar">
-                      <div class="percent-fill" [style.width.%]="sub.percentage"
-                           [class.good]="sub.percentage >= 70"
-                           [class.avg]="sub.percentage >= 40 && sub.percentage < 70"
-                           [class.poor]="sub.percentage < 40"></div>
-                    </div>
-                    <span class="percent-text">{{ sub.percentage }}%</span>
-                  </td>
-                  <td>{{ formatTime(sub.timeTaken) }}</td>
-                  <td>{{ sub.submittedAt | date:'medium' }}</td>
-                  <td>
-                    <a [routerLink]="['/admin/submissions', sub._id]" class="view-btn">View Details</a>
-                  </td>
+                  <th>#</th>
+                  <th>Position</th>
+                  <th>Interviewer</th>
+                  <th>Quizzes</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Action</th>
                 </tr>
-              }
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                @for (interview of interviews(); track interview._id; let i = $index) {
+                  <tr class="interview-row">
+                    <td>
+                      <span class="interview-seq">INT-{{ String(i + 1).padStart(3, '0') }}</span>
+                    </td>
+                    <td class="interview-position">{{ interview.position || '—' }}</td>
+                    <td>
+                      <div class="interviewer-cell">
+                        <div class="interviewer-avatar">{{ interview.interviewerId?.name?.charAt(0) || '?' }}</div>
+                        <span>{{ interview.interviewerId?.name || 'Unassigned' }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="quiz-count-badge">{{ (interview.quizzes || []).length }} Quiz{{ (interview.quizzes || []).length !== 1 ? 'zes' : '' }}</span>
+                    </td>
+                    <td>
+                      <span class="status-badge" [ngClass]="getStatusClass(interview.status)">
+                        <span class="status-dot"></span>
+                        {{ getStatusLabel(interview.status) }}
+                      </span>
+                    </td>
+                    <td class="date-cell">{{ interview.dateOfInterview | date:'dd MMM yyyy' }}</td>
+                    <td>
+                      <button class="view-btn" (click)="selectInterview(interview)">
+                        View Quizzes <span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">arrow_forward</span>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+      } @else {
+        <!-- ========== INTERVIEW DETAIL / QUIZ DRILL-DOWN ========== -->
+        <div class="interview-detail-header card card-padding" style="margin-bottom: 32px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <p class="section-label-sm">Interview Details</p>
+              <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: var(--text-primary);">{{ selectedInterview().position }}</h2>
+              <div class="student-contact-info" style="margin-top: 8px;">
+                <span class="contact-item">
+                  <span class="material-symbols-rounded">person</span> {{ selectedInterview().interviewerId?.name || 'Unassigned' }}
+                </span>
+                <span class="contact-item">
+                  <span class="material-symbols-rounded">calendar_today</span> {{ selectedInterview().dateOfInterview | date:'dd MMM yyyy' }}
+                </span>
+                <span class="contact-item">
+                  <span class="material-symbols-rounded">source</span> {{ selectedInterview().source || 'N/A' }}
+                </span>
+              </div>
+            </div>
+            <span class="status-badge status-badge-lg" [ngClass]="getStatusClass(selectedInterview().status)">
+              <span class="status-dot"></span>
+              {{ getStatusLabel(selectedInterview().status) }}
+            </span>
+          </div>
         </div>
+
+        <!-- Quiz table within interview -->
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="material-symbols-rounded section-icon">quiz</span>
+            Assessment Rounds
+          </h2>
+        </div>
+
+        @if (loadingSubmissions()) {
+          <div class="loading-state">
+            <div class="loader"></div>
+            <p>Loading quiz results...</p>
+          </div>
+        } @else if ((selectedInterview().quizzes || []).length === 0) {
+          <div class="empty-state">
+            <span class="material-symbols-rounded empty-icon">assignment</span>
+            <h3>No quizzes assigned</h3>
+            <p>No assessment rounds were linked to this interview.</p>
+          </div>
+        } @else {
+          <div class="history-table-wrap">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Quiz ID</th>
+                  <th>Quiz Name</th>
+                  <th>Topic</th>
+                  <th>Level</th>
+                  <th>Comfort Level</th>
+                  <th>Score</th>
+                  <th>Percentage</th>
+                  <th>Time Taken</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (iq of selectedInterview().quizzes; track iq._id; let i = $index) {
+                  <tr>
+                    <td>
+                      <code class="quiz-id-badge">{{ getQuizId(iq, i) }}</code>
+                    </td>
+                    <td class="quiz-name">{{ iq.quizId?.title || iq.title || 'Quiz' }}</td>
+                    <td>{{ iq.quizId?.category || 'N/A' }}</td>
+                    <td>
+                      <span class="diff-badge"
+                        [class.diff-easy]="(iq.quizId?.difficulty || '').toLowerCase() === 'easy'"
+                        [class.diff-medium]="(iq.quizId?.difficulty || '').toLowerCase() === 'medium'"
+                        [class.diff-hard]="(iq.quizId?.difficulty || '').toLowerCase() === 'hard'">
+                        {{ iq.quizId?.difficulty | uppercase }}
+                      </span>
+                    </td>
+                    <td>{{ getComfortLevel(iq.quizId?.category) }}</td>
+                    <td>
+                      @if (getSubmissionForQuiz(iq.quizId?._id || iq.quizId); as sub) {
+                        <span class="score-badge">{{ sub.score }}/{{ sub.totalMarks }}</span>
+                      } @else if (iq.score !== null && iq.score !== undefined) {
+                        <span class="score-badge">{{ iq.score }}/{{ iq.totalMarks }}</span>
+                      } @else {
+                        <span class="not-taken">Not Taken</span>
+                      }
+                    </td>
+                    <td>
+                      @if (getSubmissionForQuiz(iq.quizId?._id || iq.quizId); as sub) {
+                        <div class="percent-bar">
+                          <div class="percent-fill" [style.width.%]="sub.percentage"
+                               [class.good]="sub.percentage >= 70"
+                               [class.avg]="sub.percentage >= 40 && sub.percentage < 70"
+                               [class.poor]="sub.percentage < 40"></div>
+                        </div>
+                        <span class="percent-text">{{ sub.percentage }}%</span>
+                      } @else if (iq.percentage !== null && iq.percentage !== undefined) {
+                        <div class="percent-bar">
+                          <div class="percent-fill" [style.width.%]="iq.percentage"
+                               [class.good]="iq.percentage >= 70"
+                               [class.avg]="iq.percentage >= 40 && iq.percentage < 70"
+                               [class.poor]="iq.percentage < 40"></div>
+                        </div>
+                        <span class="percent-text">{{ iq.percentage }}%</span>
+                      } @else {
+                        <span class="not-taken">—</span>
+                      }
+                    </td>
+                    <td>
+                      @if (getSubmissionForQuiz(iq.quizId?._id || iq.quizId); as sub) {
+                        {{ formatTime(sub.timeTaken) }}
+                      } @else { — }
+                    </td>
+                    <td class="date-cell">
+                      @if (getSubmissionForQuiz(iq.quizId?._id || iq.quizId); as sub) {
+                        {{ sub.submittedAt | date:'dd MMM yyyy' }}
+                      } @else { — }
+                    </td>
+                    <td>
+                      @if (getSubmissionForQuiz(iq.quizId?._id || iq.quizId); as sub) {
+                        <a [routerLink]="['/admin/submissions', sub._id]" class="view-btn">
+                          Review <span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">open_in_new</span>
+                        </a>
+                      } @else {
+                        <span class="not-taken">Pending</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       }
     }
 

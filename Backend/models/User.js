@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  signature: {
+    type: String,
+    default: ''
+  },
   password: {
     type: String,
     required: [true, 'Password is required'],
@@ -30,7 +34,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'hr', 'candidate'],
+    enum: ['admin', 'hr', 'candidate', 'pm', 'interviewer'],
     default: 'candidate'
   },
   group: {

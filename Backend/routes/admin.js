@@ -21,7 +21,7 @@
   router.get('/users', async (req, res) => {
     try {
       const { role } = req.query;
-      const filter = role ? { role } : { role: { $in: ['candidate', 'hr'] } };
+      const filter = role ? { role } : { role: { $in: ['candidate', 'hr', 'pm', 'interviewer'] } };
       const users = await User.find(filter)
         .select('-password')
         .sort({ createdAt: -1 });
@@ -47,15 +47,20 @@
     }
   });
 
-  // @route   POST /api/admin/users/create-hr
-  // @desc    Create an HR user
+  // @route   POST /api/admin/users/create-staff
+  // @desc    Create a staff user (HR, PM, Interviewer)
   // @access  Admin
-  router.post('/users/create-hr', async (req, res) => {
+  router.post('/users/create-staff', async (req, res) => {
     try {
-      const { name, email, password } = req.body;
+      const { name, email, password, role } = req.body;
 
-      if (!name || !email || !password) {
-        return res.status(400).json({ message: 'Please provide name, email, and password' });
+      if (!name || !email || !password || !role) {
+        return res.status(400).json({ message: 'Please provide name, email, password, and role' });
+      }
+
+      const validRoles = ['hr', 'pm', 'interviewer'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ message: 'Invalid role' });
       }
 
       const existingUser = await User.findOne({ email });
@@ -63,10 +68,10 @@
         return res.status(400).json({ message: 'User with this email already exists' });
       }
 
-      const user = await User.create({ name, email, password, role: 'hr' });
+      const user = await User.create({ name, email, password, role });
 
       res.status(201).json({
-        message: 'HR user created successfully',
+        message: 'Staff user created successfully',
         user: {
           id: user._id,
           name: user.name,
@@ -198,6 +203,30 @@
         .sort({ submittedAt: -1 });
 
       res.json({ user, submissions });
+    } catch (error) {
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  });
+
+  // @route   GET /api/admin/users/:userId/interviews
+  // @desc    Get all interviews assigned to a specific user
+  // @access  Admin
+  router.get('/users/:userId/interviews', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const Interview = require('../models/Interview');
+
+      const user = await User.findById(userId).select('-password');
+      if (!user) return res.status(404).json({ message: 'User not found' });
+
+      const interviews = await Interview.find({ candidateId: userId })
+        .populate('interviewerId', 'name email role')
+        .populate('createdBy', 'name')
+        .populate('decidedBy', 'name')
+        .populate('quizzes.quizId', 'title category difficulty timer totalQuestions')
+        .sort({ createdAt: -1 });
+
+      res.json({ user, interviews });
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
     }

@@ -32,4 +32,8 @@ export class HRDashboardComponent implements OnInit {
   openUsersPopup(): void {
     this.uiService.showManageUsersPopup.set(true);
   }
+
+  openInterviewPopup(): void {
+    this.uiService.showInterviewPopup.set(true);
+  }
 }

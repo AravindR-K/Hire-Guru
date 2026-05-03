@@ -12,18 +12,41 @@ import { QuizService } from '../../../services/quiz.service';
   styleUrl: './dashboard.css'
 })
 export class CandidateDashboardComponent implements OnInit {
-  quizzes = signal<any[]>([]);
+  interviews = signal<any[]>([]);
   loading = signal(true);
+  uploadingCodingId = signal<string | null>(null);
 
   constructor(public authService: AuthService, private quizService: QuizService) {}
 
   ngOnInit(): void {
-    this.quizService.getAvailableQuizzes().subscribe({
+    this.loadInterviews();
+  }
+
+  loadInterviews(): void {
+    this.quizService.getCandidateInterviews().subscribe({
       next: (res) => {
-        this.quizzes.set(res.quizzes);
+        this.interviews.set(res.interviews);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
     });
+  }
+
+  onCodingZipSelected(event: any, interviewId: string): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.uploadingCodingId.set(interviewId);
+      this.quizService.uploadCandidateCodingSubmission(interviewId, file).subscribe({
+        next: (res) => {
+          this.uploadingCodingId.set(null);
+          this.loadInterviews();
+          alert('Coding round submitted successfully!');
+        },
+        error: (err) => {
+          this.uploadingCodingId.set(null);
+          alert(err.error?.message || 'Failed to submit coding round');
+        }
+      });
+    }
   }
 }

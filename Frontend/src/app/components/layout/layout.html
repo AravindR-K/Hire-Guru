@@ -13,7 +13,8 @@
     <div class="mobile-actions">
       <button class="icon-btn" (click)="toggleThemeMenu()">
         <span class="material-symbols-rounded">
-          {{ themeService.currentTheme() === 'light' ? 'light_mode' : themeService.currentTheme() === 'dark' ? 'dark_mode' : 'water' }}
+          {{ themeService.currentTheme() === 'light' ? 'light_mode' : themeService.currentTheme() === 'dark' ?
+          'dark_mode' : 'water' }}
         </span>
       </button>
     </div>
@@ -37,22 +38,20 @@
       <!-- Navigation -->
       <nav class="sidebar-nav">
         @for (item of navItems(); track item.route) {
-          @if (item.route === '/admin/users' || item.route === '/hr/users') {
-            <a class="nav-item" (click)="handleNavClick(item, $event)" href="javascript:void(0)"
-               [class.active]="router.url.includes('/admin/users') || router.url.includes('/hr/users') || router.url.includes('manage-groups')">
-              <span class="material-symbols-rounded nav-icon">{{ item.icon }}</span>
-              <span class="nav-label">{{ item.label }}</span>
-            </a>
-          } @else {
-            <a [routerLink]="item.route"
-               routerLinkActive="active"
-               [routerLinkActiveOptions]="{exact: item.route.includes('dashboard')}"
-               class="nav-item"
-               (click)="mobileSidebarOpen = false">
-              <span class="material-symbols-rounded nav-icon">{{ item.icon }}</span>
-              <span class="nav-label">{{ item.label }}</span>
-            </a>
-          }
+        @if (item.route === '/admin/users' || item.route === '/hr/users') {
+        <a class="nav-item" (click)="handleNavClick(item, $event)" href="javascript:void(0)"
+          [class.active]="router.url.includes('/admin/users') || router.url.includes('/hr/users') || router.url.includes('manage-groups')">
+          <span class="material-symbols-rounded nav-icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+        } @else {
+        <a [routerLink]="item.route" routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: item.route.includes('dashboard')}" class="nav-item"
+          (click)="mobileSidebarOpen = false">
+          <span class="material-symbols-rounded nav-icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+        }
         }
       </nav>
 
@@ -61,13 +60,10 @@
         <div class="section-label">Theme</div>
         <div class="theme-switcher">
           @for (t of themes; track t.id) {
-            <button
-              class="theme-btn"
-              [class.active]="themeService.currentTheme() === t.id"
-              (click)="setTheme(t.id)"
-              [title]="t.label">
-              <span class="material-symbols-rounded">{{ t.icon }}</span>
-            </button>
+          <button class="theme-btn" [class.active]="themeService.currentTheme() === t.id" (click)="setTheme(t.id)"
+            [title]="t.label">
+            <span class="material-symbols-rounded">{{ t.icon }}</span>
+          </button>
           }
         </div>
       </div>
@@ -81,6 +77,7 @@
             <span class="user-email">{{ authService.currentUser()?.email }}</span>
           </div>
         </div>
+        
         <button class="logout-btn" (click)="logout()">
           <span class="material-symbols-rounded">logout</span>
           <span>Sign Out</span>
@@ -97,51 +94,128 @@
 
 <!-- Manage Users Glassy Popup -->
 @if (uiService.showManageUsersPopup()) {
-  <div class="glassy-overlay" (click)="closeManageUsersPopup()">
-    <div class="glassy-modal animate-fade-in" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Manage Users & Groups</h2>
-        <button class="close-btn" (click)="closeManageUsersPopup()">
-          <span class="material-symbols-rounded">close</span>
-        </button>
-      </div>
-      
-      <div class="modal-options">
-        <a [routerLink]="getUsersRoute()" class="glassy-option" (click)="closeManageUsersPopup()">
-          <div class="option-icon-wrapper">
-            <span class="material-symbols-rounded block-icon">people</span>
-          </div>
-          <div class="option-text">
-            <h3>Student Users</h3>
-            <p>Review and manage candidate profiles and test histories</p>
-          </div>
-          <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
-        </a>
-        
-        <a [routerLink]="getManageGroupsRoute()" class="glassy-option" (click)="closeManageUsersPopup()">
-          <div class="option-icon-wrapper">
-            <span class="material-symbols-rounded block-icon">group_add</span>
-          </div>
-          <div class="option-text">
-            <h3>Manage Groups</h3>
-            <p>Create and structure student categorization effectively</p>
-          </div>
-          <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
-        </a>
-                                                                                                                                          
-        @if (authService.getUserRole() === 'admin') {
-          <a routerLink="/admin/hr-users" class="glassy-option" (click)="closeManageUsersPopup()">
-            <div class="option-icon-wrapper">
-              <span class="material-symbols-rounded block-icon">assignment_ind</span>
-            </div>
-            <div class="option-text">
-              <h3>HR Users</h3>
-              <p>Manage HR staff platform access</p>
-            </div>
-            <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
-          </a>
-        }
-      </div>
+<div class="glassy-overlay" (click)="closeManageUsersPopup()">
+  <div class="glassy-modal animate-fade-in" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Manage Users & Groups</h2>
+      <button class="close-btn" (click)="closeManageUsersPopup()">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <div class="modal-options">
+      <a [routerLink]="getUsersRoute()" class="glassy-option" (click)="closeManageUsersPopup()">
+        <div class="option-icon-wrapper">
+          <span class="material-symbols-rounded block-icon">people</span>
+        </div>
+        <div class="option-text">
+          <h3>Student Users</h3>
+          <p>Review and manage candidate profiles and test histories</p>
+        </div>
+        <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
+      </a>
+
+      <a [routerLink]="getManageGroupsRoute()" class="glassy-option" (click)="closeManageUsersPopup()">
+        <div class="option-icon-wrapper">
+          <span class="material-symbols-rounded block-icon">group_add</span>
+        </div>
+        <div class="option-text">
+          <h3>Manage Groups</h3>
+          <p>Create and structure student categorization effectively</p>
+        </div>
+        <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
+      </a>
+
+      @if (authService.getUserRole() === 'admin') {
+      <a routerLink="/admin/staff/hr" class="glassy-option" (click)="closeManageUsersPopup()">
+        <div class="option-icon-wrapper">
+          <span class="material-symbols-rounded block-icon">assignment_ind</span>
+        </div>
+        <div class="option-text">
+          <h3>HR Users</h3>
+          <p>Manage HR staff platform access</p>
+        </div>
+        <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
+      </a>
+
+      <a routerLink="/admin/staff/pm" class="glassy-option" (click)="closeManageUsersPopup()">
+        <div class="option-icon-wrapper">
+          <span class="material-symbols-rounded block-icon">work</span>
+        </div>
+        <div class="option-text">
+          <h3>Project Managers</h3>
+          <p>Manage PMs who assign and track interviews</p>
+        </div>
+        <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
+      </a>
+
+      <a routerLink="/admin/staff/interviewer" class="glassy-option" (click)="closeManageUsersPopup()">
+        <div class="option-icon-wrapper">
+          <span class="material-symbols-rounded block-icon">person_search</span>
+        </div>
+        <div class="option-text">
+          <h3>Interviewers</h3>
+          <p>Manage technical and HR interviewers</p>
+        </div>
+        <span class="material-symbols-rounded arrow-icon">arrow_forward</span>
+      </a>
+      }
     </div>
   </div>
+</div>
+}
+
+@if (uiService.showInterviewPopup()) {
+<div class="glassy-overlay" (click)="uiService.showInterviewPopup.set(false)">
+  <div class="glassy-modal animate-fade-in" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Interview Management</h2>
+
+      <button class="close-btn" (click)="uiService.showInterviewPopup.set(false)">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <div class="modal-options horizontal-options">
+
+
+
+      <a routerLink="/admin/individual-interview" class="glassy-option"
+        (click)="uiService.showInterviewPopup.set(false)">
+        <div class="option-icon-wrapper">
+          <span class="material-symbols-rounded block-icon">
+            person
+          </span>
+        </div>
+
+        <div class="option-text">
+          <h3>Individual Interview</h3>
+          <p>Evaluate technical and one-to-one interviews</p>
+        </div>
+
+        <span class="material-symbols-rounded arrow-icon">
+          arrow_forward
+        </span>
+      </a>
+
+      <a routerLink="/admin/group-interview" class="glassy-option" (click)="uiService.showInterviewPopup.set(false)">
+        <div class="option-icon-wrapper">
+          <span class="material-symbols-rounded block-icon">
+            groups
+          </span>
+        </div>
+
+        <div class="option-text">
+          <h3>Group Interview</h3>
+          <p>Evaluate group discussion and teamwork rounds</p>
+        </div>
+
+        <span class="material-symbols-rounded arrow-icon">
+          arrow_forward
+        </span>
+      </a>
+
+    </div>
+  </div>
+</div>
 }

@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { adminGuard, hrGuard, candidateGuard, guestGuard } from './guards/auth.guard';
+import { adminGuard, hrGuard, candidateGuard, guestGuard, pmGuard, interviewerGuard } from './guards/auth.guard';
 import { LayoutComponent } from './components/layout/layout';
 
 export const routes: Routes = [
@@ -42,12 +42,20 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin/manage-groups/manage-groups').then(m => m.ManageGroupsComponent)
       },
       {
-        path: 'hr-users',
+        path: 'staff/:role',
         loadComponent: () => import('./pages/admin/hr-users/hr-users').then(m => m.AdminHrUsersComponent)
       },
       {
         path: 'submissions/:submissionId',
         loadComponent: () => import('./pages/admin/submission-detail/submission-detail').then(m => m.SubmissionDetailComponent)
+      },
+      {
+        path: 'individual-interview',
+        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+      },
+      {
+        path: 'group-interview',
+        loadComponent: () => import('./pages/admin/group-interview/group-interview').then(m => m.GroupInterviewComponent)
       },
       {
         path: 'quizzes',
@@ -64,6 +72,10 @@ export const routes: Routes = [
       {
         path: 'quiz/:quizId/edit',
         loadComponent: () => import('./pages/admin/edit-quiz/edit-quiz').then(m => m.EditQuizComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./pages/staff/profile/profile').then(m => m.StaffProfileComponent)
       },
     ]
   },
@@ -83,7 +95,7 @@ export const routes: Routes = [
         path: 'quizzes',
         loadComponent: () => import('./pages/hr/quizzes/quizzes').then(m => m.HRQuizzesComponent)
       },
-        {
+      {
         path: 'users/:userId/history',
         loadComponent: () => import('./pages/hr/user-history/user-history').then(m => m.HRUserHistoryComponent)
       },
@@ -110,6 +122,58 @@ export const routes: Routes = [
       {
         path: 'quiz/:quizId/edit',
         loadComponent: () => import('./pages/hr/edit-quiz/edit-quiz').then(m => m.HREditQuizComponent)
+      },
+      {
+        path: 'individual-interview',
+        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./pages/staff/profile/profile').then(m => m.StaffProfileComponent)
+      },
+    ]
+  },
+
+  // ========== PROJECT MANAGER ROUTES ==========
+  {
+    path: 'pm',
+    component: LayoutComponent,
+    canActivate: [pmGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+      },
+      {
+        path: 'interviews',
+        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./pages/staff/profile/profile').then(m => m.StaffProfileComponent)
+      },
+    ]
+  },
+
+  // ========== INTERVIEWER ROUTES ==========
+  {
+    path: 'interviewer',
+    component: LayoutComponent,
+    canActivate: [interviewerGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+      },
+      {
+        path: 'interviews',
+        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./pages/staff/profile/profile').then(m => m.StaffProfileComponent)
       },
     ]
   },

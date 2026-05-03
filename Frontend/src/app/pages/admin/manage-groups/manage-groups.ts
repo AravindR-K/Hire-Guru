@@ -1,7 +1,7 @@
 import { Component, signal, OnInit, computed } from '@angular/core';
+import { Location } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { QuizService } from '../../../services/quiz.service';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 
@@ -31,7 +31,11 @@ export class ManageGroupsComponent implements OnInit {
     return this.allStudents().filter(s => !s.group || s.group === 'General');
   });
 
-  constructor(private quizService: QuizService) {}
+  constructor(private quizService: QuizService, private location: Location) {}
+
+  goBack(): void {
+    this.location.back();
+  }
 
   ngOnInit(): void {
     this.loadGroups();

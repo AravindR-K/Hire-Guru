@@ -1,7 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
+import { Location } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { QuizService } from '../../../services/quiz.service';
 
@@ -18,10 +19,11 @@ export class AdminHrUsersComponent implements OnInit {
   error = signal<string>('');
   success = signal<string>('');
   
-  // Create New HR
+  // Create New Staff
   newName = signal('');
   newEmail = signal('');
   newPassword = signal('');
+  currentRole = signal('hr');
   creating = signal(false);
 
   // Edit HR
@@ -31,17 +33,29 @@ export class AdminHrUsersComponent implements OnInit {
   editPassword = signal('');
   saving = signal(false);
 
-  constructor(private quizService: QuizService) {}
+  constructor(private quizService: QuizService, private route: ActivatedRoute, private location: Location) {}
+
+  goBack(): void {
+    this.location.back();
+  }
 
   ngOnInit(): void {
-    this.loadHRUsers();
+    this.route.paramMap.subscribe(params => {
+      const role = params.get('role');
+      if (role) {
+        this.currentRole.set(role);
+      }
+      this.loadHRUsers();
+    });
   }
 
   loadHRUsers(): void {
     this.loading.set(true);
-    this.quizService.getUsers('hr').subscribe({
+    this.quizService.getUsers().subscribe({
       next: (res) => {
-        this.hrUsers.set(res.users);
+        // Filter users based on current role
+        const staff = res.users.filter((u: any) => u.role === this.currentRole());
+        this.hrUsers.set(staff);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)
@@ -50,7 +64,7 @@ export class AdminHrUsersComponent implements OnInit {
 
   createHRUser(): void {
     if (!this.newName().trim() || !this.newEmail().trim() || !this.newPassword().trim()) {
-      this.error.set('Please fill out name, email, and password');
+      this.error.set('Please fill out all fields');
       return;
     }
     
@@ -58,13 +72,14 @@ export class AdminHrUsersComponent implements OnInit {
     this.error.set('');
     this.success.set('');
 
-    this.quizService.createHRUser({
+    this.quizService.createStaffUser({
       name: this.newName().trim(),
       email: this.newEmail().trim(),
-      password: this.newPassword().trim()
+      password: this.newPassword().trim(),
+      role: this.currentRole()
     }).subscribe({
       next: () => {
-        this.success.set('HR User created successfully!');
+        this.success.set('Staff User created successfully!');
         this.creating.set(false);
         this.newName.set('');
         this.newEmail.set('');
@@ -72,7 +87,7 @@ export class AdminHrUsersComponent implements OnInit {
         this.loadHRUsers();
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to create HR user');
+        this.error.set(err.error?.message || 'Failed to create staff user');
         this.creating.set(false);
       }
     });
@@ -101,32 +116,39 @@ export class AdminHrUsersComponent implements OnInit {
 
     this.quizService.editUser(userId, data).subscribe({
       next: () => {
-        this.success.set('HR User updated successfully!');
+        this.success.set('Staff User updated successfully!');
         this.saving.set(false);
         this.cancelEdit();
         this.loadHRUsers();
       },
       error: (err) => {
-        this.error.set(err.error?.message || 'Failed to update HR user');
+        this.error.set(err.error?.message || 'Failed to update staff user');
         this.saving.set(false);
       }
     });
   }
 
   deleteHRUser(userId: string): void {
-    if (confirm('Are you sure you want to delete this HR server? This revokes access entirely.')) {
+    if (confirm('Are you sure you want to delete this staff user? This revokes access entirely.')) {
       this.error.set('');
       this.success.set('');
       
       this.quizService.deleteUser(userId).subscribe({
         next: () => {
-          this.success.set('HR User deleted successfully!');
+          this.success.set('Staff User deleted successfully!');
           this.loadHRUsers();
         },
         error: (err) => {
-          this.error.set(err.error?.message || 'Failed to delete HR user');
+          this.error.set(err.error?.message || 'Failed to delete staff user');
         }
       });
     }
+  }
+  getRoleDisplay(): string {
+    const role = this.currentRole();
+    if (role === 'hr') return 'HR User';
+    if (role === 'pm') return 'Project Manager';
+    if (role === 'interviewer') return 'Interviewer';
+    return 'Staff User';
   }
 }

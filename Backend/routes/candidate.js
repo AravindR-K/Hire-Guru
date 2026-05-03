@@ -12,6 +12,24 @@ const router = express.Router();
 // All candidate routes require authentication + candidate role
 router.use(protect, authorize('candidate'));
 
+// @route   GET /api/candidate/interviews
+// @desc    Get assigned interviews for the candidate
+// @access  Candidate
+router.get('/interviews', async (req, res) => {
+  try {
+    const Interview = require('../models/Interview');
+    const interviews = await Interview.find({ candidateId: req.user._id })
+      .populate('interviewerId', 'name email')
+      .populate('createdBy', 'name')
+      .populate('quizzes.quizId', 'title timer totalQuestions category difficulty')
+      .sort({ createdAt: -1 });
+    
+    res.json({ interviews });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // @route   GET /api/candidate/quizzes
 // @desc    Get assigned and available quizzes for the candidate
 // @access  Candidate
@@ -86,9 +104,18 @@ router.get('/quiz/:quizId', async (req, res) => {
 
     // Check assignment - is this candidate allowed to take this quiz?
     const user = await User.findById(req.user._id);
+    
+    // Check if part of interview
+    const Interview = require('../models/Interview');
+    const interview = await Interview.findOne({ 
+      candidateId: req.user._id, 
+      'quizzes.quizId': quizId 
+    });
+
     const isAssigned = quiz.assignToAll ||
       quiz.assignees.some(a => a.toString() === req.user._id.toString()) ||
-      quiz.assignedGroups.includes(user.group);
+      quiz.assignedGroups.includes(user.group) ||
+      !!interview;
 
     if (!isAssigned) {
       return res.status(403).json({ message: 'You are not assigned to this quiz' });
@@ -167,6 +194,20 @@ router.post('/quiz/:quizId/submit', async (req, res) => {
       percentage,
       timeTaken: timeTaken || 0
     });
+
+    // Update Interview if applicable
+    const Interview = require('../models/Interview');
+    await Interview.findOneAndUpdate(
+      { candidateId: req.user._id, 'quizzes.quizId': quizId },
+      { 
+        $set: { 
+          'quizzes.$.score': score,
+          'quizzes.$.totalMarks': totalMarks,
+          'quizzes.$.percentage': percentage,
+          'quizzes.$.completed': true
+        }
+      }
+    );
 
     res.status(201).json({
       message: 'Quiz submitted successfully',
@@ -256,6 +297,44 @@ function checkAnswersMatch(arr1, arr2) {
   const b = arr2.map(x => x.toString().trim().toLowerCase()).sort().join('||');
   return a === b;
 }
+
+// @route   POST /api/candidate/interview/:interviewId/coding
+// @desc    Submit coding round zip file
+// @access  Candidate
+router.post('/interview/:interviewId/coding', upload.single('codingZip'), async (req, res) => {
+  try {
+    const Interview = require('../models/Interview');
+    const { interviewId } = req.params;
+
+    const interview = await Interview.findOne({ _id: interviewId, candidateId: req.user._id });
+    if (!interview) {
+      return res.status(404).json({ message: 'Interview not found' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Please upload a ZIP file' });
+    }
+
+    interview.codingRound = {
+      zipFile: `/uploads/${req.file.filename}`,
+      submittedAt: Date.now(),
+      validated: false
+    };
+
+    // Update status to coding phase evaluation
+    if (interview.status === 'quiz_phase' || interview.status === 'pending') {
+      interview.status = 'evaluation';
+    } else {
+        interview.status = 'evaluation'; // Since they submitted, it needs eval
+    }
+
+    await interview.save();
+
+    res.json({ message: 'Coding round submitted successfully', interview });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 
 // @route   GET /api/candidate/profile
 // @desc    Get candidate profile including topics of interest

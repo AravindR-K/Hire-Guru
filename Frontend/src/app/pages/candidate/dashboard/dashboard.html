@@ -3,81 +3,179 @@
   <div class="page-header">
     <div>
       <h1>Welcome, {{ authService.currentUser()?.name }}!</h1>
-      <p class="page-subtitle">Your assigned quizzes are listed below</p>
+      <p class="page-subtitle">Your assigned interviews and assessments</p>
     </div>
   </div>
 
   @if (loading()) {
     <div class="loading-center">
       <div class="spinner spinner-lg"></div>
-      <p class="loading-text">Loading quizzes...</p>
+      <p class="loading-text">Loading interviews...</p>
     </div>
-  } @else if (quizzes().length === 0) {
+  } @else if (interviews().length === 0) {
     <div class="empty-state">
-      <span class="material-symbols-rounded">assignment</span>
-      <h3>No quizzes assigned</h3>
-      <p>Check back later for new assessments</p>
+      <span class="material-symbols-rounded">event_busy</span>
+      <h3>No interviews assigned</h3>
+      <p>Check back later for new opportunities</p>
     </div>
   } @else {
-    <div class="quiz-grid stagger-children">
-      @for (quiz of quizzes(); track quiz.id) {
-        <div class="quiz-card card" [class.taken]="quiz.taken">
-          <div class="quiz-card-header">
-            <div class="quiz-icon-wrap" [class.completed]="quiz.taken">
-              <span class="material-symbols-rounded">{{ quiz.taken ? 'task_alt' : 'description' }}</span>
+    <div class="interview-list stagger-children">
+      @for (interview of interviews(); track interview._id) {
+        <div class="interview-card card" style="padding: 32px; margin-bottom: 24px;">
+          <!-- Header Area -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <h2 style="margin: 0; font-size: 28px; font-weight: 700; color: var(--text-primary);">{{ interview.position || 'Software Engineering Interview' }}</h2>
+              </div>
+              <p style="margin: 0; color: var(--text-muted); font-size: 15px;">{{ interview.source || 'General Recruitment' }} • Tech Stack: {{ interview.techStack || 'Various' }}</p>
+              
+              <div style="display: flex; align-items: center; gap: 16px; margin-top: 20px;">
+                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--bg-body); border-radius: 8px; border: 1px solid var(--border-color);">
+                  <span class="material-symbols-rounded" style="color: var(--text-muted); font-size: 20px;">groups</span>
+                  <span style="font-size: 14px; font-weight: 500;">Individual Participation</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--bg-body); border-radius: 8px; border: 1px solid var(--border-color);">
+                  <span class="material-symbols-rounded" style="color: var(--text-muted); font-size: 20px;">quiz</span>
+                  <span style="font-size: 14px; font-weight: 500;">Quizzes & Technical</span>
+                </div>
+              </div>
             </div>
-            <div class="quiz-meta">
-              @if (quiz.category) {
-                <span class="badge badge-primary" title="{{ quiz.category }}">{{ quiz.category | uppercase }}</span>
-              }
-              @if (quiz.difficulty) {
-                <span class="badge difficulty-badge" [ngClass]="{
-                  'badge-success': quiz.difficulty.toLowerCase() === 'easy',
-                  'badge-warning': quiz.difficulty.toLowerCase() === 'medium',
-                  'badge-danger': quiz.difficulty.toLowerCase() === 'hard'
-                }">{{ quiz.difficulty | uppercase }}</span>
-              }
+            <div style="padding: 16px; background: var(--bg-body); border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
+              <div style="font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Interview Date</div>
+              <div style="font-size: 16px; font-weight: 600; color: var(--accent-primary);">{{ interview.dateOfInterview | date:'dd MMM yyyy' }}</div>
             </div>
-          </div>
-          <h3 class="quiz-title">{{ quiz.title }}</h3>
-          <div class="quiz-details">
-            <span class="quiz-detail">
-              <span class="material-symbols-rounded">timer</span>
-              {{ quiz.timer }} min
-            </span>
-            <span class="quiz-detail">
-              <span class="material-symbols-rounded">help</span>
-              {{ quiz.totalQuestions }} questions
-            </span>
           </div>
 
-          @if (quiz.taken) {
-            <div class="quiz-result">
-              <div class="result-bar-track">
-                <div class="result-bar-fill"
-                     [style.width.%]="quiz.percentage"
-                     [ngClass]="{
-                       'fill-good': quiz.percentage >= 70,
-                       'fill-avg': quiz.percentage >= 40 && quiz.percentage < 70,
-                       'fill-poor': quiz.percentage < 40
-                     }"></div>
+          <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 32px 0;">
+
+          <!-- Eligibility -->
+          <div style="margin-bottom: 32px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+              <div style="width: 4px; height: 24px; background: var(--accent-primary); border-radius: 4px;"></div>
+              <h3 style="margin: 0; font-size: 20px; font-weight: 600;">Eligibility</h3>
+            </div>
+            <p style="margin: 0; color: var(--text-muted); line-height: 1.6; padding-left: 16px;">
+              Engineering Students • Postgraduate • Undergraduate • Management • Sciences & Others
+            </p>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 32px 0;">
+
+          <!-- Stages and Timelines -->
+          <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+              <div style="width: 4px; height: 24px; background: var(--accent-primary); border-radius: 4px;"></div>
+              <h3 style="margin: 0; font-size: 20px; font-weight: 600;">Stages and Timelines</h3>
+            </div>
+
+            @if (interview.quizzes && interview.quizzes.length > 0) {
+              <div style="display: flex; flex-direction: column; gap: 24px; padding-left: 16px;">
+                @for (q of interview.quizzes; track q._id; let i = $index) {
+                  <div style="display: flex; gap: 16px;">
+                    <!-- Timeline Marker -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 48px;">
+                      <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--bg-body); border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                        <span style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Round</span>
+                        <span style="font-size: 12px; font-weight: 600; color: var(--accent-primary);">0{{ i + 1 }}</span>
+                      </div>
+                      <div style="width: 2px; flex: 1; background: var(--border-color); min-height: 40px;"></div>
+                    </div>
+
+                    <!-- Stage Card -->
+                    <div class="card" style="flex: 1; border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h4 style="margin: 0; font-size: 18px; font-weight: 600;">{{ q.title || q.quizId?.title }}</h4>
+                        <div style="display: flex; gap: 8px;">
+                          @if (q.quizId?.category) {
+                            <span class="badge badge-primary">{{ q.quizId?.category | uppercase }}</span>
+                          }
+                          @if (q.quizId?.difficulty) {
+                            <span class="badge" [ngClass]="{
+                              'badge-success': q.quizId?.difficulty?.toLowerCase() === 'easy',
+                              'badge-warning': q.quizId?.difficulty?.toLowerCase() === 'medium',
+                              'badge-danger': q.quizId?.difficulty?.toLowerCase() === 'hard'
+                            }">{{ q.quizId?.difficulty | uppercase }}</span>
+                          }
+                        </div>
+                      </div>
+
+                      <ul style="margin: 0 0 24px 0; padding-left: 20px; color: var(--text-muted); line-height: 1.6;">
+                        <li>In this round, you'll take a structured online assessment consisting of {{ q.quizId?.totalQuestions }} multiple-choice questions.</li>
+                        <li>This evaluates your technical knowledge, analytical thinking, and job-relevant skills.</li>
+                        <li>You will have {{ q.quizId?.timer }} minutes to complete this assessment.</li>
+                      </ul>
+
+                      <div style="display: flex; justify-content: flex-end; align-items: center;">
+                        @if (q.completed || q.score !== null) {
+                          <div style="display: flex; align-items: center; gap: 16px;">
+                            <!-- Score hidden for candidate -->
+                            <div style="padding: 8px 16px; background: rgba(34, 197, 94, 0.1); color: #22c55e; border-radius: 8px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                              <span class="material-symbols-rounded" style="font-size: 18px;">check_circle</span> Completed
+                            </div>
+                          </div>
+                        } @else if (i === 0 || interview.quizzes[i-1].completed) {
+                          <a [routerLink]="['/candidate/quiz', q.quizId?._id || q.quizId]" class="btn btn-primary" style="padding: 10px 24px; border-radius: 8px; font-weight: 600;">
+                            Start Assessment
+                          </a>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+                
+                <!-- Coding Round Stage -->
+                <div style="display: flex; gap: 16px;">
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 48px;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--bg-body); border: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                      <span style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Round</span>
+                      <span style="font-size: 12px; font-weight: 600; color: var(--accent-primary);">0{{ interview.quizzes ? interview.quizzes.length + 1 : 1 }}</span>
+                    </div>
+                  </div>
+
+                  <div class="card" style="flex: 1; border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                      <h4 style="margin: 0; font-size: 18px; font-weight: 600;">Coding Challenge</h4>
+                      <span class="badge badge-warning">PRACTICAL</span>
+                    </div>
+
+                    <ul style="margin: 0 0 24px 0; padding-left: 20px; color: var(--text-muted); line-height: 1.6;">
+                      <li>In this round, you need to complete the coding challenge provided in the interview brief.</li>
+                      <li>Submit a ZIP file containing your code, output file (.txt), and screenshots of test cases.</li>
+                      <li>Maximum file size is 25MB.</li>
+                    </ul>
+
+                    <div style="display: flex; justify-content: flex-end; align-items: center;">
+                      @if (interview.codingRound?.zipFile) {
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                          <div style="padding: 8px 16px; background: rgba(34, 197, 94, 0.1); color: #22c55e; border-radius: 8px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                            <span class="material-symbols-rounded" style="font-size: 18px;">check_circle</span> Submitted
+                          </div>
+                        </div>
+                      } @else if (!interview.quizzes || interview.quizzes.length === 0 || interview.quizzes[interview.quizzes.length - 1].completed) {
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                          @if (uploadingCodingId() === interview._id) {
+                            <span class="spinner spinner-sm" style="width: 20px; height: 20px; border: 2px solid var(--accent-primary); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></span> <span style="font-weight: 600;">Uploading...</span>
+                          } @else {
+                            <label class="btn btn-primary" style="padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; margin: 0;">
+                              Upload ZIP
+                              <input type="file" style="display: none" accept=".zip,.rar" (change)="onCodingZipSelected($event, interview._id)">
+                            </label>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+
               </div>
-              <span class="result-score">Score: {{ quiz.score }}/{{ quiz.totalMarks }} ({{ quiz.percentage }}%)</span>
-            </div>
-            <div class="quiz-card-footer">
-              <span class="badge badge-success">
-                <span class="material-symbols-rounded" style="font-size: 14px">check</span>
-                Completed
-              </span>
-            </div>
-          } @else {
-            <div class="quiz-card-footer">
-              <a [routerLink]="['/candidate/quiz', quiz.id]" class="btn btn-primary btn-sm">
-                Start Quiz
-                <span class="material-symbols-rounded" style="font-size: 16px">arrow_forward</span>
-              </a>
-            </div>
-          }
+            } @else {
+              <div style="padding: 24px; background: var(--bg-body); border-radius: 12px; border: 1px dashed var(--border-color); text-align: center; color: var(--text-muted);">
+                No assessment stages assigned to this interview yet.
+              </div>
+            }
+          </div>
+
         </div>
       }
     </div>

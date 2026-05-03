@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Group = require('../models/Group');
 const { protect } = require('../middleware/auth');
+const upload = require('../middleware/upload');
+const fs = require('fs');
+const path = require('path');
 const router = express.Router();
 
 // Generate JWT Token
@@ -119,6 +122,32 @@ router.get('/me', protect, async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/signature
+// @desc    Upload digital signature image
+// @access  Private
+router.post('/signature', protect, upload.single('signature'), async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Please upload an image file' });
+    }
+
+    if (user.signature) {
+      const oldPath = path.join(__dirname, '..', 'uploads', path.basename(user.signature));
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    }
+
+    user.signature = `/uploads/${req.file.filename}`;
+    await user.save();
+
+    res.json({ message: 'Signature uploaded successfully', signature: user.signature });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 // @route   GET /api/auth/groups
 // @desc    Get all groups for registration
 // @access  Public
@@ -130,6 +159,28 @@ router.get('/groups', async (req, res) => {
     const userGroups = await User.distinct('group');
     const allGroups = [...new Set([...groupNames, ...userGroups])].filter(g => g && g !== 'General');
     res.json({ groups: allGroups });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// @route   PUT /api/auth/profile
+// @desc    Update current user profile
+// @access  Private
+router.put('/profile', protect, upload.none(), async (req, res) => {
+  try {
+    const { name, email, phoneNumber } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+
+    await user.save();
+
+    res.json({ message: 'Profile updated', user });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

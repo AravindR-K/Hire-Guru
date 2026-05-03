@@ -1,0 +1,102 @@
+<div class="page-container">
+  <div class="content-wrapper">
+    
+    @if (loading()) {
+      <div class="loading-center">
+        <span class="spinner"></span>
+        <p>Loading your profile...</p>
+      </div>
+    } @else if (user()) {
+      <div class="profile-header">
+        <div class="ph-avatar">
+          {{ user().name?.charAt(0)?.toUpperCase() }}
+        </div>
+        <div class="ph-info">
+          <h1>{{ user().name }}</h1>
+          <p class="ph-role">{{ user().role | uppercase }}</p>
+          <div class="ph-meta">
+            <span class="meta-item"><span class="material-symbols-rounded">mail</span> {{ user().email }}</span>
+            @if (user().phoneNumber) {
+              <span class="meta-item"><span class="material-symbols-rounded">call</span> {{ user().phoneNumber }}</span>
+            }
+          </div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-outline" (click)="openEditProfile()">
+            <span class="material-symbols-rounded">edit</span> Edit Profile
+          </button>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <div class="pg-main">
+          <!-- Signature Section -->
+          <div class="content-card">
+            <div class="card-header">
+              <h2>Digital Signature</h2>
+            </div>
+            <div class="card-body">
+              @if (user().signature) {
+                <div class="signature-box">
+                  <img [src]="getSignatureUrl()" alt="Your Signature">
+                </div>
+                <div class="action-row" style="margin-top: 16px;">
+                  <label class="btn btn-primary" style="cursor: pointer;">
+                    @if (isUploadingSignature()) { <span class="spinner spinner-sm"></span> Uploading... }
+                    @else { <span class="material-symbols-rounded">upload</span> Replace Signature }
+                    <input type="file" accept="image/*" style="display: none;" (change)="uploadSignature($event)">
+                  </label>
+                </div>
+              } @else {
+                <div class="empty-state" style="padding: 40px 20px;">
+                  <span class="material-symbols-rounded">draw</span>
+                  <h3>No Signature Uploaded</h3>
+                  <p>Upload your digital signature to attach it to evaluation forms automatically.</p>
+                  <label class="btn btn-primary" style="margin-top: 16px; cursor: pointer; display: inline-flex;">
+                    @if (isUploadingSignature()) { <span class="spinner spinner-sm"></span> Uploading... }
+                    @else { <span class="material-symbols-rounded">upload</span> Upload Signature }
+                    <input type="file" accept="image/*" style="display: none;" (change)="uploadSignature($event)">
+                  </label>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+@if (isEditingProfile()) {
+  <div class="modal-overlay" (click)="closeEditProfile()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Edit Profile</h2>
+        <button class="btn-icon" (click)="closeEditProfile()"><span class="material-symbols-rounded">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input class="form-input" [(ngModel)]="editName" placeholder="Enter your full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input class="form-input" [(ngModel)]="editEmail" placeholder="Enter your email" type="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-input" [(ngModel)]="editPhone" placeholder="Enter phone number">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeEditProfile()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveProfile()" [disabled]="isSavingProfile()">
+          @if (isSavingProfile()) { <span class="spinner spinner-sm"></span> Saving... }
+          @else { Save Changes }
+        </button>
+      </div>
+    </div>
+  </div>
+}
