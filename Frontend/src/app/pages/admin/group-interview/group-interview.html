@@ -94,11 +94,12 @@
             </div>
 
             <!-- Candidate progress chips -->
-            <div class="candidate-chips">
+            <div class="candidate-pills">
               @for (m of g.members; track m._id) {
-                <span class="candidate-chip" [ngClass]="getStatusClass(m.status)" [title]="m.candidateId?.name + ' — ' + formatStatus(m.status)">
-                  {{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}
-                </span>
+                <div class="candidate-pill" [ngClass]="getStatusClass(m.status)" [title]="'Status: ' + formatStatus(m.status)">
+                  <div class="cp-avatar">{{ m.candidateId?.name ? m.candidateId.name.charAt(0).toUpperCase() : '?' }}</div>
+                  <span class="cp-name">{{ m.candidateId?.name || 'Unknown Candidate' }}</span>
+                </div>
               }
             </div>
 
@@ -433,15 +434,10 @@
                       <span class="step-dot"></span><span class="step-label">Done</span>
                     </div>
                   </div>
-                </div>
-                <div class="candidate-row-right">
-                  <span class="badge" [ngClass]="getStatusClass(m.status)">{{ formatStatus(m.status) }}</span>
-                  @if (m.finalDecision !== 'pending') {
-                    <span class="badge" [ngClass]="getDecisionClass(m.finalDecision)">{{ formatDecision(m.finalDecision) }}</span>
-                  }
-                  <!-- Quiz scores -->
+
+                  <!-- Quiz scores aligned to left -->
                   @if (m.quizzes?.length > 0) {
-                    <div class="quiz-scores-inline">
+                    <div class="quiz-scores-inline" style="margin-top: 14px;">
                       @for (q of m.quizzes; track q.quizId) {
                         <span class="quiz-score-chip" [class.completed]="q.completed">
                           {{ q.title }}: {{ q.completed ? q.score + '/' + q.totalMarks : 'Pending' }}
@@ -449,8 +445,14 @@
                       }
                     </div>
                   }
+                </div>
+                <div class="candidate-row-right">
+                  <span class="badge" [ngClass]="getStatusClass(m.status)">{{ formatStatus(m.status) }}</span>
+                  @if (m.finalDecision !== 'pending') {
+                    <span class="badge" [ngClass]="getDecisionClass(m.finalDecision)">{{ formatDecision(m.finalDecision) }}</span>
+                  }
                   <!-- Decision buttons (admin) -->
-                  @if (authService.getUserRole() === 'admin' && m.status !== 'completed') {
+                  @if (authService.getUserRole() === 'admin' && m.status === 'evaluation') {
                     <div class="mini-decision-btns">
                       <button class="mini-btn success" (click)="setDecision(m._id, 'accepted'); $event.stopPropagation()">Accept</button>
                       <button class="mini-btn danger"  (click)="setDecision(m._id, 'rejected'); $event.stopPropagation()">Reject</button>
