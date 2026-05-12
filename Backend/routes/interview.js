@@ -428,9 +428,9 @@ router.put('/:id/evaluate', authorize('admin', 'hr', 'pm', 'interviewer'), async
 // ============================================================
 // @route   PUT /api/interview/:id/decision
 // @desc    Set final decision (accepted/rejected/on_hold/2nd_round)
-// @access  Admin only
+// @access  Admin, HR
 // ============================================================
-router.put('/:id/decision', authorize('admin'), async (req, res) => {
+router.put('/:id/decision', authorize('admin', 'hr'), async (req, res) => {
   try {
     const { decision } = req.body;
     if (!decision) return res.status(400).json({ message: 'Decision is required' });
@@ -515,9 +515,9 @@ router.put('/:id/validate-coding', authorize('admin', 'hr', 'pm', 'interviewer')
 // ============================================================
 // @route   DELETE /api/interview/:id
 // @desc    Delete an interview
-// @access  Admin only
+// @access  Admin, HR
 // ============================================================
-router.delete('/:id', authorize('admin'), async (req, res) => {
+router.delete('/:id', authorize('admin', 'hr'), async (req, res) => {
   try {
     const interview = await Interview.findById(req.params.id);
     if (!interview) return res.status(404).json({ message: 'Interview not found' });

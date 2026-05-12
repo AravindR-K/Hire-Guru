@@ -93,14 +93,21 @@
               }
             </div>
 
-            <!-- Candidate progress chips -->
+            <!-- Candidate progress chips — click any chip to open the evaluation panel directly -->
             <div class="candidate-chips">
               @for (m of g.members; track m._id) {
-                <span class="candidate-chip" [ngClass]="getStatusClass(m.status)" [title]="m.candidateId?.name + ' — ' + formatStatus(m.status)">
-                  {{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}
+                <span class="candidate-chip clickable-chip" [ngClass]="getStatusClass(m.status)"
+                  [title]="m.candidateId?.name + ' — ' + formatStatus(m.status) + (hasPendingEvaluations(m) ? ' (Evaluations pending)' : '')"
+                  (click)="openMemberDetail(m._id, $event)">
+                  @if (hasPendingEvaluations(m)) {
+                    <span class="chip-alert" title="Evaluations still pending">⚠️</span>
+                  }
+                  {{ m.candidateId?.name }}
                 </span>
               }
             </div>
+
+
 
             <div class="iv-card-bottom">
               <span class="status-summary">{{ groupStatusSummary(g.members) }}</span>
@@ -403,60 +410,65 @@
           <div class="candidate-detail-list">
             @for (m of selectedGroup().members; track m._id) {
               <div class="candidate-row">
-                <div class="candidate-row-left">
-                  <div class="iv-avatar small">{{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}</div>
-                  <div>
-                    <div class="cr-name">{{ m.candidateId?.name }}</div>
-                    <div class="cr-email">{{ m.candidateId?.email }}</div>
+
+                <!-- Top row: clickable avatar+name on the left, progress bar on the right -->
+                <div class="candidate-row-top">
+                  <button class="cr-clickable" (click)="openMemberDetail(m._id, $event)">
+                    <div class="iv-avatar small">{{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}</div>
+                    <div>
+                      <div class="cr-name">
+                        {{ m.candidateId?.name }}
+                        @if (needsEvaluation(m)) {
+                          <span class="eval-pending-badge" title="Your evaluation is pending">⚠️ Evaluate</span>
+                        }
+                        @if (hasPendingEvaluations(m)) {
+                          <span class="eval-pending-badge warn" title="Some evaluations are still pending">⏳</span>
+                        }
+                      </div>
+                      <div class="cr-email">{{ m.candidateId?.email }}</div>
+                    </div>
+                  </button>
+                  <div class="candidate-row-mid">
+                    <div class="progress-steps mini">
+                      <div class="step" [class.done]="['quiz_phase','coding_phase','evaluation','completed'].includes(m.status)">
+                        <span class="step-dot"></span><span class="step-label">Created</span>
+                      </div>
+                      <div class="step-line" [class.done]="['quiz_phase','coding_phase','evaluation','completed'].includes(m.status)"></div>
+                      <div class="step" [class.active]="m.status==='quiz_phase'" [class.done]="['coding_phase','evaluation','completed'].includes(m.status)">
+                        <span class="step-dot"></span><span class="step-label">Quiz</span>
+                      </div>
+                      <div class="step-line" [class.done]="['coding_phase','evaluation','completed'].includes(m.status)"></div>
+                      <div class="step" [class.active]="m.status==='coding_phase'" [class.done]="['evaluation','completed'].includes(m.status)">
+                        <span class="step-dot"></span><span class="step-label">Coding</span>
+                      </div>
+                      <div class="step-line" [class.done]="['evaluation','completed'].includes(m.status)"></div>
+                      <div class="step" [class.active]="m.status==='evaluation'" [class.done]="m.status==='completed'">
+                        <span class="step-dot"></span><span class="step-label">Evaluate</span>
+                      </div>
+                      <div class="step-line" [class.done]="m.status==='completed'"></div>
+                      <div class="step" [class.active]="m.status==='completed'" [class.done]="m.status==='completed'">
+                        <span class="step-dot"></span><span class="step-label">Done</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div class="candidate-row-mid">
-                  <!-- Progress steps mini -->
-                  <div class="progress-steps mini">
-                    <div class="step" [class.done]="['quiz_phase','coding_phase','evaluation','completed'].includes(m.status)">
-                      <span class="step-dot"></span><span class="step-label">Created</span>
-                    </div>
-                    <div class="step-line" [class.done]="['quiz_phase','coding_phase','evaluation','completed'].includes(m.status)"></div>
-                    <div class="step" [class.active]="m.status==='quiz_phase'" [class.done]="['coding_phase','evaluation','completed'].includes(m.status)">
-                      <span class="step-dot"></span><span class="step-label">Quiz</span>
-                    </div>
-                    <div class="step-line" [class.done]="['coding_phase','evaluation','completed'].includes(m.status)"></div>
-                    <div class="step" [class.active]="m.status==='coding_phase'" [class.done]="['evaluation','completed'].includes(m.status)">
-                      <span class="step-dot"></span><span class="step-label">Coding</span>
-                    </div>
-                    <div class="step-line" [class.done]="['evaluation','completed'].includes(m.status)"></div>
-                    <div class="step" [class.active]="m.status==='evaluation'" [class.done]="m.status==='completed'">
-                      <span class="step-dot"></span><span class="step-label">Evaluate</span>
-                    </div>
-                    <div class="step-line" [class.done]="m.status==='completed'"></div>
-                    <div class="step" [class.active]="m.status==='completed'" [class.done]="m.status==='completed'">
-                      <span class="step-dot"></span><span class="step-label">Done</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="candidate-row-right">
+
+                <!-- Bottom row: status badge + quiz scores (no accept/reject here) -->
+                <div class="candidate-row-bottom">
                   <span class="badge" [ngClass]="getStatusClass(m.status)">{{ formatStatus(m.status) }}</span>
                   @if (m.finalDecision !== 'pending') {
                     <span class="badge" [ngClass]="getDecisionClass(m.finalDecision)">{{ formatDecision(m.finalDecision) }}</span>
                   }
-                  <!-- Quiz scores -->
                   @if (m.quizzes?.length > 0) {
-                    <div class="quiz-scores-inline">
-                      @for (q of m.quizzes; track q.quizId) {
-                        <span class="quiz-score-chip" [class.completed]="q.completed">
-                          {{ q.title }}: {{ q.completed ? q.score + '/' + q.totalMarks : 'Pending' }}
-                        </span>
-                      }
-                    </div>
+                    @for (q of m.quizzes; track q.quizId) {
+                      <span class="quiz-score-chip" [class.completed]="q.completed">
+                        {{ q.title }}: {{ q.completed ? q.score + '/' + q.totalMarks : 'Pending' }}
+                      </span>
+                    }
                   }
-                  <!-- Decision buttons (admin) -->
-                  @if (authService.getUserRole() === 'admin' && m.status !== 'completed') {
-                    <div class="mini-decision-btns">
-                      <button class="mini-btn success" (click)="setDecision(m._id, 'accepted'); $event.stopPropagation()">Accept</button>
-                      <button class="mini-btn danger"  (click)="setDecision(m._id, 'rejected'); $event.stopPropagation()">Reject</button>
-                    </div>
-                  }
+                  <span class="cr-open-hint">Click name to evaluate →</span>
                 </div>
+
               </div>
             }
           </div>
@@ -465,7 +477,7 @@
       </div>
 
       <div class="modal-footer">
-        @if (authService.getUserRole() === 'admin') {
+        @if (authService.getUserRole() === 'admin' || authService.getUserRole() === 'hr') {
           <button class="btn btn-danger btn-sm" (click)="deleteGroupInterview(selectedGroup().groupId)">
             Delete All Interviews
           </button>
@@ -475,4 +487,262 @@
 
     </div>
   </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════
+     MEMBER DETAIL MODAL — full evaluation panel for one candidate
+═══════════════════════════════════════════════════════════ -->
+@if (showMemberDetailModal() && selectedMember()) {
+  <div class="modal-overlay" (click)="closeMemberDetail()">
+    <div class="modal-container modal-xl" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div>
+          <h2>{{ selectedMember().candidateId?.name }}</h2>
+          <span class="badge" [ngClass]="getStatusClass(selectedMember().status)">{{ formatStatus(selectedMember().status) }}</span>
+          @if (selectedMember().finalDecision !== 'pending') {
+            <span class="badge" [ngClass]="getDecisionClass(selectedMember().finalDecision)" style="margin-left:6px">
+              {{ formatDecision(selectedMember().finalDecision) }}
+            </span>
+          }
+        </div>
+        <button class="icon-btn" (click)="closeMemberDetail()"><span class="material-symbols-rounded">close</span></button>
+      </div>
+
+      <div class="modal-body detail-body">
+
+        <!-- Candidate Info -->
+        <div class="detail-section">
+          <h3 class="detail-section-title">Candidate Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">Name</span>
+              <span class="detail-value">{{ selectedMember().candidateId?.name }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Email</span>
+              <span class="detail-value">{{ selectedMember().candidateId?.email }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Position</span>
+              <span class="detail-value">{{ selectedMember().position }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Tech Stack</span>
+              <span class="detail-value">{{ selectedMember().techStack || '—' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Date of Interview</span>
+              <span class="detail-value">{{ selectedMember().dateOfInterview | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Results -->
+        @if (selectedMember().quizzes?.length > 0) {
+          <div class="detail-section">
+            <h3 class="detail-section-title">Quiz Results</h3>
+            <div class="quiz-results-grid">
+              @for (q of selectedMember().quizzes; track q.quizId) {
+                <div class="quiz-result-card">
+                  <div class="qr-title">{{ q.title }}</div>
+                  @if (q.completed) {
+                    <div class="qr-score">{{ q.score }}/{{ q.totalMarks }} ({{ q.percentage }}%)</div>
+                  } @else {
+                    <div class="qr-pending">Not Taken</div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Evaluations -->
+        <div class="detail-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 class="detail-section-title" style="margin:0;">Evaluations</h3>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              @if (allMemberEvaluationsDone()) {
+                <span class="badge badge-success">All evaluations done</span>
+                <button class="btn btn-primary btn-sm" (click)="downloadEvaluationPdf()">
+                  @if (isPdfGenerating()) { <span class="spinner spinner-sm"></span> Generating... } @else { <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">download</span> Download PDF }
+                </button>
+              } @else {
+                <span class="badge badge-warning">Evaluations pending</span>
+              }
+            </div>
+          </div>
+
+          <!-- Evaluation list -->
+          @if (selectedMember().evaluations?.length > 0) {
+            <div class="eval-list">
+              @for (ev of selectedMember().evaluations; track ev._id) {
+                <div class="eval-card">
+                  <div class="eval-header">
+                    <div class="eval-evaluator">
+                      <strong>{{ ev.evaluatorId?.name }}</strong>
+                      <span class="eval-role badge badge-muted">{{ ev.evaluatorRole | uppercase }}</span>
+                    </div>
+                    <span class="badge" [ngClass]="getDecisionClass(ev.recommendation)">{{ formatDecision(ev.recommendation) }}</span>
+                  </div>
+                  @if (ev.comments) {
+                    <p class="eval-comments">"{{ ev.comments }}"</p>
+                  }
+                  <span class="eval-date">{{ ev.date | date:'medium' }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="text-muted">No evaluations yet</p>
+          }
+
+          <!-- Add evaluation form (HR / PM / Interviewer, not if already submitted or completed) -->
+          @if (!hasMemberEvaluated() && selectedMember().status !== 'completed') {
+            <div class="eval-form">
+              <h4>Add Your Evaluation</h4>
+              <div class="form-group">
+                <label class="form-label">Comments</label>
+                <textarea class="form-input form-textarea" [(ngModel)]="memberEvalComment"
+                  placeholder="Enter your comments..." rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Recommendation *</label>
+                <select class="form-input" [(ngModel)]="memberEvalRecommendation">
+                  <option value="">Select recommendation</option>
+                  <option value="offer">Offer / Hire as Intern</option>
+                  <option value="on_hold">On Hold</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="2nd_round">2nd Round</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" (click)="submitMemberEvaluation()"
+                [disabled]="!memberEvalRecommendation || isMemberSubmitting()">
+                @if (isMemberSubmitting()) { <span class="spinner spinner-sm"></span> Submitting... }
+                @else { Submit Evaluation }
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Final Decision — Admin and HR, only when all evaluations done -->
+        @if ((authService.getUserRole() === 'admin' || authService.getUserRole() === 'hr') && allMemberEvaluationsDone() && selectedMember().status !== 'completed') {
+          <div class="detail-section decision-section">
+            <h3 class="detail-section-title">Final Decision</h3>
+            <div class="decision-buttons">
+              <button class="btn btn-success" (click)="setMemberDecision('accepted')">
+                <span class="material-symbols-rounded">check_circle</span> Accept
+              </button>
+              <button class="btn btn-warning" (click)="setMemberDecision('on_hold')">
+                <span class="material-symbols-rounded">pause_circle</span> On Hold
+              </button>
+              <button class="btn btn-danger" (click)="setMemberDecision('rejected')">
+                <span class="material-symbols-rounded">cancel</span> Reject
+              </button>
+              <button class="btn btn-outline" (click)="setMemberDecision('2nd_round')">
+                <span class="material-symbols-rounded">replay</span> 2nd Round
+              </button>
+            </div>
+          </div>
+        }
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline" (click)="closeMemberDetail()">Close</button>
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- Print Template for Evaluation PDF -->
+@if (selectedMember()) {
+<div class="print-container">
+  <div class="print-header">
+    <div class="print-header-left">
+      <h2 style="margin: 0; font-size: 20px;">Intern Interview Evaluation Form</h2>
+    </div>
+    <div class="print-header-right" style="text-align: right;">
+      <span style="color: #0078d4; font-weight: bold; font-size: 24px;">IDEAL</span><br>
+      <span style="font-size: 10px; color: #555;">TECH LABS</span>
+    </div>
+  </div>
+
+  <table class="print-table" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold; width: 25%;">Candidate Name:</td>
+      <td style="border: 1px solid #000; padding: 8px; width: 25%;">{{ selectedMember().candidateId?.name }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold; width: 25%;">Date of Interview:</td>
+      <td style="border: 1px solid #000; padding: 8px; width: 25%;">{{ selectedMember().dateOfInterview | date:'mediumDate' }}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Position:</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedMember().position }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Source</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedMember().source || '—' }}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Tech Stack:</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedMember().techStack || '—' }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Interviewer(s):</td>
+      <td style="border: 1px solid #000; padding: 8px;">
+        @if (selectedMember().assignedInterviewers?.length) {
+          @for (i of selectedMember().assignedInterviewers; track i._id; let last = $last) {
+            {{ i.name }}{{ !last ? ', ' : '' }}
+          }
+        } @else {
+          {{ selectedMember().interviewerId?.name || '—' }}
+        }
+      </td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">General Aptitude Test QP Set</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedMember().quizzes?.[0]?.title || '—' }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">General Aptitude Test Score</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedMember().quizzes?.[0]?.completed ? selectedMember().quizzes[0].score + '/' + selectedMember().quizzes[0].totalMarks : 'Not Taken' }}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Technical MCQ Test QP Set</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedMember().quizzes?.[1]?.title || '—' }}</td>
+      <td style="border: 1px solid #000; padding: 8px; font-weight: bold;">Technical MCQ Test Score</td>
+      <td style="border: 1px solid #000; padding: 8px;">{{ selectedMember().quizzes?.[1]?.completed ? selectedMember().quizzes[1].score + '/' + selectedMember().quizzes[1].totalMarks : 'Not Taken' }}</td>
+    </tr>
+  </table>
+
+  <!-- Render evaluations -->
+  @for (ev of selectedMember().evaluations; track ev._id) {
+    <div class="print-eval-block" style="margin-bottom: 30px; page-break-inside: avoid;">
+      <div class="print-eval-title" style="font-weight: bold; margin-bottom: 10px;">
+        {{ ev.evaluatorRole === 'hr' ? 'HR' : ev.evaluatorRole === 'pm' ? 'Project Manager' : 'Interviewer' }}'s Comments ({{ ev.evaluatorId?.name }}):
+      </div>
+      <div class="print-comments" style="min-height: 80px; margin-bottom: 15px;">
+        {{ ev.comments || 'No comments provided.' }}
+      </div>
+      
+      <div class="print-recommendation" style="margin-bottom: 20px;">
+        <strong style="margin-right: 15px;">Recommendation:</strong>
+        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ ev.recommendation === 'offer' ? '☑' : '☐' }}</span> Offer/Hire as Intern</span>
+        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ ev.recommendation === 'on_hold' ? '☑' : '☐' }}</span> On Hold</span>
+        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ ev.recommendation === 'rejected' ? '☑' : '☐' }}</span> Rejected</span>
+        <span><span style="font-size: 16px;">{{ ev.recommendation === '2nd_round' ? '☑' : '☐' }}</span> 2nd Round</span>
+      </div>
+
+      <div class="print-signature-row" style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div class="print-signature" style="display: flex; align-items: flex-end;">
+          <strong>Evaluator's Signature:</strong>
+          @if (ev.evaluatorId?.signature) {
+            <img [src]="'http://localhost:5000' + ev.evaluatorId.signature" style="max-height: 40px; margin-left: 10px;">
+          } @else {
+            <span style="border-bottom: 1px solid #000; display: inline-block; width: 150px; margin-left: 10px;"></span>
+          }
+        </div>
+        <div class="print-date" style="display: flex; align-items: flex-end;">
+          <strong>Date:</strong>
+          <span style="border-bottom: 1px solid #000; display: inline-block; width: 120px; margin-left: 10px; text-align: center;">{{ ev.date | date:'shortDate' }}</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>
 }

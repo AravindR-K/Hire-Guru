@@ -74,11 +74,16 @@ export class GroupInterviewComponent implements OnInit {
   pendingSetsCount = 2;
   quizSets: QuizSet[] = [];
 
-  // ── Detail modal state ────────────────────────────────────
+  // ── Group detail modal state ─────────────────────────────
   showDetailModal   = signal(false);
   selectedGroup     = signal<any>(null);
-  evalComment       = signal('');
-  evalRecommendation = signal('');
+
+  // ── Per-candidate (member) detail modal ──────────────────
+  showMemberDetailModal   = signal(false);
+  selectedMember          = signal<any>(null);   // full interview doc
+  memberEvalComment       = '';
+  memberEvalRecommendation = '';
+  isMemberSubmitting      = signal(false);
 
   constructor(private quizService: QuizService, public authService: AuthService) {}
 
@@ -244,7 +249,7 @@ export class GroupInterviewComponent implements OnInit {
     });
   }
 
-  // ── Detail modal ──────────────────────────────────────────
+  // ── Group detail modal ────────────────────────────────────
   openDetail(group: any): void {
     this.selectedGroup.set(group);
     this.showDetailModal.set(true);
@@ -253,6 +258,108 @@ export class GroupInterviewComponent implements OnInit {
   closeDetail(): void {
     this.showDetailModal.set(false);
     this.selectedGroup.set(null);
+  }
+
+  // ── Member (candidate) detail modal ──────────────────────
+  openMemberDetail(interviewId: string, event: Event): void {
+    event.stopPropagation();
+    this.quizService.getInterviewById(interviewId).subscribe({
+      next: res => {
+        this.selectedMember.set(res.interview);
+        this.memberEvalComment = '';
+        this.memberEvalRecommendation = '';
+        this.showMemberDetailModal.set(true);
+      }
+    });
+  }
+
+  closeMemberDetail(): void {
+    this.showMemberDetailModal.set(false);
+    this.selectedMember.set(null);
+  }
+
+  submitMemberEvaluation(): void {
+    const m = this.selectedMember();
+    if (!m || !this.memberEvalRecommendation) return;
+    this.isMemberSubmitting.set(true);
+    this.quizService.submitEvaluation(m._id, {
+      comments: this.memberEvalComment,
+      recommendation: this.memberEvalRecommendation
+    }).subscribe({
+      next: res => {
+        this.selectedMember.set(res.interview);
+        this.memberEvalComment = '';
+        this.memberEvalRecommendation = '';
+        this.isMemberSubmitting.set(false);
+        // refresh the group list so chips update
+        this.loadInterviews();
+      },
+      error: () => this.isMemberSubmitting.set(false)
+    });
+  }
+
+  setMemberDecision(decision: string): void {
+    const m = this.selectedMember();
+    if (!m) return;
+    this.quizService.setInterviewDecision(m._id, decision).subscribe({
+      next: res => {
+        this.selectedMember.set(res.interview);
+        this.loadInterviews();
+        this.loadStats();
+      }
+    });
+  }
+
+  hasMemberEvaluated(): boolean {
+    const m = this.selectedMember();
+    if (!m) return false;
+    const userId = this.authService.currentUser()?.id;
+    return m.evaluations?.some((e: any) => e.evaluatorId?._id === userId || e.evaluatorId === userId);
+  }
+
+  allMemberEvaluationsDone(): boolean {
+    const m = this.selectedMember();
+    if (!m) return false;
+    const total = (m.assignedInterviewers?.length || 0) +
+                  (m.assignedHRs?.length || 0) +
+                  (m.assignedPMs?.length || 0);
+    if (total === 0) return false;
+    return (m.evaluations?.length || 0) >= total;
+  }
+
+  /** True when THIS user still needs to evaluate this member */
+  needsEvaluation(m: any): boolean {
+    if (m.status === 'completed') return false;
+    const userId = this.authService.currentUser()?.id;
+    const role   = this.authService.getUserRole();
+    if (role === 'admin') return false;  // admin gives final decision, not evaluation
+    const evaluated = m.evaluations?.some(
+      (e: any) => e.evaluatorId?._id === userId || e.evaluatorId === userId
+    );
+    return !evaluated;
+  }
+
+  /** Whether ANY assigned staff member hasn't evaluated a given candidate interview yet */
+  hasPendingEvaluations(m: any): boolean {
+    if (m.status === 'completed') return false;
+    const total = (m.assignedInterviewers?.length || 0) +
+                  (m.assignedHRs?.length || 0) +
+                  (m.assignedPMs?.length || 0);
+    return (m.evaluations?.length || 0) < total;
+  }
+
+  isPdfGenerating = signal(false);
+
+  downloadEvaluationPdf(): void {
+    const m = this.selectedMember();
+    if (!m) return;
+
+    this.isPdfGenerating.set(true);
+
+    setTimeout(() => {
+      window.print();
+      this.isPdfGenerating.set(false);
+    }, 500);
   }
 
   // ── Helpers ───────────────────────────────────────────────

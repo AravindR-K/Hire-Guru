@@ -370,8 +370,8 @@
           }
         </div>
 
-        <!-- Final Decision (admin only) -->
-        @if (authService.getUserRole() === 'admin' && selectedInterview().status !== 'completed') {
+        <!-- Final Decision (admin and hr only) -->
+        @if ((authService.getUserRole() === 'admin' || authService.getUserRole() === 'hr') && selectedInterview().status !== 'completed') {
           <div class="detail-section decision-section">
             <h3 class="detail-section-title">Final Decision</h3>
             <div class="decision-buttons">
@@ -393,7 +393,7 @@
       </div>
 
       <div class="modal-footer">
-        @if (authService.getUserRole() === 'admin') {
+        @if (authService.getUserRole() === 'admin' || authService.getUserRole() === 'hr') {
           <button class="btn btn-danger btn-sm" (click)="deleteInterview(selectedInterview()._id)">Delete Interview</button>
         }
         <button class="btn btn-outline" (click)="closeDetail()">Close</button>

@@ -59,12 +59,15 @@
 /* Candidate chips row */
 .candidate-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .candidate-chip {
-  width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; font-size: 12px; font-weight: 700; color: #fff;
+  padding: 4px 12px; border-radius: 16px; display: flex; align-items: center;
+  justify-content: center; font-size: 12px; font-weight: 600; color: #fff!important;
   border: 2px solid var(--bg-card); background: #667eea;
   transition: transform 0.15s;
+  white-space: nowrap;
 }
 .candidate-chip:hover { transform: scale(1.15); z-index: 1; }
+.candidate-chip.clickable-chip { cursor: pointer; }
+.candidate-chip.clickable-chip:hover { transform: scale(1.12); box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
 .candidate-chip.badge-warning { background: #f59e0b; }
 .candidate-chip.badge-info    { background: #3b82f6; }
 .candidate-chip.badge-success { background: #22c55e; }
@@ -72,6 +75,29 @@
 
 .iv-card-bottom { display: flex; justify-content: flex-end; }
 .status-summary { font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+/* ⚠ badge on chip */
+.chip-alert { font-size: 11px; margin-right: 3px; }
+
+/* Evaluation pending badge inside candidate row name */
+.eval-pending-badge {
+  display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;
+  padding: 2px 7px; border-radius: 10px; margin-left: 8px;
+  background: rgba(245,158,11,0.15); color: #f59e0b;
+}
+.eval-pending-badge.warn { background: rgba(102,126,234,0.1); color: #667eea; }
+
+/* Clickable candidate left section (button reset) */
+.cr-clickable {
+  display: flex; align-items: center; gap: 12px;
+  background: none; border: none; cursor: pointer; text-align: left;
+  padding: 6px 10px; border-radius: 10px; transition: background 0.15s;
+  min-width: 160px; flex-shrink: 0;
+}
+.cr-clickable:hover { background: rgba(102,126,234,0.08); }
+
+/* Hint text at end of bottom row */
+.cr-open-hint { font-size: 11px; color: var(--text-muted); margin-left: auto; font-style: italic; }
 
 /* ═══════════════════════════════════════════════════════
    BADGES
@@ -293,20 +319,26 @@
 /* Candidate detail list */
 .candidate-detail-list { display: flex; flex-direction: column; gap: 12px; }
 .candidate-row {
-  display: flex; align-items: flex-start; gap: 16px; padding: 16px;
+  display: flex; flex-direction: column; gap: 12px; padding: 16px;
   border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-hover);
-  flex-wrap: wrap; transition: border-color 0.2s;
+  transition: border-color 0.2s;
 }
 .candidate-row:hover { border-color: rgba(102,126,234,0.35); }
 
-.candidate-row-left { display: flex; align-items: center; gap: 12px; min-width: 180px; }
+/* Top row: avatar+name on left, progress stepper fills the rest */
+.candidate-row-top { display: flex; align-items: center; gap: 16px; }
+.candidate-row-left { display: flex; align-items: center; gap: 12px; min-width: 160px; flex-shrink: 0; }
 .iv-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg,#667eea,#764ba2); color:#fff; font-weight:700; font-size:16px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.iv-avatar.small { width: 32px; height: 32px; font-size: 14px; border-radius: 8px; }
+.iv-avatar.small { width: 36px; height: 36px; font-size: 15px; border-radius: 9px; }
 .cr-name  { font-size: 14px; font-weight: 600; color: var(--text-primary); }
 .cr-email { font-size: 12px; color: var(--text-muted); }
+.candidate-row-mid { flex: 1; }
 
-.candidate-row-mid { flex: 1; min-width: 280px; }
-.candidate-row-right { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+/* Bottom row: status badge + quiz chips + accept/reject — all left-aligned */
+.candidate-row-bottom {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding-top: 10px; border-top: 1px solid var(--border-color);
+}
 
 /* Progress steps (mini) */
 .progress-steps { display: flex; align-items: center; }
@@ -353,6 +385,45 @@
 @keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
 /* ═══════════════════════════════════════════════════════
+   EVALUATION PANEL (member detail modal)
+   Mirrors individual-interview styles
+═══════════════════════════════════════════════════════ */
+.quiz-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.quiz-result-card {
+  padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color);
+  background: var(--bg-input);
+}
+.qr-title   { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+.qr-score   { font-size: 22px; font-weight: 700; color: #22c55e; }
+.qr-pending { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+.eval-list  { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.eval-card  {
+  padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color);
+  background: var(--bg-input);
+}
+.eval-header    { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.eval-evaluator { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.eval-role      { font-size: 10px !important; padding: 2px 6px !important; }
+.eval-comments  { font-size: 13px; color: var(--text-secondary); font-style: italic; margin: 6px 0 8px; }
+.eval-date      { font-size: 11px; color: var(--text-muted); }
+
+.eval-form {
+  margin-top: 16px; padding: 18px 20px; border-radius: 14px;
+  border: 1px dashed rgba(102,126,234,0.35);
+  background: rgba(102,126,234,0.04);
+  display: flex; flex-direction: column; gap: 12px;
+}
+.eval-form h4 { font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0; }
+.form-textarea  { resize: vertical; min-height: 80px; }
+
+.decision-section { border-bottom: none; }
+.decision-buttons { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn-success { background: #22c55e; color: #fff; border: none; }
+.btn-warning { background: #f59e0b; color: #fff; border: none; }
+
+
+/* ═══════════════════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
@@ -364,4 +435,42 @@
   .candidate-row { flex-direction: column; }
   .candidate-row-right { align-items: flex-start; }
   .da-header, .da-row { grid-template-columns: 1fr; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PRINT STYLES FOR EVALUATION PDF
+═══════════════════════════════════════════════════════ */
+.print-container {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-container, .print-container * {
+    visibility: visible;
+  }
+  
+  .print-container {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+    background: white;
+    color: black;
+    font-family: Arial, sans-serif;
+  }
+
+  .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #0078d4;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
 }
