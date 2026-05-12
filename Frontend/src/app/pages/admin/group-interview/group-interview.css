@@ -56,24 +56,26 @@
 .meta-item { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
 .meta-item .material-symbols-rounded { font-size: 16px; color: var(--text-muted); }
 
-/* Candidate chips row */
-.candidate-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.candidate-chip {
-  padding: 4px 12px; border-radius: 16px; display: flex; align-items: center;
-  justify-content: center; font-size: 12px; font-weight: 600; color: #fff!important;
-  border: 2px solid var(--bg-card); background: #667eea;
-  transition: transform 0.15s;
-  white-space: nowrap;
+/* Candidate pills row */
+.candidate-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.candidate-pill {
+  display: flex; align-items: center; gap: 6px; padding: 4px 10px 4px 4px;
+  border-radius: 20px; background: var(--bg-hover); border: 1px solid var(--border-color);
+  transition: all 0.2s;
 }
-.candidate-chip:hover { transform: scale(1.15); z-index: 1; }
-.candidate-chip.clickable-chip { cursor: pointer; }
-.candidate-chip.clickable-chip:hover { transform: scale(1.12); box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
-.candidate-chip.badge-warning { background: #f59e0b; }
-.candidate-chip.badge-info    { background: #3b82f6; }
-.candidate-chip.badge-success { background: #22c55e; }
-.candidate-chip.badge-purple  { background: #a855f7; }
+.candidate-pill:hover { border-color: rgba(102,126,234,0.4); transform: translateY(-1px); }
+.cp-avatar {
+  width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 11px; font-weight: 700; color: #fff; background: #667eea;
+}
+.cp-name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
 
-.iv-card-bottom { display: flex; justify-content: flex-end; }
+.candidate-pill.badge-warning .cp-avatar { background: #f59e0b; }
+.candidate-pill.badge-info .cp-avatar    { background: #3b82f6; }
+.candidate-pill.badge-success .cp-avatar { background: #22c55e; }
+.candidate-pill.badge-purple .cp-avatar  { background: #a855f7; }
+
+.iv-card-bottom { display: flex; justify-content: flex-start; margin-top: 10px; }
 .status-summary { font-size: 12px; color: var(--text-muted); font-style: italic; }
 
 /* ⚠ badge on chip */
