@@ -15,13 +15,13 @@ export interface QuizSet {
 }
 
 @Component({
-  selector: 'app-group-interview',
+  selector: 'app-hr-group-interview',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './group-interview.html',
   styleUrl: './group-interview.css'
 })
-export class GroupInterviewComponent implements OnInit {
+export class HRGroupInterviewComponent implements OnInit {
 
   // ── List state ────────────────────────────────────────────
   interviews    = signal<any[]>([]);
@@ -410,5 +410,29 @@ export class GroupInterviewComponent implements OnInit {
     this.quizService.setInterviewDecision(interviewId, decision).subscribe({
       next: () => this.loadInterviews()
     });
+  }
+
+  // -- Quick-evaluate dropdown ---------------------------
+  expandedGroups = new Set<string>();
+
+  toggleExpand(groupId: string, event: Event): void {
+    event.stopPropagation();
+    if (this.expandedGroups.has(groupId)) {
+      this.expandedGroups.delete(groupId);
+    } else {
+      this.expandedGroups.add(groupId);
+    }
+  }
+
+  isExpanded(groupId: string): boolean {
+    return this.expandedGroups.has(groupId);
+  }
+
+  groupHasPendingEvals(members: any[]): boolean {
+    const userId = this.authService.currentUser()?.id;
+    return members.some(m =>
+      m.status !== 'completed' &&
+      !m.evaluations?.some((e: any) => e.evaluatorId?._id === userId || e.evaluatorId === userId)
+    );
   }
 }

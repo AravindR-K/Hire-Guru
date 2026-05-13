@@ -1,0 +1,71 @@
+<div class="page animate-fade-in">
+  <div class="page-header">
+    <div>
+      <h1>Interviewer Dashboard</h1>
+      <p class="page-subtitle">Overview of your assigned candidate interviews</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+  <div class="loading-center">
+    <div class="spinner spinner-lg"></div>
+    <p class="loading-text">Loading statistics...</p>
+  </div>
+  } @else {
+  <!-- Stats Cards -->
+  <div class="stats-grid stagger-children">
+    <div class="stat-card">
+      <div class="stat-icon-wrap blue">
+        <span class="material-symbols-rounded">work</span>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ stats().total }}</span>
+        <span class="stat-label">Total Assigned</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon-wrap orange">
+        <span class="material-symbols-rounded">pending_actions</span>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ stats().pending }}</span>
+        <span class="stat-label">Pending</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon-wrap green">
+        <span class="material-symbols-rounded">check_circle</span>
+      </div>
+      <div class="stat-body">
+        <span class="stat-value">{{ stats().completed }}</span>
+        <span class="stat-label">Evaluated</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section" style="margin-top: 32px;">
+    <h2 class="section-title">Quick Actions</h2>
+    <div class="actions-grid">
+      <a routerLink="/interviewer/individual-interview" class="action-card card card-hover card-padding">
+        <span class="material-symbols-rounded action-icon">person_search</span>
+        <div class="action-info">
+          <h3>Individual Interviews</h3>
+          <p>Evaluate individual candidates</p>
+        </div>
+        <span class="material-symbols-rounded action-arrow">arrow_forward</span>
+      </a>
+      <a routerLink="/interviewer/group-interview" class="action-card card card-hover card-padding">
+        <span class="material-symbols-rounded action-icon">groups</span>
+        <div class="action-info">
+          <h3>Group Interviews</h3>
+          <p>Evaluate group candidate pools</p>
+        </div>
+        <span class="material-symbols-rounded action-arrow">arrow_forward</span>
+      </a>
+    </div>
+  </div>
+  }
+</div>

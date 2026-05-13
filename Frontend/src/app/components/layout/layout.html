@@ -180,7 +180,7 @@
 
 
 
-      <a routerLink="/admin/individual-interview" class="glassy-option"
+      <a [routerLink]="getIndividualInterviewRoute()" class="glassy-option"
         (click)="uiService.showInterviewPopup.set(false)">
         <div class="option-icon-wrapper">
           <span class="material-symbols-rounded block-icon">
@@ -198,7 +198,7 @@
         </span>
       </a>
 
-      <a routerLink="/admin/group-interview" class="glassy-option" (click)="uiService.showInterviewPopup.set(false)">
+      <a [routerLink]="getGroupInterviewRoute()" class="glassy-option" (click)="uiService.showInterviewPopup.set(false)">
         <div class="option-icon-wrapper">
           <span class="material-symbols-rounded block-icon">
             groups

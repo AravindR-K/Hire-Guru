@@ -56,13 +56,15 @@ export class LayoutComponent {
       case 'pm':
         return [
           { icon: 'dashboard', label: 'Dashboard', route: '/pm/dashboard' },
-          { icon: 'work', label: 'Interviews', route: '/pm/interviews' },
+          { icon: 'person_search', label: 'Individual', route: '/pm/individual-interview' },
+          { icon: 'groups', label: 'Group', route: '/pm/group-interview' },
           { icon: 'person', label: 'Profile', route: '/pm/profile' },
         ];
       case 'interviewer':
         return [
           { icon: 'dashboard', label: 'Dashboard', route: '/interviewer/dashboard' },
-          { icon: 'assignment_ind', label: 'My Interviews', route: '/interviewer/interviews' },
+          { icon: 'person_search', label: 'Individual', route: '/interviewer/individual-interview' },
+          { icon: 'groups', label: 'Group', route: '/interviewer/group-interview' },
           { icon: 'person', label: 'Profile', route: '/interviewer/profile' },
         ];
       case 'candidate':
@@ -127,5 +129,21 @@ export class LayoutComponent {
 
   getManageGroupsRoute(): string {
     return this.authService.getUserRole() === 'hr' ? '/hr/manage-groups' : '/admin/manage-groups';
+  }
+
+  getIndividualInterviewRoute(): string {
+    const role = this.authService.getUserRole();
+    if (role === 'hr') return '/hr/individual-interview';
+    if (role === 'pm') return '/pm/individual-interview';
+    if (role === 'interviewer') return '/interviewer/individual-interview';
+    return '/admin/individual-interview';
+  }
+
+  getGroupInterviewRoute(): string {
+    const role = this.authService.getUserRole();
+    if (role === 'hr') return '/hr/group-interview';
+    if (role === 'pm') return '/pm/group-interview';
+    if (role === 'interviewer') return '/interviewer/group-interview';
+    return '/admin/group-interview';
   }
 }

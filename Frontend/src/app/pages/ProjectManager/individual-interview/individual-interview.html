@@ -3,12 +3,8 @@
     <div class="page-header">
       <div>
         <h1>Individual Interviews</h1>
-        <p class="page-subtitle">Manage one-on-one candidate interview evaluations</p>
+        <p class="page-subtitle">View and evaluate your assigned candidates</p>
       </div>
-      <button class="btn btn-primary" (click)="openCreateModal()">
-        <span class="material-symbols-rounded">add</span>
-        New Interview
-      </button>
     </div>
 
     <!-- Stats -->
@@ -113,107 +109,6 @@
   </div>
 </div>
 
-<!-- Create Interview Modal -->
-@if (showCreateModal()) {
-  <div class="modal-overlay" (click)="closeCreateModal()">
-    <div class="modal-container modal-lg" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Create Individual Interview</h2>
-        <button class="icon-btn" (click)="closeCreateModal()"><span class="material-symbols-rounded">close</span></button>
-      </div>
-      <div class="modal-body">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Candidate *</label>
-            <select class="form-input" [(ngModel)]="newInterview.candidateId">
-              <option value="">Select candidate</option>
-              @for (c of candidates(); track c._id) {
-                <option [value]="c._id">{{ c.name }} ({{ c.email }})</option>
-              }
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group" style="flex: 1;">
-            <label class="form-label">Interviewers</label>
-            <div class="quiz-select-grid" style="max-height: 120px; overflow-y: auto;">
-              @for (i of interviewers(); track i._id) {
-                <label class="quiz-select-item" style="cursor: pointer;">
-                  <input type="checkbox" [value]="i._id" (change)="toggleSelection($event, newInterview.assignedInterviewers)" style="margin-right: 8px;"> {{ i.name }}
-                </label>
-              }
-              @if (interviewers().length === 0) { <p class="text-muted" style="font-size: 12px;">No interviewers found</p> }
-            </div>
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label class="form-label">Project Managers</label>
-            <div class="quiz-select-grid" style="max-height: 120px; overflow-y: auto;">
-              @for (p of pms(); track p._id) {
-                <label class="quiz-select-item" style="cursor: pointer;">
-                  <input type="checkbox" [value]="p._id" (change)="toggleSelection($event, newInterview.assignedPMs)" style="margin-right: 8px;"> {{ p.name }}
-                </label>
-              }
-              @if (pms().length === 0) { <p class="text-muted" style="font-size: 12px;">No PMs found</p> }
-            </div>
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label class="form-label">HRs</label>
-            <div class="quiz-select-grid" style="max-height: 120px; overflow-y: auto;">
-              @for (h of hrs(); track h._id) {
-                <label class="quiz-select-item" style="cursor: pointer;">
-                  <input type="checkbox" [value]="h._id" (change)="toggleSelection($event, newInterview.assignedHRs)" style="margin-right: 8px;"> {{ h.name }}
-                </label>
-              }
-              @if (hrs().length === 0) { <p class="text-muted" style="font-size: 12px;">No HRs found</p> }
-            </div>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Position *</label>
-            <input class="form-input" [(ngModel)]="newInterview.position" placeholder="e.g., Software Intern">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Tech Stack</label>
-            <input class="form-input" [(ngModel)]="newInterview.techStack" placeholder="e.g., React, Node.js">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Source</label>
-            <input class="form-input" [(ngModel)]="newInterview.source" placeholder="e.g., LinkedIn, Campus">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Date of Interview</label>
-            <input class="form-input" type="date" [(ngModel)]="newInterview.dateOfInterview">
-          </div>
-        </div>
-
-        <!-- Quiz Selection -->
-        <div class="form-group">
-          <label class="form-label">Assign Quizzes (optional)</label>
-          <div class="quiz-select-grid">
-            @for (q of quizzes(); track q._id) {
-              <div class="quiz-select-item" [class.selected]="isQuizSelected(q._id)" (click)="toggleQuizSelection(q._id)">
-                <span class="material-symbols-rounded">{{ isQuizSelected(q._id) ? 'check_box' : 'check_box_outline_blank' }}</span>
-                <span>{{ q.title }}</span>
-              </div>
-            }
-            @if (quizzes().length === 0) {
-              <p class="text-muted">No quizzes available</p>
-            }
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline" (click)="closeCreateModal()">Cancel</button>
-        <button class="btn btn-primary" (click)="createInterview()" [disabled]="isSubmitting() || !newInterview.candidateId || !newInterview.position">
-          @if (isSubmitting()) { <span class="spinner spinner-sm"></span> Creating... } @else { Create Interview }
-        </button>
-      </div>
-    </div>
-  </div>
-}
 
 <!-- Interview Detail Modal -->
 @if (showDetailModal() && selectedInterview()) {
@@ -323,9 +218,9 @@
               </button>
             }
           </div>
-          @if (selectedInterview().evaluations?.length > 0) {
+          @if (getVisibleEvaluations(selectedInterview().evaluations).length > 0) {
             <div class="eval-list">
-              @for (ev of selectedInterview().evaluations; track ev._id) {
+              @for (ev of getVisibleEvaluations(selectedInterview().evaluations); track ev._id) {
                 <div class="eval-card">
                   <div class="eval-header">
                     <div class="eval-evaluator">
@@ -370,32 +265,10 @@
           }
         </div>
 
-        <!-- Final Decision (admin and hr only) -->
-        @if ((authService.getUserRole() === 'admin' || authService.getUserRole() === 'hr') && selectedInterview().status !== 'completed') {
-          <div class="detail-section decision-section">
-            <h3 class="detail-section-title">Final Decision</h3>
-            <div class="decision-buttons">
-              <button class="btn btn-success" (click)="setDecision('accepted')">
-                <span class="material-symbols-rounded">check_circle</span> Accept
-              </button>
-              <button class="btn btn-warning" (click)="setDecision('on_hold')">
-                <span class="material-symbols-rounded">pause_circle</span> On Hold
-              </button>
-              <button class="btn btn-danger" (click)="setDecision('rejected')">
-                <span class="material-symbols-rounded">cancel</span> Reject
-              </button>
-              <button class="btn btn-outline" (click)="setDecision('2nd_round')">
-                <span class="material-symbols-rounded">replay</span> 2nd Round
-              </button>
-            </div>
-          </div>
-        }
+
       </div>
 
       <div class="modal-footer">
-        @if (authService.getUserRole() === 'admin' || authService.getUserRole() === 'hr') {
-          <button class="btn btn-danger btn-sm" (click)="deleteInterview(selectedInterview()._id)">Delete Interview</button>
-        }
         <button class="btn btn-outline" (click)="closeDetail()">Close</button>
       </div>
     </div>

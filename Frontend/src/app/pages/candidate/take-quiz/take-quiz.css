@@ -50,8 +50,40 @@
 .option-text { flex: 1; }
 .check-icon { color: var(--accent-primary); font-size: 20px; }
 
-.quiz-nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-.question-dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+/* Dots: scrollable strip with arrow buttons */
+.quiz-nav { display: flex; justify-content: center; align-items: center; gap: 16px; position: relative; }
+.quiz-nav .btn { position: absolute; }
+.quiz-nav .btn:first-child { left: 0; }
+.quiz-nav .btn:last-child { right: 0; }
+.dots-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 350px; /* max width for the dots wrapper */
+  min-width: 0;
+  overflow: hidden;
+}
+.dots-scroll-btn {
+  flex-shrink: 0;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+  padding: 0;
+}
+.dots-scroll-btn:hover { background: var(--bg-hover); border-color: var(--border-strong); color: var(--text-primary); }
+.dots-scroll-btn .material-symbols-rounded { font-size: 20px; }
+.question-dots {
+  display: flex; gap: 6px;
+  overflow-x: auto; flex: 1;
+  scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE */
+  padding: 4px 2px;
+}
+.question-dots::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
 .dot {
   width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);
   background: transparent; color: var(--text-muted); font-size: 12px; font-weight: 600;
@@ -65,6 +97,7 @@
 @media (max-width: 640px) {
   .quiz-page { padding: 16px; }
   .question-card { padding: 20px; }
-  .quiz-nav { flex-direction: column; }
-  .question-dots { order: -1; }
+  .quiz-nav { flex-direction: column; position: static; }
+  .quiz-nav .btn { position: static; width: 100%; }
+  .dots-wrapper { order: -1; width: 100%; flex: 1; max-width: none; }
 }

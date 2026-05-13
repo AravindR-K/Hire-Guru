@@ -5,13 +5,13 @@ import { QuizService } from '../../../services/quiz.service';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
-  selector: 'app-individual-interview',
+  selector: 'app-hr-individual-interview',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './individual-interview.html',
   styleUrl: './individual-interview.css'
 })
-export class IndividualInterviewComponent implements OnInit {
+export class HRIndividualInterviewComponent implements OnInit {
   interviews = signal<any[]>([]);
   loading = signal(true);
   showCreateModal = signal(false);
@@ -250,6 +250,12 @@ export class IndividualInterviewComponent implements OnInit {
   }
 
   isPdfGenerating = signal(false);
+
+  getEvaluationByRole(role: string): any {
+    const iv = this.selectedInterview();
+    if (!iv || !iv.evaluations) return null;
+    return iv.evaluations.find((e: any) => e.evaluatorRole === role) || null;
+  }
 
   allEvaluationsDone(): boolean {
     const iv = this.selectedInterview();

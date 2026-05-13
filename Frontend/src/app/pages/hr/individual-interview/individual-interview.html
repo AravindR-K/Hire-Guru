@@ -371,7 +371,7 @@
         </div>
 
         <!-- Final Decision (admin and hr only) -->
-        @if ((authService.getUserRole() === 'admin' || authService.getUserRole() === 'hr') && selectedInterview().status !== 'completed') {
+        @if (authService.getUserRole() === 'admin' && selectedInterview().status !== 'completed') {
           <div class="detail-section decision-section">
             <h3 class="detail-section-title">Final Decision</h3>
             <div class="decision-buttons">
@@ -457,35 +457,35 @@
   </table>
 
   <!-- Render evaluations -->
-  @for (ev of selectedInterview().evaluations; track ev._id) {
+  @for (roleObj of [{id:'interviewer', title:'Interviewer'}, {id:'pm', title:'Project Manager'}, {id:'hr', title:'HR'}]; track roleObj.id) {
     <div class="print-eval-block" style="margin-bottom: 30px; page-break-inside: avoid;">
       <div class="print-eval-title" style="font-weight: bold; margin-bottom: 10px;">
-        {{ ev.evaluatorRole === 'hr' ? 'HR' : ev.evaluatorRole === 'pm' ? 'Project Manager' : 'Interviewer' }}'s Comments ({{ ev.evaluatorId?.name }}):
+        {{ roleObj.title }}'s Comments ({{ getEvaluationByRole(roleObj.id)?.evaluatorId?.name || '' }}):
       </div>
       <div class="print-comments" style="min-height: 80px; margin-bottom: 15px;">
-        {{ ev.comments || 'No comments provided.' }}
+        {{ getEvaluationByRole(roleObj.id)?.comments || '' }}
       </div>
       
       <div class="print-recommendation" style="margin-bottom: 20px;">
         <strong style="margin-right: 15px;">Recommendation:</strong>
-        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ ev.recommendation === 'offer' ? '☑' : '☐' }}</span> Offer/Hire as Intern</span>
-        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ ev.recommendation === 'on_hold' ? '☑' : '☐' }}</span> On Hold</span>
-        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ ev.recommendation === 'rejected' ? '☑' : '☐' }}</span> Rejected</span>
-        <span><span style="font-size: 16px;">{{ ev.recommendation === '2nd_round' ? '☑' : '☐' }}</span> 2nd Round</span>
+        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ getEvaluationByRole(roleObj.id)?.recommendation === 'offer' ? '☑' : '☐' }}</span> Offer/Hire as Intern</span>
+        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ getEvaluationByRole(roleObj.id)?.recommendation === 'on_hold' ? '☑' : '☐' }}</span> On Hold</span>
+        <span style="margin-right: 15px;"><span style="font-size: 16px;">{{ getEvaluationByRole(roleObj.id)?.recommendation === 'rejected' ? '☑' : '☐' }}</span> Rejected</span>
+        <span><span style="font-size: 16px;">{{ getEvaluationByRole(roleObj.id)?.recommendation === '2nd_round' ? '☑' : '☐' }}</span> 2nd Round</span>
       </div>
 
       <div class="print-signature-row" style="display: flex; justify-content: space-between; align-items: flex-end;">
         <div class="print-signature" style="display: flex; align-items: flex-end;">
           <strong>Evaluator's Signature:</strong>
-          @if (ev.evaluatorId?.signature) {
-            <img [src]="'http://localhost:5000' + ev.evaluatorId.signature" style="max-height: 40px; margin-left: 10px;">
+          @if (getEvaluationByRole(roleObj.id)?.evaluatorId?.signature) {
+            <img [src]="'http://localhost:5000' + getEvaluationByRole(roleObj.id).evaluatorId.signature" style="max-height: 40px; margin-left: 10px;">
           } @else {
             <span style="border-bottom: 1px solid #000; display: inline-block; width: 150px; margin-left: 10px;"></span>
           }
         </div>
         <div class="print-date" style="display: flex; align-items: flex-end;">
           <strong>Date:</strong>
-          <span style="border-bottom: 1px solid #000; display: inline-block; width: 120px; margin-left: 10px; text-align: center;">{{ ev.date | date:'shortDate' }}</span>
+          <span style="border-bottom: 1px solid #000; display: inline-block; width: 120px; margin-left: 10px; text-align: center;">{{ getEvaluationByRole(roleObj.id)?.date ? (getEvaluationByRole(roleObj.id).date | date:'shortDate') : '' }}</span>
         </div>
       </div>
     </div>

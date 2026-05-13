@@ -125,7 +125,11 @@ export const routes: Routes = [
       },
       {
         path: 'individual-interview',
-        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+        loadComponent: () => import('./pages/hr/individual-interview/individual-interview').then(m => m.HRIndividualInterviewComponent)
+      },
+      {
+        path: 'group-interview',
+        loadComponent: () => import('./pages/hr/group-interview/group-interview').then(m => m.HRGroupInterviewComponent)
       },
       {
         path: 'profile',
@@ -143,11 +147,15 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
-        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+        loadComponent: () => import('./pages/ProjectManager/dashboard/dashboard').then(m => m.DashboardComponent)
       },
       {
-        path: 'interviews',
-        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+        path: 'individual-interview',
+        loadComponent: () => import('./pages/ProjectManager/individual-interview/individual-interview').then(m => m.PMIndividualInterviewComponent)
+      },
+      {
+        path: 'group-interview',
+        loadComponent: () => import('./pages/ProjectManager/group-interview/group-interview').then(m => m.PMGroupInterviewComponent)
       },
       {
         path: 'profile',
@@ -165,11 +173,15 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
-        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+        loadComponent: () => import('./pages/Interviewer/dashboard/dashboard').then(m => m.DashboardComponent)
       },
       {
-        path: 'interviews',
-        loadComponent: () => import('./pages/admin/individual-interview/individual-interview').then(m => m.IndividualInterviewComponent)
+        path: 'individual-interview',
+        loadComponent: () => import('./pages/Interviewer/individual-interview/individual-interview').then(m => m.InterviewerIndividualInterviewComponent)
+      },
+      {
+        path: 'group-interview',
+        loadComponent: () => import('./pages/Interviewer/group-interview/group-interview').then(m => m.InterviewerGroupInterviewComponent)
       },
       {
         path: 'profile',

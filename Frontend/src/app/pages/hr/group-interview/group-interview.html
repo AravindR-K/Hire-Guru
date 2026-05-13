@@ -72,13 +72,28 @@
                   <p class="iv-email">{{ g.members.length }} candidate{{ g.members.length !== 1 ? 's' : '' }} · {{ g.position }}</p>
                 </div>
               </div>
-              <div class="iv-badges">
+              <div class="iv-card-right">
                 <span class="badge badge-group">Group</span>
                 @if (completedCount(g.members) === g.members.length && g.members.length > 0) {
                   <span class="badge badge-success">All Done</span>
                 } @else {
                   <span class="badge badge-warning">In Progress</span>
                 }
+                <!-- Dropdown toggle button with alert indicator -->
+                <div class="eval-toggle-wrap">
+                  @if (groupHasPendingEvals(g.members)) {
+                    <span class="eval-alert-dot" title="You have pending evaluations"></span>
+                  }
+                  <button class="eval-toggle-btn" [class.open]="isExpanded(g.groupId)"
+                    (click)="toggleExpand(g.groupId, $event)"
+                    [title]="isExpanded(g.groupId) ? 'Hide candidates' : 'Quick Evaluate'">
+                    <span class="material-symbols-rounded">{{ isExpanded(g.groupId) ? 'expand_less' : 'how_to_reg' }}</span>
+                    <span class="eval-toggle-label">{{ isExpanded(g.groupId) ? 'Close' : 'Evaluate' }}</span>
+                    @if (groupHasPendingEvals(g.members) && !isExpanded(g.groupId)) {
+                      <span class="eval-badge-count">{{ g.members.length }}</span>
+                    }
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -93,20 +108,41 @@
               }
             </div>
 
-            <!-- Candidate progress chips — click any chip to open the evaluation panel directly -->
-            <div class="candidate-chips">
-              @for (m of g.members; track m._id) {
-                <span class="candidate-chip clickable-chip" [ngClass]="getStatusClass(m.status)"
-                  [title]="m.candidateId?.name + ' — ' + formatStatus(m.status) + (hasPendingEvaluations(m) ? ' (Evaluations pending)' : '')"
-                  (click)="openMemberDetail(m._id, $event)">
-                  @if (hasPendingEvaluations(m)) {
-                    <span class="chip-alert" title="Evaluations still pending">⚠️</span>
-                  }
-                  {{ m.candidateId?.name }}
-                </span>
-              }
-            </div>
-
+            <!-- Quick-evaluate dropdown panel -->
+            @if (isExpanded(g.groupId)) {
+              <div class="quick-eval-panel" (click)="$event.stopPropagation()">
+                <div class="qep-header">
+                  <span class="material-symbols-rounded">how_to_reg</span>
+                  <span>Select a candidate to evaluate</span>
+                </div>
+                @for (m of g.members; track m._id) {
+                  <div class="qep-row" [class.qep-done]="!needsEvaluation(m)">
+                    <div class="qep-candidate">
+                      <div class="qep-avatar" [ngClass]="getStatusClass(m.status)">
+                        {{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}
+                      </div>
+                      <div class="qep-info">
+                        <span class="qep-name">{{ m.candidateId?.name }}</span>
+                        <span class="qep-status">{{ formatStatus(m.status) }}</span>
+                      </div>
+                    </div>
+                    <div class="qep-action">
+                      @if (needsEvaluation(m)) {
+                        <button class="btn-evaluate" (click)="openMemberDetail(m._id, $event)">
+                          <span class="material-symbols-rounded">rate_review</span>
+                          Evaluate
+                        </button>
+                      } @else {
+                        <span class="qep-done-label">
+                          <span class="material-symbols-rounded">check_circle</span>
+                          Done
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
 
 
             <div class="iv-card-bottom">
@@ -413,21 +449,15 @@
 
                 <!-- Top row: clickable avatar+name on the left, progress bar on the right -->
                 <div class="candidate-row-top">
-                  <button class="cr-clickable" (click)="openMemberDetail(m._id, $event)">
+                  <div class="cr-clickable" style="cursor: default;">
                     <div class="iv-avatar small">{{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}</div>
                     <div>
                       <div class="cr-name">
                         {{ m.candidateId?.name }}
-                        @if (needsEvaluation(m)) {
-                          <span class="eval-pending-badge" title="Your evaluation is pending">⚠️ Evaluate</span>
-                        }
-                        @if (hasPendingEvaluations(m)) {
-                          <span class="eval-pending-badge warn" title="Some evaluations are still pending">⏳</span>
-                        }
                       </div>
                       <div class="cr-email">{{ m.candidateId?.email }}</div>
                     </div>
-                  </button>
+                  </div>
                   <div class="candidate-row-mid">
                     <div class="progress-steps mini">
                       <div class="step" [class.done]="['quiz_phase','coding_phase','evaluation','completed'].includes(m.status)">
@@ -453,20 +483,22 @@
                   </div>
                 </div>
 
-                <!-- Bottom row: status badge + quiz scores (no accept/reject here) -->
-                <div class="candidate-row-bottom">
-                  <span class="badge" [ngClass]="getStatusClass(m.status)">{{ formatStatus(m.status) }}</span>
-                  @if (m.finalDecision !== 'pending') {
-                    <span class="badge" [ngClass]="getDecisionClass(m.finalDecision)">{{ formatDecision(m.finalDecision) }}</span>
-                  }
-                  @if (m.quizzes?.length > 0) {
-                    @for (q of m.quizzes; track q.quizId) {
-                      <span class="quiz-score-chip" [class.completed]="q.completed">
-                        {{ q.title }}: {{ q.completed ? q.score + '/' + q.totalMarks : 'Pending' }}
-                      </span>
+                <!-- Bottom row: status badge + final decision -->
+                <div class="candidate-row-bottom" style="display: flex; justify-content: space-between; width: 100%;">
+                  <div style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px; border-radius: 4px;" (click)="openMemberDetail(m._id, $event)">
+                    <span style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Current Status:</span>
+                    <span class="badge" [ngClass]="getStatusClass(m.status)">{{ formatStatus(m.status) }}</span>
+                    @if (needsEvaluation(m)) {
+                      <span class="eval-pending-badge" title="Your evaluation is pending" style="margin-left: 4px;">⚠️ Evaluate</span>
                     }
+                  </div>
+                  
+                  @if (m.finalDecision !== 'pending') {
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Overall Status:</span>
+                      <span class="badge" [ngClass]="getDecisionClass(m.finalDecision)">{{ formatDecision(m.finalDecision) }}</span>
+                    </div>
                   }
-                  <span class="cr-open-hint">Click name to evaluate →</span>
                 </div>
 
               </div>
@@ -626,7 +658,7 @@
         </div>
 
         <!-- Final Decision — Admin and HR, only when all evaluations done -->
-        @if ((authService.getUserRole() === 'admin' || authService.getUserRole() === 'hr') && allMemberEvaluationsDone() && selectedMember().status !== 'completed') {
+        @if (authService.getUserRole() === 'admin' && allMemberEvaluationsDone() && selectedMember().status !== 'completed') {
           <div class="detail-section decision-section">
             <h3 class="detail-section-title">Final Decision</h3>
             <div class="decision-buttons">

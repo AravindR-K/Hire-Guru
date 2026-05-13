@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { QuizService } from '../../../services/quiz.service';
@@ -15,6 +15,8 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
   questions = signal<any[]>([]);
   currentIndex = signal<number>(0);
   answers = signal<Map<string, string[]>>(new Map());
+
+  @ViewChild('dotsContainer') dotsContainer!: ElementRef<HTMLDivElement>;
 
   timeLeft = signal<number>(0);
   timerInterval: any;
@@ -116,6 +118,11 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
 
   prev(): void { this.goTo(this.currentIndex() - 1); }
   next(): void { this.goTo(this.currentIndex() + 1); }
+
+  scrollDots(direction: number): void {
+    const el = this.dotsContainer?.nativeElement;
+    if (el) el.scrollBy({ left: direction * 120, behavior: 'smooth' });
+  }
 
   submitQuiz(): void {
     if (this.submitting() || this.submitted()) return;

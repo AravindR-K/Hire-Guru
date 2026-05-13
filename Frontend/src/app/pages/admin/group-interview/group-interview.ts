@@ -24,9 +24,9 @@ export interface QuizSet {
 export class GroupInterviewComponent implements OnInit {
 
   // ── List state ────────────────────────────────────────────
-  interviews    = signal<any[]>([]);
-  loading       = signal(true);
-  filterStatus  = '';
+  interviews = signal<any[]>([]);
+  loading = signal(true);
+  filterStatus = '';
 
   // ── Grouped view (one card per groupId) ──────────────────
   groupedList = computed<any[]>(() => {
@@ -55,37 +55,37 @@ export class GroupInterviewComponent implements OnInit {
 
   // ── Create modal state ────────────────────────────────────
   showCreateModal = signal(false);
-  isSubmitting    = signal(false);
-  successMsg      = signal('');
+  isSubmitting = signal(false);
+  successMsg = signal('');
 
   // dropdown data
-  groups      = signal<any[]>([]);
+  groups = signal<any[]>([]);
   interviewers = signal<any[]>([]);
-  hrs          = signal<any[]>([]);
-  pms          = signal<any[]>([]);
-  quizzes      = signal<any[]>([]);
+  hrs = signal<any[]>([]);
+  pms = signal<any[]>([]);
+  quizzes = signal<any[]>([]);
   groupMembers = signal<any[]>([]);
 
   // form
   newGroupInterview = this.blankForm();
 
   // quiz-set builder
-  showQuizSetup  = false;
+  showQuizSetup = false;
   pendingSetsCount = 2;
   quizSets: QuizSet[] = [];
 
   // ── Group detail modal state ─────────────────────────────
-  showDetailModal   = signal(false);
-  selectedGroup     = signal<any>(null);
+  showDetailModal = signal(false);
+  selectedGroup = signal<any>(null);
 
   // ── Per-candidate (member) detail modal ──────────────────
-  showMemberDetailModal   = signal(false);
-  selectedMember          = signal<any>(null);   // full interview doc
-  memberEvalComment       = '';
+  showMemberDetailModal = signal(false);
+  selectedMember = signal<any>(null);   // full interview doc
+  memberEvalComment = '';
   memberEvalRecommendation = '';
-  isMemberSubmitting      = signal(false);
+  isMemberSubmitting = signal(false);
 
-  constructor(private quizService: QuizService, public authService: AuthService) {}
+  constructor(private quizService: QuizService, public authService: AuthService) { }
 
   ngOnInit(): void {
     this.loadInterviews();
@@ -99,7 +99,7 @@ export class GroupInterviewComponent implements OnInit {
     if (this.filterStatus) params.status = this.filterStatus;
     this.quizService.getInterviews(params).subscribe({
       next: res => { this.interviews.set(res.interviews || []); this.loading.set(false); },
-      error: ()  => this.loading.set(false)
+      error: () => this.loading.set(false)
     });
   }
 
@@ -321,8 +321,8 @@ export class GroupInterviewComponent implements OnInit {
     const m = this.selectedMember();
     if (!m) return false;
     const total = (m.assignedInterviewers?.length || 0) +
-                  (m.assignedHRs?.length || 0) +
-                  (m.assignedPMs?.length || 0);
+      (m.assignedHRs?.length || 0) +
+      (m.assignedPMs?.length || 0);
     if (total === 0) return false;
     return (m.evaluations?.length || 0) >= total;
   }
@@ -331,7 +331,7 @@ export class GroupInterviewComponent implements OnInit {
   needsEvaluation(m: any): boolean {
     if (m.status === 'completed') return false;
     const userId = this.authService.currentUser()?.id;
-    const role   = this.authService.getUserRole();
+    const role = this.authService.getUserRole();
     if (role === 'admin') return false;  // admin gives final decision, not evaluation
     const evaluated = m.evaluations?.some(
       (e: any) => e.evaluatorId?._id === userId || e.evaluatorId === userId
@@ -343,8 +343,8 @@ export class GroupInterviewComponent implements OnInit {
   hasPendingEvaluations(m: any): boolean {
     if (m.status === 'completed') return false;
     const total = (m.assignedInterviewers?.length || 0) +
-                  (m.assignedHRs?.length || 0) +
-                  (m.assignedPMs?.length || 0);
+      (m.assignedHRs?.length || 0) +
+      (m.assignedPMs?.length || 0);
     return (m.evaluations?.length || 0) < total;
   }
 
@@ -411,4 +411,29 @@ export class GroupInterviewComponent implements OnInit {
       next: () => this.loadInterviews()
     });
   }
+
+  // -- Quick-evaluate dropdown ---------------------------
+  expandedGroups = new Set<string>();
+
+  toggleExpand(groupId: string, event: Event): void {
+    event.stopPropagation();
+    if (this.expandedGroups.has(groupId)) {
+      this.expandedGroups.delete(groupId);
+    } else {
+      this.expandedGroups.add(groupId);
+    }
+  }
+
+  isExpanded(groupId: string): boolean {
+    return this.expandedGroups.has(groupId);
+  }
+
+  groupHasPendingEvals(members: any[]): boolean {
+    const userId = this.authService.currentUser()?.id;
+    return members.some(m =>
+      m.status !== 'completed' &&
+      !m.evaluations?.some((e: any) => e.evaluatorId?._id === userId || e.evaluatorId === userId)
+    );
+  }
+
 }

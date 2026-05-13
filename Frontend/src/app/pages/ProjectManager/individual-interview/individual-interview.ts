@@ -5,49 +5,25 @@ import { QuizService } from '../../../services/quiz.service';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
-  selector: 'app-individual-interview',
+  selector: 'app-pm-individual-interview',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './individual-interview.html',
   styleUrl: './individual-interview.css'
 })
-export class IndividualInterviewComponent implements OnInit {
+export class PMIndividualInterviewComponent implements OnInit {
   interviews = signal<any[]>([]);
   loading = signal(true);
-  showCreateModal = signal(false);
   showDetailModal = signal(false);
   selectedInterview = signal<any>(null);
 
-  // Create form data
-  candidates = signal<any[]>([]);
-  interviewers = signal<any[]>([]);
-  hrs = signal<any[]>([]);
-  pms = signal<any[]>([]);
-  quizzes = signal<any[]>([]);
-
-  newInterview = {
-    candidateId: '',
-    assignedInterviewers: [] as string[],
-    assignedHRs: [] as string[],
-    assignedPMs: [] as string[],
-    position: '',
-    techStack: '',
-    source: '',
-    dateOfInterview: new Date().toISOString().split('T')[0],
-    quizIds: [] as string[]
-  };
-
-  // Evaluation form
   evalComment = signal('');
   evalRecommendation = signal('');
 
-  // Stats
   stats = signal<any>({ total: 0, pending: 0, completed: 0, accepted: 0, rejected: 0 });
-
-  // Filter
   filterStatus = signal('');
-
   isSubmitting = signal(false);
+  isPdfGenerating = signal(false);
 
   constructor(private quizService: QuizService, public authService: AuthService) {}
 
@@ -74,74 +50,6 @@ export class IndividualInterviewComponent implements OnInit {
   loadStats(): void {
     this.quizService.getInterviewStats().subscribe({
       next: (res) => this.stats.set(res)
-    });
-  }
-
-  openCreateModal(): void {
-    // Load dropdown data
-    this.quizService.getInterviewCandidates().subscribe({
-      next: (res) => this.candidates.set(res.candidates || [])
-    });
-    this.quizService.getInterviewers().subscribe({
-      next: (res) => {
-        const staff = res.interviewers || [];
-        this.interviewers.set(staff.filter((s: any) => s.role === 'interviewer'));
-        this.pms.set(staff.filter((s: any) => s.role === 'pm'));
-        this.hrs.set(staff.filter((s: any) => s.role === 'hr'));
-      }
-    });
-    this.quizService.getAdminQuizzes().subscribe({
-      next: (res) => this.quizzes.set(res.quizzes || [])
-    });
-    this.newInterview = {
-      candidateId: '', assignedInterviewers: [], assignedHRs: [], assignedPMs: [], position: '', techStack: '',
-      source: '', dateOfInterview: new Date().toISOString().split('T')[0], quizIds: []
-    };
-    this.showCreateModal.set(true);
-  }
-
-  closeCreateModal(): void {
-    this.showCreateModal.set(false);
-  }
-
-  toggleQuizSelection(quizId: string): void {
-    const idx = this.newInterview.quizIds.indexOf(quizId);
-    if (idx >= 0) {
-      this.newInterview.quizIds.splice(idx, 1);
-    } else {
-      this.newInterview.quizIds.push(quizId);
-    }
-  }
-
-  toggleSelection(event: any, array: string[]): void {
-    const val = event.target.value;
-    if (event.target.checked) {
-      array.push(val);
-    } else {
-      const idx = array.indexOf(val);
-      if (idx >= 0) array.splice(idx, 1);
-    }
-  }
-
-  isQuizSelected(quizId: string): boolean {
-    return this.newInterview.quizIds.includes(quizId);
-  }
-
-  createInterview(): void {
-    if (!this.newInterview.candidateId || !this.newInterview.position) return;
-
-    this.isSubmitting.set(true);
-    this.quizService.createInterview(this.newInterview).subscribe({
-      next: () => {
-        this.isSubmitting.set(false);
-        this.closeCreateModal();
-        this.loadInterviews();
-        this.loadStats();
-      },
-      error: (err) => {
-        this.isSubmitting.set(false);
-        alert(err.error?.message || 'Failed to create interview');
-      }
     });
   }
 
@@ -178,31 +86,6 @@ export class IndividualInterviewComponent implements OnInit {
       },
       error: () => this.isSubmitting.set(false)
     });
-  }
-
-  setDecision(decision: string): void {
-    const interview = this.selectedInterview();
-    if (!interview) return;
-
-    this.quizService.setInterviewDecision(interview._id, decision).subscribe({
-      next: (res) => {
-        this.selectedInterview.set(res.interview);
-        this.loadInterviews();
-        this.loadStats();
-      }
-    });
-  }
-
-  deleteInterview(id: string): void {
-    if (confirm('Are you sure you want to delete this interview?')) {
-      this.quizService.deleteInterview(id).subscribe({
-        next: () => {
-          this.loadInterviews();
-          this.loadStats();
-          this.closeDetail();
-        }
-      });
-    }
   }
 
   onFilterChange(): void {
@@ -249,8 +132,6 @@ export class IndividualInterviewComponent implements OnInit {
     return interview.evaluations?.some((e: any) => e.evaluatorId?._id === userId);
   }
 
-  isPdfGenerating = signal(false);
-
   getEvaluationByRole(role: string): any {
     const iv = this.selectedInterview();
     if (!iv || !iv.evaluations) return null;
@@ -272,12 +153,16 @@ export class IndividualInterviewComponent implements OnInit {
   downloadEvaluationPdf(): void {
     const iv = this.selectedInterview();
     if (!iv) return;
-
     this.isPdfGenerating.set(true);
-
     setTimeout(() => {
       window.print();
       this.isPdfGenerating.set(false);
     }, 500);
+  }
+
+  getVisibleEvaluations(evaluations: any[]): any[] {
+    if (!evaluations) return [];
+    const userId = this.authService.currentUser()?.id;
+    return evaluations.filter((e: any) => e.evaluatorId?._id === userId || e.evaluatorId === userId);
   }
 }

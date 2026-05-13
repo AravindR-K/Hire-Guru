@@ -86,8 +86,8 @@ router.get('/', authorize('admin', 'hr', 'pm', 'interviewer'), async (req, res) 
     const { status, type } = req.query;
     let filter = {};
 
-    // Evaluators only see their assigned interviews or created by them (unless Admin)
-    if (req.user.role !== 'admin') {
+    // Evaluators only see their assigned interviews or created by them (unless Admin/HR)
+    if (!['admin', 'hr'].includes(req.user.role)) {
       filter.$or = [
         { interviewerId: req.user._id },
         { assignedInterviewers: req.user._id },
@@ -124,7 +124,7 @@ router.get('/', authorize('admin', 'hr', 'pm', 'interviewer'), async (req, res) 
 router.get('/stats', authorize('admin', 'hr', 'pm', 'interviewer'), async (req, res) => {
   try {
     let filter = {};
-    if (req.user.role !== 'admin') {
+    if (!['admin', 'hr'].includes(req.user.role)) {
       filter.$or = [
         { interviewerId: req.user._id },
         { assignedInterviewers: req.user._id },
@@ -314,14 +314,18 @@ router.get('/:id', authorize('admin', 'hr', 'pm', 'interviewer'), async (req, re
     }
 
     // Check authorization to view
-    if (req.user.role !== 'admin') {
-      const isAuthorized = 
-        (interview.interviewerId && interview.interviewerId._id.toString() === req.user._id.toString()) ||
-        interview.assignedInterviewers?.some(u => u.toString() === req.user._id.toString()) ||
-        interview.assignedHRs?.some(u => u.toString() === req.user._id.toString()) ||
-        interview.assignedPMs?.some(u => u.toString() === req.user._id.toString()) ||
-        (interview.createdBy && interview.createdBy._id.toString() === req.user._id.toString());
-      
+    // Note: after populate(), assigned arrays contain objects — extract ._id for comparison
+    if (!['admin', 'hr'].includes(req.user.role)) {
+      const userId = req.user._id.toString();
+      const getId = (u) => (u && typeof u === 'object' ? (u._id || u).toString() : u.toString());
+
+      const isAuthorized =
+        (interview.interviewerId && getId(interview.interviewerId) === userId) ||
+        interview.assignedInterviewers?.some(u => getId(u) === userId) ||
+        interview.assignedHRs?.some(u => getId(u) === userId) ||
+        interview.assignedPMs?.some(u => getId(u) === userId) ||
+        (interview.createdBy && getId(interview.createdBy) === userId);
+
       if (!isAuthorized) {
         return res.status(403).json({ message: 'Not authorized to view this interview' });
       }
