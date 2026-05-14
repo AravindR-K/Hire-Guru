@@ -214,6 +214,10 @@
       return this.adminUrl;
     }
 
+    getQuizzes(): Observable<any> {
+      return this.http.get(`${this.getBaseUrl()}/quizzes`);
+    }
+
     createGroup(name: string): Observable<any> {
       return this.http.post(`${this.getBaseUrl()}/groups`, { name });
     }

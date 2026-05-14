@@ -116,7 +116,7 @@
                   <span>Select a candidate to evaluate</span>
                 </div>
                 @for (m of g.members; track m._id) {
-                  <div class="qep-row" [class.qep-done]="!needsEvaluation(m)">
+                  <div class="qep-row" [class.qep-done]="!['quiz_phase', 'coding_phase'].includes(m.status) && !needsEvaluation(m)">
                     <div class="qep-candidate">
                       <div class="qep-avatar" [ngClass]="getStatusClass(m.status)">
                         {{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}
@@ -127,7 +127,12 @@
                       </div>
                     </div>
                     <div class="qep-action">
-                      @if (needsEvaluation(m)) {
+                      @if (['quiz_phase', 'coding_phase'].includes(m.status)) {
+                        <span class="qep-pending-label" style="color:var(--text-muted); font-size:12px; font-weight:500; display:flex; align-items:center; gap:4px;">
+                          <span class="material-symbols-rounded" style="font-size:16px;">hourglass_empty</span>
+                          Pending
+                        </span>
+                      } @else if (needsEvaluation(m)) {
                         <button class="btn-evaluate" (click)="openMemberDetail(m._id, $event)">
                           <span class="material-symbols-rounded">rate_review</span>
                           Evaluate

@@ -116,7 +116,7 @@
                   <span>Select a candidate to evaluate</span>
                 </div>
                 @for (m of g.members; track m._id) {
-                  <div class="qep-row" [class.qep-done]="!needsEvaluation(m)">
+                  <div class="qep-row" [class.qep-done]="!['quiz_phase', 'coding_phase'].includes(m.status) && !needsEvaluation(m)">
                     <div class="qep-candidate">
                       <div class="qep-avatar" [ngClass]="getStatusClass(m.status)">
                         {{ m.candidateId?.name?.charAt(0)?.toUpperCase() }}
@@ -127,7 +127,12 @@
                       </div>
                     </div>
                     <div class="qep-action">
-                      @if (needsEvaluation(m)) {
+                      @if (['quiz_phase', 'coding_phase'].includes(m.status)) {
+                        <span class="qep-pending-label" style="color:var(--text-muted); font-size:12px; font-weight:500; display:flex; align-items:center; gap:4px;">
+                          <span class="material-symbols-rounded" style="font-size:16px;">hourglass_empty</span>
+                          Pending
+                        </span>
+                      } @else if (needsEvaluation(m)) {
                         <button class="btn-evaluate" (click)="openMemberDetail(m._id, $event)">
                           <span class="material-symbols-rounded">rate_review</span>
                           Evaluate
@@ -269,7 +274,7 @@
             <span class="material-symbols-rounded">quiz</span> Quiz Configuration
             @if (quizSets.length > 0) {
               <button class="btn btn-outline btn-sm" style="margin-left: auto;" (click)="addMoreSet()">
-                <span class="material-symbols-rounded">add</span> Add Set
+                <span class="material-symbols-rounded">add</span> Add Quiz
               </button>
             }
           </div>
@@ -277,7 +282,7 @@
           @if (quizSets.length === 0 && !showQuizSetup) {
             <div class="quiz-empty-hint">
               <span class="material-symbols-rounded">quiz</span>
-              <p>No quiz sets configured yet.</p>
+              <p>No quizzes configured yet.</p>
               <button class="btn btn-primary" (click)="showQuizSetup = true">
                 <span class="material-symbols-rounded">add</span> Add Quiz
               </button>
@@ -287,7 +292,7 @@
           @if (showQuizSetup) {
             <div class="quiz-setup-prompt">
               <span class="material-symbols-rounded">help_outline</span>
-              <span>How many quiz sets?</span>
+              <span>How many quizzes?</span>
               <input type="number" min="1" max="10" class="sets-count-input"
                 [(ngModel)]="pendingSetsCount" placeholder="e.g. 2">
               <button class="btn btn-primary btn-sm" (click)="confirmSetsCount()">Confirm</button>
@@ -300,11 +305,11 @@
             <div class="quiz-set-block">
               <div class="quiz-set-header">
                 <div class="quiz-set-title">
-                  <span class="set-badge">Set {{ si + 1 }}</span>
+                  <span class="set-badge">Quiz {{ si + 1 }}</span>
                   @if (isSingleQuizSet(set)) {
                     <span class="set-note">📌 Assigned to all candidates</span>
                   } @else if (isMultiQuizSet(set)) {
-                    <span class="set-note">🎯 {{ validEntries(set).length }} quizzes · {{ set.mode === 'random' ? '🎲 Random' : 'Direct' }} assignment</span>
+                    <span class="set-note">🎯 {{ validEntries(set).length }} sets · {{ set.mode === 'random' ? '🎲 Random' : 'Direct' }} assignment</span>
                   }
                 </div>
                 <button class="icon-btn danger" (click)="removeQuizSet(si)">
@@ -316,7 +321,7 @@
               @for (entry of set.quizEntries; track $index; let ei = $index) {
                 <div class="quiz-entry-row">
                   <select class="form-input" [(ngModel)]="entry.quizId">
-                    <option value="">— Select quiz —</option>
+                    <option value="">— Select set —</option>
                     @for (q of getAvailableQuizzes(si, ei); track q._id) {
                       <option [value]="q._id">{{ q.title }}</option>
                     }
@@ -328,7 +333,7 @@
               }
 
               <button class="btn btn-ghost btn-sm" (click)="addQuizToSet(si)">
-                <span class="material-symbols-rounded">add</span> Add quiz to Set {{ si + 1 }}
+                <span class="material-symbols-rounded">add</span> Add set to Quiz {{ si + 1 }}
               </button>
 
               <!-- Assignment mode — only shown when multiple quizzes -->

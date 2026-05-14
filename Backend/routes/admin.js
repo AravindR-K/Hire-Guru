@@ -221,9 +221,13 @@
 
       const interviews = await Interview.find({ candidateId: userId })
         .populate('interviewerId', 'name email role')
+        .populate('assignedInterviewers', 'name email')
+        .populate('assignedHRs', 'name email')
+        .populate('assignedPMs', 'name email')
         .populate('createdBy', 'name')
         .populate('decidedBy', 'name')
         .populate('quizzes.quizId', 'title category difficulty timer totalQuestions')
+        .populate('evaluations.evaluatorId', 'name email role')
         .sort({ createdAt: -1 });
 
       res.json({ user, interviews });

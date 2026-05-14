@@ -127,7 +127,7 @@ export class GroupInterviewComponent implements OnInit {
         this.hrs.set(staff.filter((s: any) => s.role === 'hr'));
       }
     });
-    this.quizService.getAdminQuizzes().subscribe({ next: r => this.quizzes.set(r.quizzes || []) });
+    this.quizService.getQuizzes().subscribe({ next: r => this.quizzes.set(r.quizzes || []) });
     this.showCreateModal.set(true);
   }
 
