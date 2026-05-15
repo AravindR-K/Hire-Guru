@@ -124,8 +124,8 @@
                            View Quizzes <span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">arrow_forward</span>
                          </button>
                          @if (hasEvaluations(interview)) {
-                           <button class="view-btn" style="background:var(--accent,#4472C4);color:#fff;border-color:#3360b0;" (click)="downloadEvaluationForm(interview)">
-                             <span class="material-symbols-rounded" style="font-size:16px;vertical-align:middle;">download</span> Eval Form
+                           <button class="btn-eval-download" (click)="downloadEvaluationForm(interview)" title="Download Evaluation Form">
+                             <span class="material-symbols-rounded">download</span> Evaluation Form
                            </button>
                          }
                        </div>
