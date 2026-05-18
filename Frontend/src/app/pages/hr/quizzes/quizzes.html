@@ -1,10 +1,31 @@
 <div class="page-container animate-fade-in">
+
+  <!-- ─── Page Header ─────────────────────────────── -->
   <div class="page-header">
-    <div>
-      <h1>Quizzes</h1>
-      <p class="page-subtitle">Manage all quizzes in the system</p>
+    <div class="page-header-left">
+      @if (selectedCategory()) {
+        <button class="back-btn" (click)="clearCategory()">
+          <span class="material-symbols-rounded">arrow_back</span>
+        </button>
+      }
+      <div>
+        <h1>
+          @if (selectedCategory()) {
+            {{ selectedCategory() }}
+          } @else {
+            Quizzes
+          }
+        </h1>
+        <p class="page-subtitle">
+          @if (selectedCategory()) {
+            {{ filteredQuizzes().length }} quiz{{ filteredQuizzes().length !== 1 ? 'zes' : '' }} in this category
+          } @else {
+            {{ categories().length }} categor{{ categories().length !== 1 ? 'ies' : 'y' }} · {{ quizzes().length }} total quizzes
+          }
+        </p>
+      </div>
     </div>
-    <a routerLink="/admin/create-quiz" class="btn btn-primary">
+    <a routerLink="/hr/create-quiz" class="btn btn-primary">
       <span class="material-symbols-rounded">add</span> Create Quiz
     </a>
   </div>
@@ -20,16 +41,46 @@
       <div class="spinner spinner-lg"></div>
       <p>Loading quizzes...</p>
     </div>
+
   } @else if (quizzes().length === 0) {
     <div class="empty-state">
       <span class="material-symbols-rounded">quiz</span>
       <h3>No quizzes yet</h3>
       <p>Create your first quiz to get started.</p>
-      <a routerLink="/admin/create-quiz" class="btn btn-primary" style="margin-top: 16px;">Create Quiz</a>
+      <a routerLink="/hr/create-quiz" class="btn btn-primary" style="margin-top: 16px;">Create Quiz</a>
     </div>
+
+  } @else if (!selectedCategory()) {
+    <!-- ─── Category Grid View ──────────────────────── -->
+    <div class="category-grid stagger-children">
+      @for (group of categoryGroups(); track group.name; let i = $index) {
+        <button class="category-card card card-hover" (click)="selectCategory(group.name)">
+          <div class="cat-icon-wrap" [style.background]="getCategoryColor(i) + '18'" [style.border-color]="getCategoryColor(i) + '30'">
+            <span class="material-symbols-rounded cat-icon" [style.color]="getCategoryColor(i)">{{ getCategoryIcon(group.name) }}</span>
+          </div>
+          <div class="cat-body">
+            <h3 class="cat-name">{{ group.name }}</h3>
+            <p class="cat-count">{{ group.count }} quiz{{ group.count !== 1 ? 'zes' : '' }}</p>
+            <div class="cat-diffs">
+              @for (diff of group.difficulties; track diff) {
+                <span class="diff-chip badge" [ngClass]="getDifficultyClass(diff)">{{ getDifficultyLabel(diff) }}</span>
+              }
+            </div>
+          </div>
+          <div class="cat-arrow-wrap">
+            <span class="material-symbols-rounded cat-arrow">chevron_right</span>
+            @if (group.totalAttempts > 0) {
+              <span class="cat-attempts-badge">{{ group.totalAttempts }} attempt{{ group.totalAttempts !== 1 ? 's' : '' }}</span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+
   } @else {
+    <!-- ─── Quiz Drill-down View ────────────────────── -->
     <div class="quiz-grid stagger-children">
-      @for (quiz of quizzes(); track quiz._id) {
+      @for (quiz of filteredQuizzes(); track quiz._id) {
         <div class="card card-hover quiz-card">
           <div class="quiz-card-header">
             <h3 class="quiz-title">{{ quiz.title }}</h3>
@@ -75,7 +126,7 @@
   }
 </div>
 
-<!-- Edit Quiz Modal -->
+<!-- ─── Edit Quiz Modal ───────────────────────────── -->
 @if (showEditPopup()) {
   <div class="modal-overlay" (click)="closeEditPopup()">
     <div class="modal-container" (click)="$event.stopPropagation()">
@@ -85,13 +136,13 @@
           <span class="material-symbols-rounded">close</span>
         </button>
       </div>
-      
+
       <div class="modal-body quiz-form">
         <div class="form-group">
           <label class="form-label">Quiz Title</label>
           <input class="form-input" [(ngModel)]="editQuizForm.title" placeholder="Quiz title">
         </div>
-        
+
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Timer (min)</label>
@@ -106,13 +157,13 @@
             </select>
           </div>
         </div>
-        
+
         <div class="form-group">
           <label class="form-label">Category</label>
           <input class="form-input" [(ngModel)]="editQuizForm.category" placeholder="e.g. Java, Angular">
         </div>
       </div>
-      
+
       <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
         <button class="btn btn-outline" (click)="editQuestions()">
           <span class="material-symbols-rounded">edit_square</span> Edit Questions

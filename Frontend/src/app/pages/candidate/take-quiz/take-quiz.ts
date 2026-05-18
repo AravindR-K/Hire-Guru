@@ -1,7 +1,12 @@
-import { Component, OnInit, OnDestroy, signal, computed, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component, OnInit, OnDestroy, signal, computed,
+  ViewChild, ElementRef, HostListener
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { QuizService } from '../../../services/quiz.service';
+import { AntiCheatService, AntiCheatWarning } from '../../../services/anti-cheat.service';
 
 @Component({
   selector: 'app-take-quiz',
@@ -17,6 +22,7 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
   answers = signal<Map<string, string[]>>(new Map());
 
   @ViewChild('dotsContainer') dotsContainer!: ElementRef<HTMLDivElement>;
+  @ViewChild('quizContainer') quizContainer!: ElementRef<HTMLDivElement>;
 
   timeLeft = signal<number>(0);
   timerInterval: any;
@@ -26,6 +32,16 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
   submitting = signal(false);
   error = signal('');
   submitted = signal(false);
+
+  // ── Anti-cheat state ─────────────────────────────────
+  showWarningModal = signal(false);
+  currentWarning = signal<AntiCheatWarning | null>(null);
+  violationCount = signal(0);
+  isFullscreen = signal(false);
+
+  private antiCheatSubs: Subscription[] = [];
+
+  // ─────────────────────────────────────────────────────
 
   currentQuestion = computed(() => this.questions()[this.currentIndex()]);
   progress = computed(() => {
@@ -43,17 +59,79 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private quizService: QuizService
+    private quizService: QuizService,
+    public antiCheat: AntiCheatService
   ) {}
 
   ngOnInit(): void {
     const quizId = this.route.snapshot.params['quizId'];
     this.loadQuiz(quizId);
+    this.setupAntiCheat();
   }
 
   ngOnDestroy(): void {
     if (this.timerInterval) clearInterval(this.timerInterval);
+    this.antiCheatSubs.forEach(s => s.unsubscribe());
+    this.antiCheat.stop();
   }
+
+  // ─────────────────────────────────────────────────────
+  // Anti-cheat setup
+  // ─────────────────────────────────────────────────────
+
+  private setupAntiCheat(): void {
+    // Subscribe to warnings
+    const warnSub = this.antiCheat.warning$.subscribe((warning: AntiCheatWarning) => {
+      this.currentWarning.set(warning);
+      this.showWarningModal.set(true);
+    });
+
+    // Subscribe to auto-submit trigger
+    const submitSub = this.antiCheat.autoSubmit$.subscribe(() => {
+      this.submitQuiz(true);
+    });
+
+    // Keep violation count in sync
+    const countSub = this.antiCheat.violationCount$.subscribe(count => {
+      this.violationCount.set(count);
+    });
+
+    this.antiCheatSubs.push(warnSub, submitSub, countSub);
+  }
+
+  private startAntiCheat(): void {
+    this.antiCheat.reset();
+    this.antiCheat.start();
+
+    // Enter fullscreen, track state
+    this.antiCheat.requestFullscreen().then(() => {
+      this.isFullscreen.set(true);
+    }).catch(() => {
+      // Silently fail if browser denies fullscreen (e.g. Safari without user gesture)
+      this.isFullscreen.set(false);
+    });
+  }
+
+  /** Dismiss warning, re-enter fullscreen if it was a fullscreen exit */
+  dismissWarning(): void {
+    const warning = this.currentWarning();
+    this.showWarningModal.set(false);
+
+    if (warning?.isAutoSubmit) return; // Already submitting
+
+    // Re-request fullscreen after dismissal
+    if (!this.antiCheat.isCurrentlyFullscreen) {
+      this.antiCheat.requestFullscreen().then(() => {
+        this.isFullscreen.set(true);
+      }).catch(() => {
+        this.isFullscreen.set(false);
+      });
+    }
+  }
+
+  // ─────────────────────────────────────────────────────
+  // Quiz lifecycle
+  // ─────────────────────────────────────────────────────
 
   loadQuiz(quizId: string): void {
     this.quizService.getQuizForTaking(quizId).subscribe({
@@ -64,6 +142,8 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
         this.startTime = Date.now();
         this.loading.set(false);
         this.startTimer();
+        // Start anti-cheat after quiz loads
+        this.startAntiCheat();
       },
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to load quiz');
@@ -84,6 +164,10 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
       }
     }, 1000);
   }
+
+  // ─────────────────────────────────────────────────────
+  // Answer management
+  // ─────────────────────────────────────────────────────
 
   selectOption(questionId: string, option: string, type: string): void {
     const currentAnswers = new Map(this.answers());
@@ -112,6 +196,10 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
     return !!ans && ans.length > 0;
   }
 
+  // ─────────────────────────────────────────────────────
+  // Navigation
+  // ─────────────────────────────────────────────────────
+
   goTo(index: number): void {
     if (index >= 0 && index < this.questions().length) this.currentIndex.set(index);
   }
@@ -124,11 +212,17 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
     if (el) el.scrollBy({ left: direction * 120, behavior: 'smooth' });
   }
 
-  submitQuiz(): void {
+  // ─────────────────────────────────────────────────────
+  // Submission
+  // ─────────────────────────────────────────────────────
+
+  submitQuiz(isAutoSubmit = false): void {
     if (this.submitting() || this.submitted()) return;
+
     this.submitting.set(true);
     this.error.set('');
     clearInterval(this.timerInterval);
+    this.antiCheat.markSubmitted();
 
     const timeTaken = Math.round((Date.now() - this.startTime) / 1000);
     const answersArray = Array.from(this.answers().entries()).map(([questionId, selectedAnswers]) => ({
@@ -139,6 +233,10 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
       next: () => {
         this.submitted.set(true);
         this.submitting.set(false);
+        // Exit fullscreen cleanly
+        if (this.antiCheat.isCurrentlyFullscreen) {
+          document.exitFullscreen?.().catch(() => {});
+        }
         setTimeout(() => this.router.navigate(['/candidate/dashboard']), 2000);
       },
       error: (err) => {
@@ -146,5 +244,9 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
         this.error.set(err.error?.message || 'Failed to submit quiz');
       }
     });
+  }
+
+  getMaxViolations(): number {
+    return this.antiCheat.getMaxViolations();
   }
 }

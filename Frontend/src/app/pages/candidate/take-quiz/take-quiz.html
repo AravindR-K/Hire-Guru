@@ -1,36 +1,70 @@
 <!-- Take Quiz -->
-<div class="quiz-page">
+<div class="quiz-page" #quizContainer>
+
+  <!-- ── Loading ─────────────────────────────── -->
   @if (loading()) {
-    <div class="loading-center"><div class="spinner spinner-lg"></div><p class="loading-text">Loading quiz...</p></div>
+    <div class="loading-center">
+      <div class="spinner spinner-lg"></div>
+      <p class="loading-text">Loading quiz...</p>
+    </div>
+
+  <!-- ── Error (pre-load) ─────────────────────── -->
   } @else if (error() && !quiz()) {
     <div class="error-state">
       <span class="material-symbols-rounded" style="font-size:48px;color:var(--danger)">error</span>
       <h2>{{ error() }}</h2>
       <a routerLink="/candidate/dashboard" class="btn btn-outline">Back to Dashboard</a>
     </div>
+
+  <!-- ── Success (submitted) ─────────────────── -->
   } @else if (submitted()) {
     <div class="success-state animate-scale-in">
       <span class="material-symbols-rounded" style="font-size:64px;color:var(--success)">check_circle</span>
       <h2>Quiz Submitted!</h2>
       <p>Redirecting to dashboard...</p>
     </div>
+
+  <!-- ── Active Quiz ────────────────────────── -->
   } @else if (quiz() && currentQuestion()) {
+
     <!-- Quiz Header -->
     <div class="quiz-header">
       <div class="quiz-title-area">
         <h1>{{ quiz().title }}</h1>
         <span class="q-counter">Question {{ currentIndex() + 1 }} of {{ questions().length }}</span>
       </div>
-      <div class="timer" [class.warning]="timeLeft() < 300 && timeLeft() >= 60" [class.danger]="timeLeft() < 60">
-        <span class="material-symbols-rounded">timer</span>
-        <span class="timer-value">{{ formattedTime() }}</span>
+
+      <div class="header-right-cluster">
+        <!-- Violation badge (shows only when there's at least 1 violation) -->
+        @if (violationCount() > 0) {
+          <div class="violation-badge" [class.critical]="violationCount() >= getMaxViolations() - 1"
+               title="Violations detected. {{ getMaxViolations() - violationCount() }} warning(s) remaining.">
+            <span class="material-symbols-rounded">warning</span>
+            <span>{{ violationCount() }}/{{ getMaxViolations() }}</span>
+          </div>
+        }
+
+        <!-- Fullscreen indicator -->
+        <div class="fullscreen-indicator" [class.active]="isFullscreen()" title="{{ isFullscreen() ? 'Fullscreen active' : 'Not in fullscreen' }}">
+          <span class="material-symbols-rounded">{{ isFullscreen() ? 'fullscreen' : 'fullscreen_exit' }}</span>
+        </div>
+
+        <!-- Timer -->
+        <div class="timer" [class.warning]="timeLeft() < 300 && timeLeft() >= 60" [class.danger]="timeLeft() < 60">
+          <span class="material-symbols-rounded">timer</span>
+          <span class="timer-value">{{ formattedTime() }}</span>
+        </div>
       </div>
     </div>
 
     <!-- Progress -->
     <div class="progress-track"><div class="progress-fill" [style.width.%]="progress()"></div></div>
 
-    @if (error()) { <div class="alert alert-error" style="margin-bottom:16px"><span class="material-symbols-rounded">error</span>{{ error() }}</div> }
+    @if (error()) {
+      <div class="alert alert-error" style="margin-bottom:16px">
+        <span class="material-symbols-rounded">error</span>{{ error() }}
+      </div>
+    }
 
     <!-- Question Card -->
     <div class="question-card card card-padding animate-fade-in">
@@ -84,3 +118,48 @@
     </div>
   }
 </div>
+
+<!-- ══════════════════════════════════════════════════════════
+     Anti-Cheat Warning Modal (rendered at page root level)
+     ══════════════════════════════════════════════════════════ -->
+@if (showWarningModal() && currentWarning()) {
+  <div class="ac-overlay" (click)="!currentWarning()!.isAutoSubmit && dismissWarning()">
+    <div class="ac-modal animate-scale-in" (click)="$event.stopPropagation()">
+
+      <!-- Icon -->
+      <div class="ac-icon-wrap" [class.danger]="currentWarning()!.isAutoSubmit">
+        <span class="material-symbols-rounded filled ac-icon">
+          {{ currentWarning()!.isAutoSubmit ? 'block' : 'warning' }}
+        </span>
+      </div>
+
+      <!-- Content -->
+      <h2 class="ac-title">{{ currentWarning()!.title }}</h2>
+      <p class="ac-message">{{ currentWarning()!.message }}</p>
+
+      <!-- Violation progress dots -->
+      @if (!currentWarning()!.isAutoSubmit) {
+        <div class="ac-violation-dots">
+          @for (i of [1,2,3]; track i) {
+            <div class="ac-dot" [class.filled]="i <= currentWarning()!.violationCount"></div>
+          }
+        </div>
+        <p class="ac-dot-label">{{ currentWarning()!.violationCount }}/{{ getMaxViolations() }} violations</p>
+      }
+
+      <!-- Actions -->
+      @if (!currentWarning()!.isAutoSubmit) {
+        <button class="btn btn-primary ac-dismiss-btn" (click)="dismissWarning()">
+          <span class="material-symbols-rounded">fullscreen</span>
+          Return to Fullscreen
+        </button>
+        <p class="ac-note">⚠️ Exiting fullscreen or switching tabs again will count as another violation.</p>
+      } @else {
+        <div class="ac-submitting">
+          <div class="spinner spinner-lg"></div>
+          <p>Submitting your quiz...</p>
+        </div>
+      }
+    </div>
+  </div>
+}

@@ -272,6 +272,8 @@
   flex: 1;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
+  min-width: 0;
+  overflow-x: hidden;
   transition: margin-left 0.3s ease;
 }
 
@@ -390,9 +392,12 @@
   padding: 32px;
   box-shadow: 0 15px 35px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   position: relative;
   display: flex;
   flex-direction: column;
+  transform: translateZ(0); /* Hardware accelerate backdrop-filter blending layer */
+  backface-visibility: hidden;
 }
 
 .modal-header {
@@ -416,7 +421,7 @@
   cursor: pointer;
   padding: 4px;
   border-radius: 50%;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease;
   display: flex;
 }
 .close-btn:hover {
@@ -429,8 +434,8 @@
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
-  padding-right: 8px; /* Space for scrollbar */
-  padding-bottom: 8px;
+  padding: 8px 12px 12px 8px; /* Buffer space for shadows and transforms */
+  margin: -8px -12px -12px -8px; /* Compensate padding to maintain perfect visual alignment */
 }
 
 .glassy-option {
@@ -442,12 +447,20 @@
   border: 1px solid var(--border-color);
   border-radius: 16px;
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* GPU Hardware Acceleration */
+  transform: translateY(0) translateZ(0);
+  will-change: transform, box-shadow, background-color, border-color;
+  backface-visibility: hidden;
+  /* Specific optimized transitions (avoiding 'transition: all') */
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background-color 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
   position: relative;
 }
 
 .glassy-option:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) translateZ(0);
   background: var(--bg-hover);
   border-color: var(--accent-primary);
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
