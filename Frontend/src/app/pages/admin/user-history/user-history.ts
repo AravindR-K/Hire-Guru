@@ -31,8 +31,8 @@ export class UserHistoryComponent implements OnInit {
   levels = [
     { value: 'beginner', label: 'Fresher' },
     { value: 'intermediate', label: 'Intern' },
-    { value: 'advanced', label: 'Intermediate' },
-    { value: 'expert', label: 'Expert' }
+    { value: 'advanced', label: 'Pre final year' },
+    { value: 'expert', label: 'Final year' }
   ];
 
   /** Difficulty → level code mapping */
@@ -46,7 +46,7 @@ export class UserHistoryComponent implements OnInit {
     private route: ActivatedRoute,
     public authService: AuthService,
     private quizService: QuizService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.userId = this.route.snapshot.params['userId'];
@@ -213,17 +213,24 @@ export class UserHistoryComponent implements OnInit {
     const ivName = ivEval?.evaluatorId?.name || 'Interviewer';
     const pmName = pmEval?.evaluatorId?.name || 'Project Manager';
     const hrName = hrEval?.evaluatorId?.name || 'HR';
+    const adminName = adminEval?.evaluatorId?.name || 'Administrator';
     const overallRec = adminEval?.recommendation || interview.finalDecision || '';
 
-    const ITL_LOGO = 'data:image/gif;base64,R0lGODlhtgBCAPcAAPqsTtTimLXVfMHah/y6Yf7QfP/snt7oov/ikf/ejb/f8b/a6r/Y6L/W5vqvUtrmnvu2XP7Ebf/UgPqwVPu4XsXciv7Jc9jv+r/q+Mzfkefsq7/n9+HppfigP//SftDhlc7gk+jy2vqyV8rejvidO9jknPuzWarQcvmpSviiQv3ky/3lzLTUev3jyfeZNveXM//XhP7Mdv7KdP7Gb7nZjr3Yg7jWf6rPcfH24v/nmePqp9Pil8Pbif7Hcf3BabvXgbPUeaXObPaTL3+83b/e7kCbzQCFzNXV1oKCg6urrODg4Orq6t/u9/X19e/3+2JiZJ/N5iCLxIrN8ZTR8nd3eQCDyp7V9BCCwKja9svLy21tb7Hd98/m8rnh+MDAwcHl+X/C5a/V6jCTyXC02ZeXmGCs1Y/F4le86wCg4AB3uuDy+0W46QCAxgB/wQCd3wCk4X/I8ABztgB6vwBnqABjpABvsQGr5ABcnQCn4xOv5nLE7i206AB9wgBfoGXA7ABqrKGhokCh1gCCyFhYWra2t1Ck0c/o9fmoSRCNz0Ck2f29ZPqtUP7NePu1W/3o0IyMjvmrTf7Cav3AZ/3p0f/bifmnSP2+ZfmqTL/c7fL3477ZhM3gkv3nz7/d7rDTd6/Sdv7q07/o99Xu+r/e77/f78Tr+f7Da/3mzfqxVvmlRfquUdLhlvmmR8jdjf7Pesrs+dzw+/u0WdDt+fihQLzakq3RdPikRPmkRf/Wg/3nzvy7Yv748cLk+LTXirbYjMjn+feaN+vur/mlRt/v+Pu5YPy8Y+vvsP/ml3C54Mnejv2/Zp/R7Mfn+Ofy2fu3XvPzuP/ciurz3LLTeO/14KDMZ9Xr5v3p0v3q0vqwU/u2W/7Qe8/glNzmn7zi96LNav7Bae314P/YhqjPb8Tbif7Fbcjeje3wsf7Oec7p+vmqSzCa0hCKyxCLzfD24bXf9tPs+/ibOdXjmfiePP3o0fDxtPaQK0Ci1+Xrqv7Icf/ZiOz03e303qfObrrakAB6vP///yH/C1hNUCBEYXRhWE1QPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS4wLWMwNjEgNjQuMTQwOTQ5LCAyMDEwLzEyLzA3LTEwOjU3OjAxICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InV1aWQ6M0VFQTQ2RTUwQjUxRTIxMTg3NjBBREQ5OUJDNDQyNkYiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RkQzNEU5MjI5NDI2MTFFMzlFMzJCNTI0NkY5NTYwMUYiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RkQzNEU5MjE5NDI2MTFFMzlFMzJCNTI0NkY5NTYwMUYiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgSWxsdXN0cmF0b3IgQ1M1Ij4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6ODYxQjI3MzY3Mjc2RTMxMUEzQjZERTY4M0Y2RDE5QTEiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6ODYxQjI3MzY3Mjc2RTMxMUEzQjZERTY4M0Y2RDE5QTEiLz4gPGRjOnRpdGxlPiA8cmRmOkFsdD4gPHJkZjpsaSB4bWw6bGFuZz0ieC1kZWZhdWx0Ij5JVExfQkNfQVc8L3JkZjpsaT4gPC9yZGY6QWx0PiA8L2RjOnRpdGxlPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgH//v38+/r5+Pf29fTz8vHw7+7t7Ovq6ejn5uXk4+Lh4N/e3dzb2tnY19bV1NPS0dDPzs3My8rJyMfGxcTDwsHAv769vLu6ubi3trW0s7KxsK+urayrqqmop6alpKOioaCfnp2cm5qZmJeWlZSTkpGQj46NjIuKiYiHhoWEg4KBgH9+fXx7enl4d3Z1dHNycXBvbm1sa2ppaGdmZWRjYmFgX15dXFtaWVhXVlVUU1JRUE9OTUxLSklIR0ZFRENCQUA/Pj08Ozo5ODc2NTQzMjEwLy4tLCsqKSgnJiUkIyIhIB8eHRwbGhkYFxYVFBMSERAPDg0MCwoJCAcGBQQDAgEAACH5BAAAAAAALAAAAAC2AEIAAAj/AP8JHEiwoMGDCBMqXMiwocOHECNKnEixosWLGDNq3Mixo8ePIEMO3NWihYoVK06dysXJkct5k0TKnEkzY4t6Ql64gCevQwpbwiodGlqzqNGjCVXkBEbCZ6pKKC5BArBoEdKrWGuqeMF0li1WKCAtcjABlQgRWdOq7bgCmLxZtw5dWoRNhIlGEJxRWMu3L8VTJGalOgRJFapYEIgRKKZIkd/HkBfm6hAXgAMRjSjosiTJRyRTkUOLFsgpRSVIlyEQUOTDFLkZ+PCNnv3YEat0qkSothSJXA8ZMRgxot187aRDi1A1IsB7hoUYrgp48ICxiPUxBK1r314kTJiDULiL/9eOHTz5hOGtcynOcNIlByYoKPo2QwajAhIk4IKB0Z//IgT5J+CAAkZBREFDEKiggAAeJMaATCCUoH8HsqeQNQCgko0ukkRgwX0SwJAPJdD091+ACyoIBUETpjhggwUxQaAZEgpYoYUIXaOKCc4oEkkPMWgTIiUJIICAif7A+M+L2ykYoUAtRjHeeQaZQaAYNVKIY0KgOBALMcp4eI4HuBCJwDE5IKnkgAU5McaAZQzU4hASPUjgkwjauCVCoEywnCTkyOCKBOEUmYMBBqiJon8HteiPnALSCREXApYhII0GtXjjnlcxuOijBjkx4Hr/zBnRm/5xcYV/UTSqJ6dYef86EJsHFfGqqRBFweo/lqaa6auwIiWrQLQaZKuWpUY6qYDYhcHsr8iO9sW01FZr7bVfXGDQM/QYowEH3MTzwQjjaGKDNCfQktCwSwqI0LH+VNhiEUPUa6+9B6Ea7z+i7ppntKJ1IfDABBdssMDvFGROMBrocMADO4DQCg81COBJuuueOKu7td7qYrEErerPFQMVAiyUJ4e2xcust+zyyyyjQ5AG9zj8gLgZVDDADwJ8ckM/GSf56bsef8xoQc76F6dAUFT6776zYSH11FRXbTXVvwzEAQcPx7PKJuXwYC4QtfADNELsgpxd0UYb1Ks/3wnU78hPbxqaFXjnrffefO//zYtA3DxQgtcgjKAzzxcHQUPQa3JsLNuSNiSyP06s7V/cKAMc2hScd+7556CD3s0/8QSwwwebJKNzDTaQLY43vjA+dMfI4spQ0/5dwZ2uSrOYcmRSBC/88MQXb7w722yTwQitrG4DCz4HQU0vsm98tEG8Q237QiYbPXLlmUM9mhrkl2//...AAAAAAAAA7';
+    const getSigHtml = (evalObj: any, fallbackName: string) => {
+      if (evalObj && evalObj.evaluatorId && evalObj.evaluatorId.signature) {
+        return `<img src="http://localhost:5000${evalObj.evaluatorId.signature}" alt="Signature"/>`;
+      }
+      return fallbackName || '';
+    };
 
+    const ITL_LOGO = '/logo.jpeg';
     const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/>
 <title>ITL Evaluation - ${candidateName}</title><style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Arial,sans-serif;background:#fff;color:#000;padding:24px;font-size:13px;}
 .page-wrap{max-width:780px;margin:0 auto;border:1px solid #ccc;}
 .header{background:#4472C4;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;}
-.header h1{color:#fff;font-size:16px;font-weight:bold;font-style:italic;text-decoration:underline;}
+.header h1{color:#fff;font-size:26px;font-weight:bold;}
 .logo-wrap img{height:52px;object-fit:contain;}
 .info-table{width:100%;border-collapse:collapse;}
 .info-table td{border:1px solid #bbb;padding:6px 10px;vertical-align:middle;}
@@ -234,11 +241,61 @@ body{font-family:Arial,sans-serif;background:#fff;color:#000;padding:24px;font-s
 .comments-text{min-height:65px;font-size:13px;font-family:Arial,sans-serif;color:#333;line-height:1.5;padding:4px 0;}
 .rec-row{border:1px solid #bbb;border-top:none;padding:8px 16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
 .rec-label{font-weight:bold;white-space:nowrap;}
-.sig-row{border:1px solid #bbb;border-top:none;padding:8px 16px;display:flex;align-items:flex-end;gap:40px;}
-.sig-field{display:flex;align-items:flex-end;gap:8px;}
-.sig-field label{font-weight:bold;white-space:nowrap;}
-.sig-line{border-bottom:1px solid #000;min-width:200px;height:18px;font-style:italic;color:#555;font-size:13px;}
-.sig-line-date{min-width:140px;}
+
+.sig-row{
+  border:1px solid #bbb;
+  border-top:none;
+  padding:14px 16px 10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:40px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.sig-field{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  flex:1;
+}
+
+.sig-field label{
+  font-weight:bold;
+  white-space:nowrap;
+  font-size:14px;
+}
+
+.signature-box{
+  border-bottom:2px solid #222;
+  width:165px;          
+  height:26px;          
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  padding-bottom:4px;
+}
+
+.signature-box img{
+  max-height:18px;      
+  max-width:90px;       
+  object-fit:contain;
+}
+
+.date-box{
+  border-bottom:2px solid #222;
+  width:130px;         
+  height:22px;          
+  display:flex;
+  align-items:flex-end;
+  padding-bottom:3px;
+  font-style:italic;
+  color:#444;
+}
+
+
+
 .actions{margin-top:16px;display:flex;justify-content:flex-end;gap:10px;}
 .btn{font-size:13px;font-family:Arial,sans-serif;padding:7px 18px;border-radius:3px;cursor:pointer;border:1px solid #aaa;}
 .btn-print{background:#4472C4;color:#fff;border-color:#3360b0;}
@@ -246,7 +303,7 @@ body{font-family:Arial,sans-serif;background:#fff;color:#000;padding:24px;font-s
 </style></head><body>
 <div class="page-wrap">
   <div class="header">
-    <h1>Intern Interview Evaluation Form</h1>
+    <h1>Candidate Evaluation Form</h1>
     <div class="logo-wrap"><img src="${ITL_LOGO}" alt="ITL Logo"/></div>
   </div>
   <table class="info-table"><tbody>
@@ -277,10 +334,21 @@ body{font-family:Arial,sans-serif;background:#fff;color:#000;padding:24px;font-s
     <div class="comments-text">${ivEval?.comments || ''}</div>
   </div>
   <div class="rec-row"><span class="rec-label">Recommendation:</span>${buildCheckboxes('rec1', ivEval?.recommendation || '')}</div>
-  <div class="sig-row">
-    <div class="sig-field"><label>Evaluator's Signature:</label><div class="sig-line">${ivName}</div></div>
-    <div class="sig-field"><label>Date:</label><div class="sig-line sig-line-date">${fmtDate(ivEval?.date)}</div></div>
+<div class="sig-row">
+  <div class="sig-field">
+    <label>Evaluator's Signature:</label>
+    <div class="signature-box">
+      ${getSigHtml(ivEval, ivName)}
+    </div>
   </div>
+
+  <div class="sig-field" style="flex:0.55;">
+    <label>Date:</label>
+    <div class="date-box">
+      ${fmtDate(ivEval?.date)}
+    </div>
+  </div>
+</div>
 
   <div class="comments-section">
     <div class="comments-label">Project Manager Comments (${pmName}):</div>
@@ -288,26 +356,64 @@ body{font-family:Arial,sans-serif;background:#fff;color:#000;padding:24px;font-s
   </div>
   <div class="rec-row"><span class="rec-label">Recommendation:</span>${buildCheckboxes('rec2', pmEval?.recommendation || '')}</div>
   <div class="sig-row">
-    <div class="sig-field"><label>Evaluator's Signature:</label><div class="sig-line">${pmName}</div></div>
-    <div class="sig-field"><label>Date:</label><div class="sig-line sig-line-date">${fmtDate(pmEval?.date)}</div></div>
+  <div class="sig-field">
+    <label>Evaluator's Signature:</label>
+    <div class="signature-box">
+${getSigHtml(pmEval, pmName)}
+    </div>
   </div>
+
+  <div class="sig-field" style="flex:0.55;">
+    <label>Date:</label>
+    <div class="date-box">
+${fmtDate(pmEval?.date)}
+    </div>
+  </div>
+</div>
+
 
   <div class="comments-section">
     <div class="comments-label">HR Comments (${hrName}):</div>
     <div class="comments-text" style="min-height:52px;">${hrEval?.comments || ''}</div>
   </div>
   <div class="rec-row"><span class="rec-label">Recommendation:</span>${buildCheckboxes('rec3', hrEval?.recommendation || '')}</div>
-  <div class="sig-row">
-    <div class="sig-field"><label>Evaluator's Signature:</label><div class="sig-line">${hrName}</div></div>
-    <div class="sig-field"><label>Date:</label><div class="sig-line sig-line-date">${fmtDate(hrEval?.date)}</div></div>
+<div class="sig-row">
+  <div class="sig-field">
+    <label>Evaluator's Signature:</label>
+    <div class="signature-box">
+ ${getSigHtml(hrEval, hrName)}
+    </div>
   </div>
 
-  <div class="comments-section"><div class="comments-label">Overall Recommendation:</div></div>
-  <div class="rec-row"><span class="rec-label">Recommendation:</span>${buildCheckboxes('rec-overall', overallRec)}</div>
-  <div class="sig-row">
-    <div class="sig-field"><label>Authorized Signature:</label><div class="sig-line">${adminEval?.evaluatorId?.name || ''}</div></div>
-    <div class="sig-field"><label>Date:</label><div class="sig-line sig-line-date">${fmtDate(adminEval?.date)}</div></div>
+  <div class="sig-field" style="flex:0.55;">
+    <label>Date:</label>
+    <div class="date-box">
+${fmtDate(hrEval?.date)}
+    </div>
   </div>
+</div>
+
+
+    <div class="comments-section">
+    <div class="comments-label">Overall Comments (${adminEval?.evaluatorId?.name}):</div>
+    <div class="comments-text" style="min-height:52px;">${adminEval?.comments || ''}</div>
+  </div>
+  <div class="rec-row"><span class="rec-label">Recommendation:</span>${buildCheckboxes('rec-overall', overallRec)}</div>
+  
+  <div class="sig-row">
+  <div class="sig-field">
+    <label>Evaluator's Signature:</label>
+    <div class="signature-box">
+${getSigHtml(adminEval, adminName)}
+    </div>
+  </div>
+
+  <div class="sig-field" style="flex:0.55;">
+    <label>Date:</label>
+    <div class="date-box">${fmtDate(adminEval?.date)}</div>
+  </div>
+</div>
+
 </div>
 <div class="actions">
   <button class="btn btn-print" onclick="window.print()">&#128438; Print / Save as PDF</button>

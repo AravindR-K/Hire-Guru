@@ -45,6 +45,16 @@ export class AdminUsersComponent implements OnInit {
     this.loadUsers();
   }
 
+  getLevelLabel(level: string): string {
+    const map: Record<string, string> = {
+      beginner: 'Fresher',
+      intermediate: 'Intern',
+      advanced: 'Pre final year',
+      expert: 'Final year'
+    };
+    return map[level?.toLowerCase()] || 'Fresher';
+  }
+
   deleteUser(userId: string): void {
     if (confirm('Are you sure you want to permanently delete this student user?')) {
       this.quizService.deleteUser(userId).subscribe({

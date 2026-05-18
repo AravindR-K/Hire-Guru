@@ -252,9 +252,6 @@
                   <div style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px; border-radius: 4px;" (click)="openMemberDetail(m._id, $event)">
                     <span style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Current Status:</span>
                     <span class="badge" [ngClass]="getStatusClass(m.status)">{{ formatStatus(m.status) }}</span>
-                    @if (needsEvaluation(m)) {
-                      <span class="eval-pending-badge" title="Your evaluation is pending" style="margin-left: 4px;">⚠️ Evaluate</span>
-                    }
                   </div>
                   
                   @if (m.finalDecision !== 'pending') {

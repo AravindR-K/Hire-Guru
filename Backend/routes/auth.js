@@ -139,10 +139,10 @@ router.post('/signature', protect, upload.single('signature'), async (req, res) 
       if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
     }
 
-    user.signature = `/uploads/${req.file.filename}`;
-    await user.save();
+    const newSignaturePath = `/uploads/${req.file.filename}`;
+    await User.updateOne({ _id: user._id }, { signature: newSignaturePath });
 
-    res.json({ message: 'Signature uploaded successfully', signature: user.signature });
+    res.json({ message: 'Signature uploaded successfully', signature: newSignaturePath });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -174,13 +174,15 @@ router.put('/profile', protect, upload.none(), async (req, res) => {
 
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (name) user.name = name;
-    if (email) user.email = email;
-    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
 
-    await user.save();
+    await User.updateOne({ _id: user._id }, { $set: updateData });
+    const updatedUser = await User.findById(req.user._id).select('-password');
 
-    res.json({ message: 'Profile updated', user });
+    res.json({ message: 'Profile updated', user: updatedUser });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

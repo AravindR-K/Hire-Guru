@@ -12,6 +12,7 @@ import { QuizService } from '../../../services/quiz.service';
 })
 export class DashboardComponent implements OnInit {
   stats = signal<any>({ total: 0, pending: 0, completed: 0 });
+  recentSubmissions = signal<any[]>([]);
   loading = signal(true);
 
   constructor(private quizService: QuizService) {}
@@ -20,6 +21,7 @@ export class DashboardComponent implements OnInit {
     this.quizService.getInterviewStats().subscribe({
       next: (res) => {
         this.stats.set(res);
+        this.recentSubmissions.set(res.recentSubmissions || []);
         this.loading.set(false);
       },
       error: () => this.loading.set(false)

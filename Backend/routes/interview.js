@@ -6,6 +6,7 @@ const { protect, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const fs = require('fs');
 const path = require('path');
+const Submission = require('../models/Submission');
 const router = express.Router();
 
 // All interview routes require authentication
@@ -124,6 +125,8 @@ router.get('/', authorize('admin', 'hr', 'pm', 'interviewer'), async (req, res) 
 router.get('/stats', authorize('admin', 'hr', 'pm', 'interviewer'), async (req, res) => {
   try {
     let filter = {};
+    let submissionFilter = {};
+
     if (!['admin', 'hr'].includes(req.user.role)) {
       filter.$or = [
         { interviewerId: req.user._id },
@@ -132,6 +135,11 @@ router.get('/stats', authorize('admin', 'hr', 'pm', 'interviewer'), async (req, 
         { assignedPMs: req.user._id },
         { createdBy: req.user._id }
       ];
+
+      // Get IDs of candidates this user is assigned to
+      const assignedInterviews = await Interview.find(filter).select('candidateId');
+      const candidateIds = [...new Set(assignedInterviews.map(iv => iv.candidateId))];
+      submissionFilter = { studentId: { $in: candidateIds } };
     }
 
     const total = await Interview.countDocuments(filter);
@@ -140,7 +148,14 @@ router.get('/stats', authorize('admin', 'hr', 'pm', 'interviewer'), async (req, 
     const accepted = await Interview.countDocuments({ ...filter, finalDecision: 'accepted' });
     const rejected = await Interview.countDocuments({ ...filter, finalDecision: 'rejected' });
 
-    res.json({ total, pending, completed, accepted, rejected });
+    // Fetch recent submissions
+    const recentSubmissions = await Submission.find(submissionFilter)
+      .populate('studentId', 'name email')
+      .populate('quizId', 'title')
+      .sort({ submittedAt: -1 })
+      .limit(5);
+
+    res.json({ total, pending, completed, accepted, rejected, recentSubmissions });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

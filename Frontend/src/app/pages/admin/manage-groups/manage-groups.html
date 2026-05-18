@@ -48,12 +48,12 @@
       <!-- Outer wrapper handles the drag contexts collectively -->
       <div class="groups-grid">
         @for (group of groups(); track group) {
-          <div class="group-lane card" cdkDropList [cdkDropListData]="group" (cdkDropListDropped)="onDrop($event)" (click)="toggleGroupExpansion(group)">
+          <div class="group-lane card" [class.expanded]="expandedGroup() === group" cdkDropList [cdkDropListData]="group" (cdkDropListDropped)="onDrop($event)" (click)="toggleGroupExpansion(group)">
             
             <div class="group-lane-header">
               <div class="group-header-info">
                 @if (editingGroup() === group) {
-                  <input type="text" class="form-input form-input-small" [ngModel]="editName()" (ngModelChange)="editName.set($event)" autofocus>
+                  <input type="text" class="form-input form-input-small" [ngModel]="editName()" (ngModelChange)="editName.set($event)" autofocus (click)="$event.stopPropagation()">
                 } @else {
                   <h4 class="lane-title"><span class="material-symbols-rounded">workspaces</span> {{ group }}</h4>
                   <span class="member-count">{{ getStudentsInGroup(group).length }} Members</span>
@@ -71,26 +71,24 @@
             </div>
 
             <!-- Drop Zone Body (Displayed on Expansion) -->
-            @if (expandedGroup() === group) {
-              <div class="group-lane-body" [class.empty-body]="getStudentsInGroup(group).length === 0" (click)="$event.stopPropagation()">
-                @if (getStudentsInGroup(group).length === 0) {
-                   <div class="drop-placeholder">No candidates found in {{group}}</div>
-                }
-                
-                @for (student of getStudentsInGroup(group); track student._id) {
-                  <div class="student-pill card" cdkDrag [cdkDragData]="student">
-                     <div class="pill-avatar">{{ student.name.charAt(0).toUpperCase() }}</div>
-                     <div class="pill-info">
-                        <span class="pill-name">{{ student.name }}</span>
-                     </div>
-                     <button class="action-btn text-danger" title="Remove" (click)="removeFromGroup(student)">
-                       <span class="material-symbols-rounded" style="font-size: 16px;">close</span>
-                     </button>
-                     <div class="custom-drag-placeholder" *cdkDragPlaceholder></div>
-                  </div>
-                }
-              </div>
-            }
+            <div class="group-lane-body" [class.empty-body]="getStudentsInGroup(group).length === 0" (click)="$event.stopPropagation()">
+              @if (getStudentsInGroup(group).length === 0) {
+                  <div class="drop-placeholder">No candidates found in {{group}}</div>
+              }
+              
+              @for (student of getStudentsInGroup(group); track student._id) {
+                <div class="student-pill card" cdkDrag [cdkDragData]="student">
+                    <div class="pill-avatar">{{ student.name.charAt(0).toUpperCase() }}</div>
+                    <div class="pill-info">
+                      <span class="pill-name">{{ student.name }}</span>
+                    </div>
+                    <button class="action-btn text-danger" title="Remove" (click)="removeFromGroup(student)">
+                      <span class="material-symbols-rounded" style="font-size: 16px;">close</span>
+                    </button>
+                    <div class="custom-drag-placeholder" *cdkDragPlaceholder></div>
+                </div>
+              }
+            </div>
           </div>
         }
       </div>

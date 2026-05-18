@@ -48,8 +48,8 @@ const userSchema = new mongoose.Schema({
   },
   level: {
     type: String,
-    enum: ['Fresher', 'Intern', 'Pre final year', 'Final year'],
-    default: 'Fresher'                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+    enum: ['Fresher', 'Intern', 'Pre final year', 'Final year', 'beginner', 'intermediate', 'advanced', 'expert'],
+    default: 'beginner'
   },
   topicsOfInterest: [{
     topic: { type: String, required: true },

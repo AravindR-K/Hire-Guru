@@ -110,24 +110,63 @@
 /* Quick Actions */
 .actions-grid {
   display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
 .action-card {
   display: flex;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: center;
+  gap: 20px;
   text-decoration: none;
   color: inherit;
   height: 100%;
+  padding: 28px !important;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.action-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(102,126,234,0.05) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.action-card:hover::before {
+  opacity: 1;
+}
+
+.action-card:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 12px 30px rgba(102,126,234,0.12);
+  transform: translateY(-4px);
 }
 
 .action-icon {
-  font-size: 28px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(102,126,234,0.1);
   color: var(--accent-primary);
+  border-radius: 14px;
+  font-size: 32px;
   flex-shrink: 0;
-  margin-top: 2px;
+  transition: all 0.3s;
+}
+
+.action-card:hover .action-icon {
+  background: var(--accent-primary);
+  color: #fff;
+  transform: scale(1.1) rotate(-5deg);
 }
 
 .action-info {

@@ -227,7 +227,7 @@
         .populate('createdBy', 'name')
         .populate('decidedBy', 'name')
         .populate('quizzes.quizId', 'title category difficulty timer totalQuestions')
-        .populate('evaluations.evaluatorId', 'name email role')
+        .populate('evaluations.evaluatorId', 'name email role signature')
         .sort({ createdAt: -1 });
 
       res.json({ user, interviews });

@@ -28,8 +28,8 @@
             <div class="user-card-info">
               <div class="name-row">
                 <h4>{{ user.name }}</h4>
-                <span class="level-badge" [attr.data-level]="user.level || 'beginner'">
-                  {{ (user.level || 'beginner') | titlecase }}
+                <span class="level-badge" [attr.data-level]="(user.level || 'beginner').toLowerCase()">
+                  {{ getLevelLabel(user.level || 'beginner') }}
                 </span>
               </div>
               <p>{{ user.email }}</p>

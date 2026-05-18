@@ -44,7 +44,7 @@
     }
 
     getUserInterviews(userId: string): Observable<any> {
-      return this.http.get(`${this.adminUrl}/users/${userId}/interviews`);
+      return this.http.get(`${this.getBaseUrl()}/users/${userId}/interviews`);
     }
 
     updateUserLevel(userId: string, level: string, role: string = 'admin'): Observable<any> {

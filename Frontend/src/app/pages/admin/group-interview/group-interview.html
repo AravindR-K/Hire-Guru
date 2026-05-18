@@ -135,7 +135,7 @@
                       } @else if (needsEvaluation(m)) {
                         <button class="btn-evaluate" (click)="openMemberDetail(m._id, $event)">
                           <span class="material-symbols-rounded">rate_review</span>
-                          Evaluate
+                          {{ authService.getUserRole() === 'admin' ? 'Review & Evaluate' : 'Evaluate' }}
                         </button>
                       } @else {
                         <span class="qep-done-label">
@@ -190,7 +190,7 @@
               <div class="checklist-box">
                 @for (i of interviewers(); track i._id) {
                   <label class="check-item">
-                    <input type="checkbox" [value]="i._id"
+                    <input type="radio" [value]="i._id"
                       (change)="toggleSelection($event, newGroupInterview.assignedInterviewers)">
                     <span>{{ i.name }}</span>
                   </label>
@@ -203,7 +203,7 @@
               <div class="checklist-box">
                 @for (h of hrs(); track h._id) {
                   <label class="check-item">
-                    <input type="checkbox" [value]="h._id"
+                    <input type="radio" [value]="h._id"
                       (change)="toggleSelection($event, newGroupInterview.assignedHRs)">
                     <span>{{ h.name }}</span>
                   </label>
@@ -216,7 +216,7 @@
               <div class="checklist-box">
                 @for (p of pms(); track p._id) {
                   <label class="check-item">
-                    <input type="checkbox" [value]="p._id"
+                    <input type="radio" [value]="p._id"
                       (change)="toggleSelection($event, newGroupInterview.assignedPMs)">
                     <span>{{ p.name }}</span>
                   </label>
@@ -492,9 +492,6 @@
                   <div style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 4px; border-radius: 4px;" (click)="openMemberDetail(m._id, $event)">
                     <span style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Current Status:</span>
                     <span class="badge" [ngClass]="getStatusClass(m.status)">{{ formatStatus(m.status) }}</span>
-                    @if (needsEvaluation(m)) {
-                      <span class="eval-pending-badge" title="Your evaluation is pending" style="margin-left: 4px;">⚠️ Evaluate</span>
-                    }
                   </div>
                   
                   @if (m.finalDecision !== 'pending') {
@@ -633,8 +630,8 @@
             <p class="text-muted">No evaluations yet</p>
           }
 
-          <!-- Add evaluation form (HR / PM / Interviewer, not if already submitted or completed) -->
-          @if (!hasMemberEvaluated() && selectedMember().status !== 'completed' && authService.getUserRole() !== 'admin') {
+          <!-- Add evaluation form (Admin / HR / PM / Interviewer, not if already submitted or completed) -->
+          @if (!hasMemberEvaluated() && selectedMember().status !== 'completed') {
             <div class="eval-form">
               <h4>Add Your Evaluation</h4>
               <div class="form-group">

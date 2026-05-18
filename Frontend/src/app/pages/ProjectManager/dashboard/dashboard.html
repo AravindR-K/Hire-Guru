@@ -67,5 +67,45 @@
       </a>
     </div>
   </div>
+
+  <!-- Recent Submissions -->
+  @if (recentSubmissions().length > 0) {
+  <div class="section" style="margin-top: 32px;">
+    <h2 class="section-title">Recent Submissions</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Quiz</th>
+            <th>Score</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (sub of recentSubmissions(); track sub._id) {
+          <tr>
+            <td>
+              <div class="user-cell">
+                <span class="user-cell-name">{{ sub.studentId?.name }}</span>
+                <span class="user-cell-email">{{ sub.studentId?.email }}</span>
+              </div>
+            </td>
+            <td>{{ sub.quizId?.title }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                      'badge-success': sub.percentage >= 70,
+                      'badge-warning': sub.percentage >= 40 && sub.percentage < 70,
+                      'badge-danger': sub.percentage < 40
+                    }">{{ sub.percentage }}%</span>
+            </td>
+            <td class="text-muted">{{ sub.submittedAt | date:'short' }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
   }
 </div>

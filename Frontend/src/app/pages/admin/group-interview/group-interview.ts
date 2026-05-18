@@ -329,10 +329,8 @@ export class GroupInterviewComponent implements OnInit {
 
   /** True when THIS user still needs to evaluate this member */
   needsEvaluation(m: any): boolean {
-    if (m.status === 'completed') return false;
+    if (m.status === 'completed' || (m.finalDecision && m.finalDecision !== 'pending')) return false;
     const userId = this.authService.currentUser()?.id;
-    const role = this.authService.getUserRole();
-    if (role === 'admin') return false;  // admin gives final decision, not evaluation
     const evaluated = m.evaluations?.some(
       (e: any) => e.evaluatorId?._id === userId || e.evaluatorId === userId
     );

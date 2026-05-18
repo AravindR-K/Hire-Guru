@@ -227,6 +227,34 @@
     }
   });
 
+  // @route   GET /api/hr/users/:userId/interviews
+  // @desc    Get all interviews assigned to a specific user
+  // @access  HR
+  router.get('/users/:userId/interviews', async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const Interview = require('../models/Interview');
+
+      const user = await User.findById(userId).select('-password');
+      if (!user) return res.status(404).json({ message: 'User not found' });
+
+      const interviews = await Interview.find({ candidateId: userId })
+        .populate('interviewerId', 'name email role')
+        .populate('assignedInterviewers', 'name email')
+        .populate('assignedHRs', 'name email')
+        .populate('assignedPMs', 'name email')
+        .populate('createdBy', 'name')
+        .populate('decidedBy', 'name')
+        .populate('quizzes.quizId', 'title category difficulty timer totalQuestions')
+        .populate('evaluations.evaluatorId', 'name email role signature')
+        .sort({ createdAt: -1 });
+
+      res.json({ user, interviews });
+    } catch (error) {
+      res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  });
+
   // ============ QUIZ MANAGEMENT ============
 
   // @route   POST /api/hr/quiz/create
