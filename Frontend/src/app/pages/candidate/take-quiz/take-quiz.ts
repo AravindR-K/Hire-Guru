@@ -229,7 +229,7 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
       questionId, selectedAnswers
     }));
 
-    this.quizService.submitQuiz(this.quiz().id, answersArray, timeTaken).subscribe({
+    this.quizService.submitQuiz(this.quiz().id, answersArray, timeTaken, isAutoSubmit).subscribe({
       next: () => {
         this.submitted.set(true);
         this.submitting.set(false);

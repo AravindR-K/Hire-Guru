@@ -175,8 +175,8 @@
       return this.http.get(`${this.candidateUrl}/quiz/${quizId}`);
     }
 
-    submitQuiz(quizId: string, answers: any[], timeTaken: number): Observable<any> {
-      return this.http.post(`${this.candidateUrl}/quiz/${quizId}/submit`, { answers, timeTaken });
+    submitQuiz(quizId: string, answers: any[], timeTaken: number, violation: boolean = false): Observable<any> {
+      return this.http.post(`${this.candidateUrl}/quiz/${quizId}/submit`, { answers, timeTaken, violation });
     }
 
     getCandidateProfile(): Observable<any> {

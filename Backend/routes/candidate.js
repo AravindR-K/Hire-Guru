@@ -145,7 +145,7 @@ router.get('/quiz/:quizId', async (req, res) => {
 router.post('/quiz/:quizId/submit', async (req, res) => {
   try {
     const { quizId } = req.params;
-    const { answers, timeTaken } = req.body;
+    const { answers, timeTaken, violation } = req.body;
 
     // Check if candidate already submitted
     const existingSubmission = await Submission.findOne({
@@ -192,7 +192,8 @@ router.post('/quiz/:quizId/submit', async (req, res) => {
       score,
       totalMarks,
       percentage,
-      timeTaken: timeTaken || 0
+      timeTaken: timeTaken || 0,
+      violation: !!violation
     });
 
     // Update Interview if applicable
@@ -204,7 +205,8 @@ router.post('/quiz/:quizId/submit', async (req, res) => {
           'quizzes.$.score': score,
           'quizzes.$.totalMarks': totalMarks,
           'quizzes.$.percentage': percentage,
-          'quizzes.$.completed': true
+          'quizzes.$.completed': true,
+          'quizzes.$.violation': !!violation
         }
       }
     );

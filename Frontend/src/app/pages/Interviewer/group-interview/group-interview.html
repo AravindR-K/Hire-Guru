@@ -373,7 +373,12 @@
                 <div class="quiz-result-card">
                   <div class="qr-title">{{ q.title }}</div>
                   @if (q.completed) {
-                    <div class="qr-score">{{ q.score }}/{{ q.totalMarks }} ({{ q.percentage }}%)</div>
+                    <div class="qr-score" [class.violation]="q.violation">{{ q.score }}/{{ q.totalMarks }} ({{ q.percentage }}%)</div>
+                    @if (q.violation) {
+                      <div style="color: #ef4444; font-size: 11px; margin-top: 6px; display: flex; align-items: center; gap: 4px; font-weight: 500;">
+                        <span class="material-symbols-rounded" style="font-size: 14px;">warning</span> Auto-submitted (Violation)
+                      </div>
+                    }
                   } @else {
                     <div class="qr-pending">Not Taken</div>
                   }

@@ -33,7 +33,8 @@ const interviewSchema = new mongoose.Schema({
     score: { type: Number, default: null },
     totalMarks: { type: Number, default: null },
     percentage: { type: Number, default: null },
-    completed: { type: Boolean, default: false }
+    completed: { type: Boolean, default: false },
+    violation: { type: Boolean, default: false }
   }],
   
   // Coding round

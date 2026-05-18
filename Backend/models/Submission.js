@@ -40,6 +40,10 @@ const submissionSchema = new mongoose.Schema({
     type: Number, // in seconds
     default: 0
   },
+  violation: {
+    type: Boolean,
+    default: false
+  },
   submittedAt: {
     type: Date,
     default: Date.now
