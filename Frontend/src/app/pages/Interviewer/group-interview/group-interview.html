@@ -201,6 +201,42 @@
               <span class="detail-label">Interview Date</span>
               <span class="detail-value">{{ selectedGroup().dateOfInterview | date:'mediumDate' }}</span>
             </div>
+            <div class="detail-item">
+              <span class="detail-label">Interviewer(s)</span>
+              <span class="detail-value">
+                @if (selectedGroup().assignedInterviewers?.length) {
+                  @for (i of selectedGroup().assignedInterviewers; track i._id; let last = $last) {
+                    {{ i.name }}{{ !last ? ', ' : '' }}
+                  }
+                } @else {
+                  —
+                }
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">HR(s)</span>
+              <span class="detail-value">
+                @if (selectedGroup().assignedHRs?.length) {
+                  @for (h of selectedGroup().assignedHRs; track h._id; let last = $last) {
+                    {{ h.name }}{{ !last ? ', ' : '' }}
+                  }
+                } @else {
+                  —
+                }
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Project Manager(s)</span>
+              <span class="detail-value">
+                @if (selectedGroup().assignedPMs?.length) {
+                  @for (p of selectedGroup().assignedPMs; track p._id; let last = $last) {
+                    {{ p.name }}{{ !last ? ', ' : '' }}
+                  }
+                } @else {
+                  —
+                }
+              </span>
+            </div>
           </div>
         </div>
 

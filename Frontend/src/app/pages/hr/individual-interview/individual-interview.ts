@@ -90,7 +90,7 @@ export class HRIndividualInterviewComponent implements OnInit {
         this.hrs.set(staff.filter((s: any) => s.role === 'hr'));
       }
     });
-    this.quizService.getAdminQuizzes().subscribe({
+    this.quizService.getHRQuizzes().subscribe({
       next: (res) => this.quizzes.set(res.quizzes || [])
     });
     this.newInterview = {
