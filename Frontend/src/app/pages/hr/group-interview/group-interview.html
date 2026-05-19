@@ -258,8 +258,11 @@
               <input class="form-input" [(ngModel)]="newGroupInterview.source" placeholder="e.g., LinkedIn, Campus">
             </div>
             <div class="form-group">
-              <label class="form-label">Date of Interview</label>
-              <input class="form-input" type="date" [(ngModel)]="newGroupInterview.dateOfInterview">
+              <label class="form-label">Date & Time</label>
+              <div style="display: flex; gap: 8px;">
+                <input class="form-input" type="date" [(ngModel)]="newGroupInterview.dateOfInterview" style="flex: 1;">
+                <input class="form-input" type="time" [(ngModel)]="newGroupInterview.timeOfInterview" style="flex: 1;">
+              </div>
             </div>
           </div>
           <div class="form-row">

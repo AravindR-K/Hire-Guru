@@ -19,7 +19,7 @@ router.use(protect);
 // ============================================================
 router.post('/', authorize('admin', 'hr', 'pm'), async (req, res) => {
   try {
-    const { candidateId, interviewerId, assignedInterviewers, assignedHRs, assignedPMs, position, techStack, source, dateOfInterview, quizIds } = req.body;
+    const { candidateId, interviewerId, assignedInterviewers, assignedHRs, assignedPMs, position, techStack, source, dateOfInterview, timeOfInterview, quizIds } = req.body;
 
     // Use interviewerId as fallback, or assignedInterviewers[0] as interviewerId for backward compatibility
     const mainInterviewerId = interviewerId || (assignedInterviewers && assignedInterviewers.length > 0 ? assignedInterviewers[0] : null);
@@ -56,6 +56,7 @@ router.post('/', authorize('admin', 'hr', 'pm'), async (req, res) => {
       techStack: techStack || '',
       source: source || '',
       dateOfInterview: dateOfInterview || new Date(),
+      timeOfInterview: timeOfInterview || '',
       quizzes,
       status: quizzes.length > 0 ? 'quiz_phase' : 'pending',
       type: 'individual',
@@ -222,7 +223,7 @@ router.post('/group', authorize('admin', 'hr', 'pm'), async (req, res) => {
   try {
     const {
       groupName, assignedInterviewers, assignedHRs, assignedPMs,
-      position, techStack, source, dateOfInterview, quizSets
+      position, techStack, source, dateOfInterview, timeOfInterview, quizSets
     } = req.body;
 
     if (!groupName || !position) {
@@ -286,6 +287,7 @@ router.post('/group', authorize('admin', 'hr', 'pm'), async (req, res) => {
         techStack: techStack || '',
         source: source || '',
         dateOfInterview: dateOfInterview || new Date(),
+        timeOfInterview: timeOfInterview || '',
         quizzes,
         status: quizzes.length > 0 ? 'quiz_phase' : 'pending',
         type: 'group',

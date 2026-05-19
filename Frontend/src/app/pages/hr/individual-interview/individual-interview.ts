@@ -34,6 +34,7 @@ export class HRIndividualInterviewComponent implements OnInit {
     techStack: '',
     source: '',
     dateOfInterview: new Date().toISOString().split('T')[0],
+    timeOfInterview: '',
     quizIds: [] as string[]
   };
 
@@ -95,7 +96,7 @@ export class HRIndividualInterviewComponent implements OnInit {
     });
     this.newInterview = {
       candidateId: '', assignedInterviewers: [], assignedHRs: [], assignedPMs: [], position: '', techStack: '',
-      source: '', dateOfInterview: new Date().toISOString().split('T')[0], quizIds: []
+      source: '', dateOfInterview: new Date().toISOString().split('T')[0], timeOfInterview: '', quizIds: []
     };
     this.showCreateModal.set(true);
   }

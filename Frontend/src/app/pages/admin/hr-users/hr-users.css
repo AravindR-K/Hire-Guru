@@ -23,8 +23,8 @@
 .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
 
-.groups-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-.group-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; display: flex; align-items: stretch; gap: 16px; transition: all 0.3s; }
+.groups-grid { column-count: 2; column-gap: 16px; }
+.group-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; display: inline-flex; width: 100%; align-items: center; gap: 16px; transition: all 0.3s; break-inside: avoid; margin-bottom: 16px; box-sizing: border-box; }
 .group-card:hover { border-color: var(--accent-primary); transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .group-icon-wrapper { width: 50px; height: 50px; border-radius: 12px; background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(102,126,234,0.2) 100%); color: var(--accent-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .group-icon-wrapper .material-symbols-rounded { font-size: 26px; }
@@ -49,8 +49,10 @@
 .empty-state h3 { color: var(--text-primary); margin: 0 0 8px; font-size: 18px; }
 .empty-state p { color: var(--text-muted); margin: 0; font-size: 14px; }
 
+@media (max-width: 768px) {
+  .groups-grid { column-count: 1; }
+}
 @media (max-width: 600px) {
   .page-container { padding: 20px 16px; }
   .row-align { flex-direction: column; align-items: stretch; }
-  .groups-grid { grid-template-columns: 1fr; }
 }

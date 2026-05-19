@@ -103,7 +103,7 @@
       </button>
     </div>
 
-    <div class="modal-options">
+    <div class="modal-options" [class.scrollable-options]="authService.getUserRole() === 'admin'">
       <a [routerLink]="getUsersRoute()" class="glassy-option" (click)="closeManageUsersPopup()">
         <div class="option-icon-wrapper">
           <span class="material-symbols-rounded block-icon">people</span>
@@ -215,6 +215,32 @@
         </span>
       </a>
 
+    </div>
+  </div>
+</div>
+}
+
+<!-- Logout Confirmation Modal -->
+@if (showLogoutConfirm) {
+<div class="glassy-overlay" (click)="showLogoutConfirm = false">
+  <div class="glassy-modal confirm-modal animate-fade-in" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirm Logout</h2>
+      <button class="close-btn" (click)="showLogoutConfirm = false">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <div class="confirm-modal-body">
+      <div class="confirm-icon-wrapper">
+        <span class="material-symbols-rounded">logout</span>
+      </div>
+      <p class="confirm-text">Are you sure you want to sign out of QuizMaster?</p>
+    </div>
+
+    <div class="confirm-modal-actions">
+      <button class="btn btn-secondary" (click)="showLogoutConfirm = false">Cancel</button>
+      <button class="btn btn-danger" (click)="confirmLogout()">Sign Out</button>
     </div>
   </div>
 </div>

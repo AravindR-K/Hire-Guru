@@ -26,6 +26,7 @@ export class LayoutComponent {
 
   showThemeMenu = false;
   mobileSidebarOpen = false;
+  showLogoutConfirm = false;
 
   themes: { id: ThemeMode; label: string; icon: string }[] = [
     { id: 'light', label: 'Light', icon: 'light_mode' },
@@ -107,6 +108,11 @@ export class LayoutComponent {
   }
 
   logout(): void {
+    this.showLogoutConfirm = true;
+  }
+
+  confirmLogout(): void {
+    this.showLogoutConfirm = false;
     this.authService.logout();
   }
 

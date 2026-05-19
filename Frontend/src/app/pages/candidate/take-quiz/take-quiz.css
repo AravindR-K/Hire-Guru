@@ -88,7 +88,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex: 0 1 350px;
+  width: 260px;
+  flex-shrink: 0;
   min-width: 0;
   overflow: hidden;
 }
@@ -102,7 +103,14 @@
   cursor: pointer; transition: all 0.2s;
   padding: 0;
 }
-.dots-scroll-btn:hover { background: var(--bg-hover); border-color: var(--border-strong); color: var(--text-primary); }
+.dots-scroll-btn:hover:not(:disabled) { background: var(--bg-hover); border-color: var(--border-strong); color: var(--text-primary); }
+.dots-scroll-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
 .dots-scroll-btn .material-symbols-rounded { font-size: 20px; }
 .question-dots {
   display: flex; gap: 6px;

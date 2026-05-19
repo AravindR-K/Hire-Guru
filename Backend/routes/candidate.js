@@ -23,8 +23,29 @@ router.get('/interviews', async (req, res) => {
       .populate('createdBy', 'name')
       .populate('quizzes.quizId', 'title timer totalQuestions category difficulty')
       .sort({ createdAt: -1 });
-    
-    res.json({ interviews });
+    const now = new Date();
+
+    // Filter out interviews scheduled in the future
+    const activeInterviews = interviews.filter(inv => {
+      if (!inv.dateOfInterview) return true; // If no date, show it
+
+      const invDate = new Date(inv.dateOfInterview);
+
+      // If time is provided, parse and set it on the date object
+      if (inv.timeOfInterview) {
+        const [hours, minutes] = inv.timeOfInterview.split(':').map(Number);
+        if (!isNaN(hours) && !isNaN(minutes)) {
+          invDate.setHours(hours, minutes, 0, 0);
+        }
+      } else {
+        // If no time is provided, we can assume it's available at the start of the day
+        invDate.setHours(0, 0, 0, 0);
+      }
+
+      return now >= invDate;
+    });
+
+    res.json({ interviews: activeInterviews });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -104,12 +125,12 @@ router.get('/quiz/:quizId', async (req, res) => {
 
     // Check assignment - is this candidate allowed to take this quiz?
     const user = await User.findById(req.user._id);
-    
+
     // Check if part of interview
     const Interview = require('../models/Interview');
-    const interview = await Interview.findOne({ 
-      candidateId: req.user._id, 
-      'quizzes.quizId': quizId 
+    const interview = await Interview.findOne({
+      candidateId: req.user._id,
+      'quizzes.quizId': quizId
     });
 
     const isAssigned = quiz.assignToAll ||
@@ -198,18 +219,27 @@ router.post('/quiz/:quizId/submit', async (req, res) => {
 
     // Update Interview if applicable
     const Interview = require('../models/Interview');
-    await Interview.findOneAndUpdate(
+    const updatedInterview = await Interview.findOneAndUpdate(
       { candidateId: req.user._id, 'quizzes.quizId': quizId },
-      { 
-        $set: { 
+      {
+        $set: {
           'quizzes.$.score': score,
           'quizzes.$.totalMarks': totalMarks,
           'quizzes.$.percentage': percentage,
           'quizzes.$.completed': true,
           'quizzes.$.violation': !!violation
         }
-      }
+      },
+      { new: true }
     );
+
+    if (updatedInterview) {
+      const allCompleted = updatedInterview.quizzes.every(q => q.completed);
+      if (allCompleted && (updatedInterview.status === 'quiz_phase' || updatedInterview.status === 'pending')) {
+        updatedInterview.status = 'coding_phase';
+        await updatedInterview.save();
+      }
+    }
 
     res.status(201).json({
       message: 'Quiz submitted successfully',
@@ -327,7 +357,7 @@ router.post('/interview/:interviewId/coding', upload.single('codingZip'), async 
     if (interview.status === 'quiz_phase' || interview.status === 'pending') {
       interview.status = 'evaluation';
     } else {
-        interview.status = 'evaluation'; // Since they submitted, it needs eval
+      interview.status = 'evaluation'; // Since they submitted, it needs eval
     }
 
     await interview.save();
@@ -345,7 +375,7 @@ router.get('/profile', async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
     if (!user) return res.status(404).json({ message: 'User not found' });
-    
+
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
@@ -358,14 +388,14 @@ router.get('/profile', async (req, res) => {
 router.put('/profile', upload.single('resume'), async (req, res) => {
   try {
     const { name, email, phoneNumber, topicsOfInterest } = req.body;
-    
+
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    
+
     if (name) user.name = name;
     if (email) user.email = email;
     if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
-    
+
     if (topicsOfInterest) {
       try {
         // If sent as FormData, it will be a JSON string
@@ -377,7 +407,7 @@ router.put('/profile', upload.single('resume'), async (req, res) => {
         return res.status(400).json({ message: 'Invalid format for topics of interest' });
       }
     }
-    
+
     // Handle resume upload
     if (req.file) {
       // If there's an old resume, delete it from the file system
@@ -389,9 +419,9 @@ router.put('/profile', upload.single('resume'), async (req, res) => {
       }
       user.resume = `/uploads/${req.file.filename}`;
     }
-    
+
     await user.save();
-    
+
     res.json({
       message: 'Profile updated successfully',
       user: {
@@ -416,7 +446,7 @@ router.delete('/profile/resume', async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: 'User not found' });
-    
+
     if (user.resume) {
       const resumePath = path.join(__dirname, '..', 'uploads', path.basename(user.resume));
       if (fs.existsSync(resumePath)) {
@@ -425,16 +455,18 @@ router.delete('/profile/resume', async (req, res) => {
       user.resume = '';
       await user.save();
     }
-    
-    res.json({ message: 'Resume deleted successfully', user: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      resume: user.resume,
-      level: user.level,
-      topicsOfInterest: user.topicsOfInterest
-    } });
+
+    res.json({
+      message: 'Resume deleted successfully', user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        resume: user.resume,
+        level: user.level,
+        topicsOfInterest: user.topicsOfInterest
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

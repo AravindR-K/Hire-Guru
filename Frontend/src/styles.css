@@ -381,6 +381,7 @@ ul, ol {
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(var(--accent-primary-rgb), 0.35);
+  color: #fff;
 }
 
 .btn-outline {
@@ -403,6 +404,7 @@ ul, ol {
 .btn-danger:hover:not(:disabled) {
   background: #dc2626;
   transform: translateY(-1px);
+  color: #fff;
 }
 
 .btn-ghost {

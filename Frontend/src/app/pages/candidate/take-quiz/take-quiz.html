@@ -95,15 +95,15 @@
       </button>
 
       <div class="dots-wrapper">
-        <button class="dots-scroll-btn" (click)="scrollDots(-1)" aria-label="Scroll left">
+        <button class="dots-scroll-btn" (click)="scrollDots(-1)" [disabled]="!canScrollLeft()" aria-label="Scroll left">
           <span class="material-symbols-rounded">chevron_left</span>
         </button>
-        <div class="question-dots" #dotsContainer>
+        <div class="question-dots" #dotsContainer (scroll)="updateScrollButtons()">
           @for (q of questions(); track q._id; let i = $index) {
             <button class="dot" [class.active]="i === currentIndex()" [class.answered]="isAnswered(i)" (click)="goTo(i)">{{ i + 1 }}</button>
           }
         </div>
-        <button class="dots-scroll-btn" (click)="scrollDots(1)" aria-label="Scroll right">
+        <button class="dots-scroll-btn" (click)="scrollDots(1)" [disabled]="!canScrollRight()" aria-label="Scroll right">
           <span class="material-symbols-rounded">chevron_right</span>
         </button>
       </div>

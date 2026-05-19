@@ -74,7 +74,7 @@
               <p style="margin: 4px 0 0; font-size: 13px; color: var(--text-muted);">{{ user.email }}</p>
             }
           </div>
-          <div class="group-actions" style="display: flex; gap: 8px;">
+          <div class="group-actions" style="display: flex; gap: 8px; align-items: center;">
             @if (editingId() === user._id) {
               <button class="action-btn text-success" (click)="saveEdit(user._id)" title="Save"><span class="material-symbols-rounded">check</span></button>
               <button class="action-btn text-danger" (click)="cancelEdit()" title="Cancel"><span class="material-symbols-rounded">close</span></button>

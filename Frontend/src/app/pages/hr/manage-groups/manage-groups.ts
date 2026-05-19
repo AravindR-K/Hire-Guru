@@ -70,6 +70,9 @@ export class HRManageGroupsComponent {
     if (event) {
       event.stopPropagation();
     }
+    if (this.editingGroup()) {
+      return; // Do nothing if we are editing a group name
+    }
     if (this.expandedGroup() === groupName) {
       this.expandedGroup.set(null);
     } else {

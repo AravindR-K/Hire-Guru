@@ -1,14 +1,15 @@
-  const express = require('express');
-  const xlsx = require('xlsx');
-  const fs = require('fs');
-  const User = require('../models/User');
-  const Group = require('../models/Group');
-  const Quiz = require('../models/Quiz');
-  const Question = require('../models/Question');
-  const Submission = require('../models/Submission');
-  const { protect, authorize } = require('../middleware/auth');
-  const upload = require('../middleware/upload');
-  const router = express.Router();
+const express = require('express');
+const xlsx = require('xlsx');
+const fs = require('fs');
+const User = require('../models/User');
+const Group = require('../models/Group');
+const Quiz = require('../models/Quiz');
+const Question = require('../models/Question');
+const Submission = require('../models/Submission');
+const Interview = require('../models/Interview');
+const { protect, authorize } = require('../middleware/auth');
+const upload = require('../middleware/upload');
+const router = express.Router();
 
   // All admin routes require authentication + admin role
   router.use(protect, authorize('admin'));
@@ -852,6 +853,7 @@ IMPORTANT: The "correct" value must be the EXACT TEXT of the option, not the opt
       await Group.findOneAndUpdate({ name: oldName }, { name: newName.trim() });
       await User.updateMany({ group: oldName }, { group: newName.trim() });
       await Quiz.updateMany({ assignedGroups: oldName }, { $set: { "assignedGroups.$": newName.trim() } });
+      await Interview.updateMany({ groupId: oldName }, { groupId: newName.trim() });
 
       res.json({ message: 'Group updated successfully' });
     } catch (error) {
@@ -869,6 +871,7 @@ IMPORTANT: The "correct" value must be the EXACT TEXT of the option, not the opt
       await Group.deleteOne({ name });
       await User.updateMany({ group: name }, { group: 'General' });
       await Quiz.updateMany({ assignedGroups: name }, { $pull: { assignedGroups: name } });
+      await Interview.updateMany({ groupId: name }, { groupId: 'General' });
 
       res.json({ message: 'Group deleted successfully' });
     } catch (error) {

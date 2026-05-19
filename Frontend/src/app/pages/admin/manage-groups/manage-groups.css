@@ -39,7 +39,7 @@
 .group-lane:hover { border-color: rgba(102,126,234,0.4); transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
 .group-lane.cdk-drop-list-receiving { border-color: var(--accent-primary); background: rgba(102,126,234,0.05); box-shadow: 0 0 0 2px rgba(102,126,234,0.2); transform: scale(1.02); z-index: 10; }
 
-.group-lane-header { padding: 18px 20px; background: rgba(102,126,234,0.05); border-bottom: 1px solid transparent; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; pointer-events: none; }
+.group-lane-header { padding: 18px 20px; background: rgba(102,126,234,0.05); border-bottom: 1px solid transparent; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; pointer-events: auto; }
 .group-lane.expanded .group-lane-header { background: rgba(102,126,234,0.1); border-bottom: 1px solid var(--border-color); }
 .group-actions { pointer-events: auto; }
 .group-lane-body { cursor: default; overflow: hidden; }

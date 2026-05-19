@@ -438,6 +438,27 @@
   margin: -8px -12px -12px -8px; /* Compensate padding to maintain perfect visual alignment */
 }
 
+.scrollable-options {
+  max-height: 242px;
+}
+
+.modal-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-options::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-options::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.modal-options::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 .glassy-option {
   display: flex;
   align-items: center;
@@ -517,4 +538,84 @@
 @keyframes modalScaleUp {
   0% { opacity: 0; transform: scale(0.95) translateY(10px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Confirm Modal Specifics */
+.confirm-modal {
+  max-width: 400px;
+  text-align: center;
+  align-items: center;
+}
+
+.confirm-modal .modal-header {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.confirm-modal-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.confirm-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--danger-light);
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.confirm-icon-wrapper .material-symbols-rounded {
+  font-size: 32px;
+}
+
+.confirm-text {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.confirm-modal-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.confirm-modal-actions .btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.confirm-modal-actions .btn-secondary {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.confirm-modal-actions .btn-secondary:hover {
+  background: var(--bg-tertiary);
+}
+
+.confirm-modal-actions .btn-danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.confirm-modal-actions .btn-danger:hover {
+  background: var(--danger-border);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }

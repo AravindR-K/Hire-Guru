@@ -145,7 +145,8 @@ export class GroupInterviewComponent implements OnInit {
       position: '',
       techStack: '',
       source: '',
-      dateOfInterview: new Date().toISOString().split('T')[0]
+      dateOfInterview: new Date().toISOString().split('T')[0],
+      timeOfInterview: ''
     };
   }
 

@@ -25,6 +25,7 @@ const interviewSchema = new mongoose.Schema({
   techStack: { type: String, default: '', trim: true },
   source: { type: String, default: '', trim: true },
   dateOfInterview: { type: Date, default: Date.now },
+  timeOfInterview: { type: String, default: '' },
   
   // Quiz assignments (aptitude + technical)
   quizzes: [{

@@ -39,6 +39,9 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
   violationCount = signal(0);
   isFullscreen = signal(false);
 
+  canScrollLeft = signal(false);
+  canScrollRight = signal(false);
+
   private antiCheatSubs: Subscription[] = [];
 
   // ─────────────────────────────────────────────────────
@@ -144,6 +147,8 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
         this.startTimer();
         // Start anti-cheat after quiz loads
         this.startAntiCheat();
+        // Scroll active dot into view and initialize scroll buttons
+        this.scrollActiveDotIntoView();
       },
       error: (err) => {
         this.error.set(err.error?.message || 'Failed to load quiz');
@@ -201,7 +206,10 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
   // ─────────────────────────────────────────────────────
 
   goTo(index: number): void {
-    if (index >= 0 && index < this.questions().length) this.currentIndex.set(index);
+    if (index >= 0 && index < this.questions().length) {
+      this.currentIndex.set(index);
+      this.scrollActiveDotIntoView();
+    }
   }
 
   prev(): void { this.goTo(this.currentIndex() - 1); }
@@ -209,7 +217,44 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
 
   scrollDots(direction: number): void {
     const el = this.dotsContainer?.nativeElement;
-    if (el) el.scrollBy({ left: direction * 120, behavior: 'smooth' });
+    if (el) {
+      el.scrollBy({ left: direction * 120, behavior: 'smooth' });
+      setTimeout(() => this.updateScrollButtons(), 300);
+    }
+  }
+
+  updateScrollButtons(): void {
+    const el = this.dotsContainer?.nativeElement;
+    if (el) {
+      // Allow a small tolerance for rounding errors in scroll position
+      this.canScrollLeft.set(el.scrollLeft > 1);
+      this.canScrollRight.set(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    }
+  }
+
+  scrollActiveDotIntoView(): void {
+    setTimeout(() => {
+      const container = this.dotsContainer?.nativeElement;
+      if (!container) return;
+
+      const activeDot = container.querySelector('.dot.active') as HTMLElement;
+      if (!activeDot) return;
+
+      const containerWidth = container.clientWidth;
+      const dotLeft = activeDot.offsetLeft;
+      const dotWidth = activeDot.clientWidth;
+
+      // Center the active dot
+      const targetScrollLeft = dotLeft - (containerWidth / 2) + (dotWidth / 2);
+
+      container.scrollTo({
+        left: targetScrollLeft,
+        behavior: 'smooth'
+      });
+
+      // Update buttons after smooth scroll animation is likely finished
+      setTimeout(() => this.updateScrollButtons(), 300);
+    }, 50);
   }
 
   // ─────────────────────────────────────────────────────
