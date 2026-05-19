@@ -515,7 +515,7 @@
         <div class="print-signature" style="display: flex; align-items: flex-end;">
           <strong>Evaluator's Signature:</strong>
           @if (getEvaluationByRole(roleObj.id)?.evaluatorId?.signature) {
-            <img [src]="'http://localhost:5000' + getEvaluationByRole(roleObj.id).evaluatorId.signature" style="max-height: 40px; margin-left: 10px;">
+            <img [src]="getEvaluationByRole(roleObj.id).evaluatorId.signature" style="max-height: 40px; margin-left: 10px;">
           } @else {
             <span style="border-bottom: 1px solid #000; display: inline-block; width: 150px; margin-left: 10px;"></span>
           }

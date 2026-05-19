@@ -85,23 +85,29 @@ export class StaffProfileComponent implements OnInit {
     const file = event.target.files[0];
     if (!file) return;
 
-    this.isUploadingSignature.set(true);
-    const formData = new FormData();
-    formData.append('signature', file);
-
-    this.authService.uploadSignature(formData).subscribe({
-      next: (res) => {
-        this.isUploadingSignature.set(false);
-        if (res.signature) {
-          // Update user signal
-          this.user.update(u => ({ ...u, signature: res.signature }));
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      this.isUploadingSignature.set(true);
+      
+      this.authService.uploadSignature({ signature: base64String }).subscribe({
+        next: (res) => {
+          this.isUploadingSignature.set(false);
+          if (res.signature) {
+            // Update user signal
+            this.user.update(u => ({ ...u, signature: res.signature }));
+          }
+        },
+        error: (err) => {
+          this.isUploadingSignature.set(false);
+          alert(err.error?.message || 'Error uploading signature');
         }
-      },
-      error: (err) => {
-        this.isUploadingSignature.set(false);
-        alert(err.error?.message || 'Error uploading signature');
-      }
-    });
+      });
+    };
+    reader.onerror = () => {
+      alert('Failed to read file');
+    };
+    reader.readAsDataURL(file);
   }
 
   deleteSignature(): void {
@@ -116,6 +122,7 @@ export class StaffProfileComponent implements OnInit {
   getSignatureUrl(): string {
     const signature = this.user()?.signature;
     if (!signature) return '';
-    return `http://localhost:5000${signature}`;
+    // Since signature is a base64 data URI, we just return it directly
+    return signature;
   }
 }

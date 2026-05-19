@@ -56,8 +56,8 @@ export class AuthService {
     return this.http.get(`${this.apiUrl}/me`);
   }
 
-  uploadSignature(formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/signature`, formData);
+  uploadSignature(payload: { signature: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/signature`, payload);
   }
 
   updateProfile(formData: FormData): Observable<any> {

@@ -125,24 +125,19 @@ router.get('/me', protect, async (req, res) => {
 // @route   POST /api/auth/signature
 // @desc    Upload digital signature image
 // @access  Private
-router.post('/signature', protect, upload.single('signature'), async (req, res) => {
+router.post('/signature', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (!req.file) {
-      return res.status(400).json({ message: 'Please upload an image file' });
+    const { signature } = req.body;
+    if (!signature) {
+      return res.status(400).json({ message: 'Please provide a base64 signature' });
     }
 
-    if (user.signature) {
-      const oldPath = path.join(__dirname, '..', 'uploads', path.basename(user.signature));
-      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    }
+    await User.updateOne({ _id: user._id }, { signature });
 
-    const newSignaturePath = `/uploads/${req.file.filename}`;
-    await User.updateOne({ _id: user._id }, { signature: newSignaturePath });
-
-    res.json({ message: 'Signature uploaded successfully', signature: newSignaturePath });
+    res.json({ message: 'Signature saved successfully', signature });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

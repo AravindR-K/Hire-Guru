@@ -218,7 +218,7 @@ export class UserHistoryComponent implements OnInit {
 
     const getSigHtml = (evalObj: any, fallbackName: string) => {
       if (evalObj && evalObj.evaluatorId && evalObj.evaluatorId.signature) {
-        return `<img src="http://localhost:5000${evalObj.evaluatorId.signature}" alt="Signature"/>`;
+        return `<img src="${evalObj.evaluatorId.signature}" alt="Signature"/>`;
       }
       return fallbackName || '';
     };

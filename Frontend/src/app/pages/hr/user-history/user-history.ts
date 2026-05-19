@@ -218,7 +218,7 @@ export class HRUserHistoryComponent implements OnInit {
 
     const getSigHtml = (evalObj: any, fallbackName: string) => {
       if (evalObj && evalObj.evaluatorId && evalObj.evaluatorId.signature) {
-        return `<img src="http://localhost:5000${evalObj.evaluatorId.signature}" style="max-height:35px; width:auto; object-fit:contain; vertical-align:bottom; display:block; margin:auto;" alt="${fallbackName}'s Signature"/>`;
+        return `<img src="${evalObj.evaluatorId.signature}" style="max-height:35px; width:auto; object-fit:contain; vertical-align:bottom; display:block; margin:auto;" alt="${fallbackName}'s Signature"/>`;
       }
       return fallbackName || '';
     };
