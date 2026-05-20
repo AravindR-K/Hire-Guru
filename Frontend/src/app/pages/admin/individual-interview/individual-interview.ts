@@ -250,8 +250,6 @@ export class IndividualInterviewComponent implements OnInit {
     return interview.evaluations?.some((e: any) => e.evaluatorId?._id === userId);
   }
 
-  isPdfGenerating = signal(false);
-
   getEvaluationByRole(role: string): any {
     const iv = this.selectedInterview();
     if (!iv || !iv.evaluations) return null;
@@ -268,17 +266,5 @@ export class IndividualInterviewComponent implements OnInit {
     if (totalExpected === 0) return false;
     const numEvaluations = iv.evaluations?.length || 0;
     return numEvaluations >= totalExpected;
-  }
-
-  downloadEvaluationPdf(): void {
-    const iv = this.selectedInterview();
-    if (!iv) return;
-
-    this.isPdfGenerating.set(true);
-
-    setTimeout(() => {
-      window.print();
-      this.isPdfGenerating.set(false);
-    }, 500);
   }
 }

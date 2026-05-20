@@ -349,20 +349,6 @@ export class HRGroupInterviewComponent implements OnInit {
     return (m.evaluations?.length || 0) < total;
   }
 
-  isPdfGenerating = signal(false);
-
-  downloadEvaluationPdf(): void {
-    const m = this.selectedMember();
-    if (!m) return;
-
-    this.isPdfGenerating.set(true);
-
-    setTimeout(() => {
-      window.print();
-      this.isPdfGenerating.set(false);
-    }, 500);
-  }
-
   // ── Helpers ───────────────────────────────────────────────
   getStatusClass(status: string): string {
     const map: any = {

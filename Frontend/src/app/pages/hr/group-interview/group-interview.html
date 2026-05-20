@@ -191,7 +191,7 @@
               <div class="checklist-box">
                 @for (i of interviewers(); track i._id) {
                   <label class="check-item">
-                    <input type="checkbox" [value]="i._id"
+                    <input type="radio" [value]="i._id"
                       (change)="toggleSelection($event, newGroupInterview.assignedInterviewers)">
                     <span>{{ i.name }}</span>
                   </label>
@@ -204,7 +204,7 @@
               <div class="checklist-box">
                 @for (h of hrs(); track h._id) {
                   <label class="check-item">
-                    <input type="checkbox" [value]="h._id"
+                    <input type="radio" [value]="h._id"
                       (change)="toggleSelection($event, newGroupInterview.assignedHRs)">
                     <span>{{ h.name }}</span>
                   </label>
@@ -217,7 +217,7 @@
               <div class="checklist-box">
                 @for (p of pms(); track p._id) {
                   <label class="check-item">
-                    <input type="checkbox" [value]="p._id"
+                    <input type="radio" [value]="p._id"
                       (change)="toggleSelection($event, newGroupInterview.assignedPMs)">
                     <span>{{ p.name }}</span>
                   </label>
@@ -643,9 +643,6 @@
             <div style="display: flex; gap: 8px; align-items: center;">
               @if (allMemberEvaluationsDone()) {
                 <span class="badge badge-success">All evaluations done</span>
-                <button class="btn btn-primary btn-sm" (click)="downloadEvaluationPdf()">
-                  @if (isPdfGenerating()) { <span class="spinner spinner-sm"></span> Generating... } @else { <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">download</span> Download PDF }
-                </button>
               } @else {
                 <span class="badge badge-warning">Evaluations pending</span>
               }

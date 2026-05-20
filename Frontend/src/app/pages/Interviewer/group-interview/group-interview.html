@@ -395,9 +395,6 @@
             <div style="display: flex; gap: 8px; align-items: center;">
               @if (allMemberEvaluationsDone()) {
                 <span class="badge badge-success">All evaluations done</span>
-                <button class="btn btn-primary btn-sm" (click)="downloadEvaluationPdf()">
-                  @if (isPdfGenerating()) { <span class="spinner spinner-sm"></span> Generating... } @else { <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px;">download</span> Download PDF }
-                </button>
               } @else {
                 <span class="badge badge-warning">Evaluations pending</span>
               }

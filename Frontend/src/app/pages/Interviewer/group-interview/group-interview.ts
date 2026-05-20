@@ -53,7 +53,6 @@ export class InterviewerGroupInterviewComponent implements OnInit {
   memberEvalComment        = '';
   memberEvalRecommendation = '';
   isMemberSubmitting       = signal(false);
-  isPdfGenerating          = signal(false);
 
   constructor(private quizService: QuizService, public authService: AuthService) {}
 
@@ -158,16 +157,6 @@ export class InterviewerGroupInterviewComponent implements OnInit {
                   (m.assignedHRs?.length || 0) +
                   (m.assignedPMs?.length || 0);
     return (m.evaluations?.length || 0) < total;
-  }
-
-  downloadEvaluationPdf(): void {
-    const m = this.selectedMember();
-    if (!m) return;
-    this.isPdfGenerating.set(true);
-    setTimeout(() => {
-      window.print();
-      this.isPdfGenerating.set(false);
-    }, 500);
   }
 
   // -- Helpers -----------------------------------------------

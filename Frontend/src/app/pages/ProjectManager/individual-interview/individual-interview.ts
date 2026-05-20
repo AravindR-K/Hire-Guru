@@ -23,7 +23,6 @@ export class PMIndividualInterviewComponent implements OnInit {
   stats = signal<any>({ total: 0, pending: 0, completed: 0, accepted: 0, rejected: 0 });
   filterStatus = signal('');
   isSubmitting = signal(false);
-  isPdfGenerating = signal(false);
 
   constructor(private quizService: QuizService, public authService: AuthService) {}
 
@@ -148,16 +147,6 @@ export class PMIndividualInterviewComponent implements OnInit {
     if (totalExpected === 0) return false;
     const numEvaluations = iv.evaluations?.length || 0;
     return numEvaluations >= totalExpected;
-  }
-
-  downloadEvaluationPdf(): void {
-    const iv = this.selectedInterview();
-    if (!iv) return;
-    this.isPdfGenerating.set(true);
-    setTimeout(() => {
-      window.print();
-      this.isPdfGenerating.set(false);
-    }, 500);
   }
 
   getVisibleEvaluations(evaluations: any[]): any[] {

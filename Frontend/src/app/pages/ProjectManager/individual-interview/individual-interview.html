@@ -249,11 +249,6 @@
         <div class="detail-section">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h3 class="detail-section-title" style="margin: 0;">Evaluations</h3>
-            @if (allEvaluationsDone()) {
-              <button class="btn btn-primary" (click)="downloadEvaluationPdf()">
-                @if (isPdfGenerating()) { <span class="spinner spinner-sm"></span> Generating... } @else { <span class="material-symbols-rounded">download</span> Download PDF }
-              </button>
-            }
           </div>
           @if (getVisibleEvaluations(selectedInterview().evaluations).length > 0) {
             <div class="eval-list">

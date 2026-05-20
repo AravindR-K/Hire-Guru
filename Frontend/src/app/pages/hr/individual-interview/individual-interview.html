@@ -139,7 +139,7 @@
             <div class="quiz-select-grid" style="max-height: 120px; overflow-y: auto;">
               @for (i of interviewers(); track i._id) {
                 <label class="quiz-select-item" style="cursor: pointer;">
-                  <input type="checkbox" [value]="i._id" (change)="toggleSelection($event, newInterview.assignedInterviewers)" style="margin-right: 8px;"> {{ i.name }}
+                  <input type="radio" [value]="i._id" (change)="toggleSelection($event, newInterview.assignedInterviewers)" style="margin-right: 8px;"> {{ i.name }}
                 </label>
               }
               @if (interviewers().length === 0) { <p class="text-muted" style="font-size: 12px;">No interviewers found</p> }
@@ -150,7 +150,7 @@
             <div class="quiz-select-grid" style="max-height: 120px; overflow-y: auto;">
               @for (p of pms(); track p._id) {
                 <label class="quiz-select-item" style="cursor: pointer;">
-                  <input type="checkbox" [value]="p._id" (change)="toggleSelection($event, newInterview.assignedPMs)" style="margin-right: 8px;"> {{ p.name }}
+                  <input type="radio" [value]="p._id" (change)="toggleSelection($event, newInterview.assignedPMs)" style="margin-right: 8px;"> {{ p.name }}
                 </label>
               }
               @if (pms().length === 0) { <p class="text-muted" style="font-size: 12px;">No PMs found</p> }
@@ -161,7 +161,7 @@
             <div class="quiz-select-grid" style="max-height: 120px; overflow-y: auto;">
               @for (h of hrs(); track h._id) {
                 <label class="quiz-select-item" style="cursor: pointer;">
-                  <input type="checkbox" [value]="h._id" (change)="toggleSelection($event, newInterview.assignedHRs)" style="margin-right: 8px;"> {{ h.name }}
+                  <input type="radio" [value]="h._id" (change)="toggleSelection($event, newInterview.assignedHRs)" style="margin-right: 8px;"> {{ h.name }}
                 </label>
               }
               @if (hrs().length === 0) { <p class="text-muted" style="font-size: 12px;">No HRs found</p> }
@@ -357,11 +357,6 @@
         <div class="detail-section">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h3 class="detail-section-title" style="margin: 0;">Evaluations</h3>
-            @if (allEvaluationsDone()) {
-              <button class="btn btn-primary" (click)="downloadEvaluationPdf()">
-                @if (isPdfGenerating()) { <span class="spinner spinner-sm"></span> Generating... } @else { <span class="material-symbols-rounded">download</span> Download PDF }
-              </button>
-            }
           </div>
           @if (selectedInterview().evaluations?.length > 0) {
             <div class="eval-list">
