@@ -294,4 +294,12 @@ export class TakeQuizComponent implements OnInit, OnDestroy {
   getMaxViolations(): number {
     return this.antiCheat.getMaxViolations();
   }
+
+  getAnsweredCount(): number {
+    let count = 0;
+    for (let i = 0; i < this.questions().length; i++) {
+      if (this.isAnswered(i)) count++;
+    }
+    return count;
+  }
 }

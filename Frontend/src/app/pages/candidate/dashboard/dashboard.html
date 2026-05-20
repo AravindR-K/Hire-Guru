@@ -115,9 +115,11 @@
                             </div>
                           </div>
                         } @else if (i === 0 || interview.quizzes[i-1].completed) {
-                          <a [routerLink]="['/candidate/quiz', q.quizId?._id || q.quizId]" class="btn btn-primary" style="padding: 10px 24px; border-radius: 8px; font-weight: 600;">
+                          <button class="btn btn-primary start-assessment-btn"
+                            (click)="openPolicyModal(q.quizId?._id || q.quizId)">
+                            <span class="material-symbols-rounded">play_arrow</span>
                             Start Assessment
-                          </a>
+                          </button>
                         }
                       </div>
                     </div>
@@ -181,3 +183,161 @@
     </div>
   }
 </div>
+
+<!-- ══════════════════════════════════════════════════════
+     Pre-Quiz Violation Policy Modal
+     ══════════════════════════════════════════════════════ -->
+@if (showPolicyModal()) {
+<div class="policy-overlay" (click)="closePolicyModal()">
+  <div class="policy-modal animate-scale-in" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="policy-modal-header">
+      <div class="policy-shield-wrap">
+        <span class="material-symbols-rounded filled policy-shield-icon">security</span>
+      </div>
+      <div class="policy-header-text">
+        <h2>Assessment Integrity Policy</h2>
+        <p>Please read all rules carefully before you begin</p>
+      </div>
+      <button class="policy-close-btn" (click)="closePolicyModal()">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <!-- Warning Banner -->
+    <div class="policy-warning-banner">
+      <span class="material-symbols-rounded filled">warning</span>
+      <span>This assessment is monitored. Any violations may result in automatic disqualification.</span>
+    </div>
+
+    <!-- Violations List -->
+    <div class="policy-body">
+      <h3 class="policy-section-title">
+        <span class="material-symbols-rounded">gavel</span>
+        Prohibited Actions During Assessment
+      </h3>
+
+      <div class="policy-rules-grid">
+
+        <!-- Rule 1 -->
+        <div class="policy-rule-card">
+          <div class="rule-icon-wrap fullscreen">
+            <span class="material-symbols-rounded filled">fullscreen_exit</span>
+          </div>
+          <div class="rule-content">
+            <h4>Exiting Fullscreen Mode</h4>
+            <p>The assessment must be taken in fullscreen. Pressing <kbd>Esc</kbd>, using browser controls, or any action that exits fullscreen will be logged as a violation.</p>
+          </div>
+          <span class="violation-chip">Violation</span>
+        </div>
+
+        <!-- Rule 2 -->
+        <div class="policy-rule-card">
+          <div class="rule-icon-wrap tabs">
+            <span class="material-symbols-rounded filled">tab</span>
+          </div>
+          <div class="rule-content">
+            <h4>Switching Browser Tabs</h4>
+            <p>Navigating to any other browser tab or opening a new tab during the assessment is strictly prohibited and will trigger an immediate violation alert.</p>
+          </div>
+          <span class="violation-chip">Violation</span>
+        </div>
+
+        <!-- Rule 3 -->
+        <div class="policy-rule-card">
+          <div class="rule-icon-wrap window">
+            <span class="material-symbols-rounded filled">desktop_windows</span>
+          </div>
+          <div class="rule-content">
+            <h4>Switching Applications or Windows</h4>
+            <p>Alt+Tab, clicking outside the browser, opening any other application, or minimizing the browser window will be detected and counted as a violation.</p>
+          </div>
+          <span class="violation-chip">Violation</span>
+        </div>
+
+        <!-- Rule 4 -->
+        <div class="policy-rule-card">
+          <div class="rule-icon-wrap search">
+            <span class="material-symbols-rounded filled">manage_search</span>
+          </div>
+          <div class="rule-content">
+            <h4>Using External Resources</h4>
+            <p>Searching the internet, consulting notes, textbooks, or communicating with others during the assessment is a violation of academic integrity.</p>
+          </div>
+          <span class="violation-chip">Violation</span>
+        </div>
+
+        <!-- Rule 5 -->
+        <div class="policy-rule-card">
+          <div class="rule-icon-wrap copy">
+            <span class="material-symbols-rounded filled">content_copy</span>
+          </div>
+          <div class="rule-content">
+            <h4>Copy-Pasting or Screen Recording</h4>
+            <p>Copying question content, recording the screen, or taking screenshots during the assessment is strictly forbidden and may lead to disqualification.</p>
+          </div>
+          <span class="violation-chip">Violation</span>
+        </div>
+
+        <!-- Rule 6 — Auto Submit -->
+        <div class="policy-rule-card danger-card">
+          <div class="rule-icon-wrap auto-submit">
+            <span class="material-symbols-rounded filled">block</span>
+          </div>
+          <div class="rule-content">
+            <h4>Automatic Submission Threshold</h4>
+            <p>After <strong>3 violations</strong>, your assessment will be <strong>automatically submitted</strong> regardless of how many questions you have answered. Your current answers will be saved.</p>
+          </div>
+          <span class="violation-chip danger">Auto-Submit</span>
+        </div>
+
+      </div>
+
+      <!-- Violation Tracker Visual -->
+      <div class="policy-tracker">
+        <div class="tracker-label">Violation Tracker</div>
+        <div class="tracker-steps">
+          <div class="tracker-step">
+            <div class="tracker-dot warn"></div>
+            <span>1st Violation<br><small>Warning shown</small></span>
+          </div>
+          <div class="tracker-connector"></div>
+          <div class="tracker-step">
+            <div class="tracker-dot warn"></div>
+            <span>2nd Violation<br><small>Final warning</small></span>
+          </div>
+          <div class="tracker-connector"></div>
+          <div class="tracker-step">
+            <div class="tracker-dot danger"></div>
+            <span>3rd Violation<br><small>Auto-submitted</small></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms & Conditions -->
+    <div class="policy-footer">
+      <label class="policy-checkbox-label" [class.checked]="policyAccepted()" (click)="policyAccepted.set(!policyAccepted())">
+        <div class="policy-checkbox" [class.checked]="policyAccepted()">
+          @if (policyAccepted()) {
+            <span class="material-symbols-rounded filled">check</span>
+          }
+        </div>
+        <span>I have read and understood all the assessment policies. I agree to follow the integrity guidelines throughout this assessment.</span>
+      </label>
+
+      <div class="policy-actions">
+        <button class="btn btn-secondary" (click)="closePolicyModal()">Cancel</button>
+        <button class="btn btn-primary policy-begin-btn"
+          [disabled]="!policyAccepted()"
+          (click)="beginAssessment()">
+          <span class="material-symbols-rounded">rocket_launch</span>
+          Begin Assessment
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+}

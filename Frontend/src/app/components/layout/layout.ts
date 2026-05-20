@@ -41,6 +41,7 @@ export class LayoutComponent {
         return [
           { icon: 'dashboard', label: 'Dashboard', route: '/admin/dashboard' },
           { icon: 'group', label: 'Users', route: '/admin/users' },
+          { icon: 'work', label: 'Interviews', route: '/admin/interviews' },
           { icon: 'quiz', label: 'Quizzes', route: '/admin/quizzes' },
           { icon: 'add_circle', label: 'Create Quiz', route: '/admin/create-quiz' },
           { icon: 'person', label: 'Profile', route: '/admin/profile' },
@@ -51,7 +52,7 @@ export class LayoutComponent {
           { icon: 'quiz', label: 'My Quizzes', route: '/hr/quizzes' },
           { icon: 'add_circle', label: 'Create Quiz', route: '/hr/create-quiz' },
           { icon: 'people', label: 'Candidates', route: '/hr/users' },
-          { icon: 'work', label: 'Interviews', route: '/hr/individual-interview' },
+          { icon: 'work', label: 'Interviews', route: '/hr/interviews' },
           { icon: 'person', label: 'Profile', route: '/hr/profile' },
         ];
       case 'pm':
@@ -120,6 +121,9 @@ export class LayoutComponent {
     if (item.route === '/admin/users' || item.route === '/hr/users') {
       event.preventDefault();
       this.uiService.showManageUsersPopup.set(true);
+    } else if (item.route === '/admin/interviews' || item.route === '/hr/interviews') {
+      event.preventDefault();
+      this.uiService.showInterviewPopup.set(true);
     } else {
       this.mobileSidebarOpen = false;
     }

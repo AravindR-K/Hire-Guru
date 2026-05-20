@@ -33,51 +33,29 @@
         </div>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-icon">📝</span>
-          <span class="stat-value">{{ submissions().length }}</span>
-          <span class="stat-label">Tests Taken</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-icon">📊</span>
-          <span class="stat-value">{{ avgScore }}%</span>
-          <span class="stat-label">Average Score</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-icon">🏆</span>
-          <span class="stat-value">{{ bestScore }}%</span>
-          <span class="stat-label">Best Score</span>
-        </div>
-      </div>
 
-      <!-- Test Results -->
-      <h2 class="section-title">Test Results</h2>
+      <!-- Test History -->
+      <h2 class="section-title">Test History</h2>
       @if (submissions().length === 0) {
         <div class="empty-state">
           <span class="empty-icon">📋</span>
-          <h3>No tests taken yet</h3>
-          <p>Complete a quiz to see your results here</p>
+          <h3>No test history yet</h3>
+          <p>Complete a quiz to see your test history here</p>
         </div>
       } @else {
         <div class="results-list">
           @for (sub of submissions(); track sub._id) {
             <div class="result-card">
               <div class="result-icon-wrap">
-                <span class="result-icon">{{ sub.percentage >= 70 ? '🏆' : sub.percentage >= 40 ? '📋' : '📝' }}</span>
+                <span class="result-icon">📝</span>
               </div>
               <div class="result-info">
                 <h4>{{ sub.quizId?.title || 'Deleted Quiz' }}</h4>
                 <p>{{ sub.submittedAt | date:'medium' }} · {{ formatTime(sub.timeTaken) }}</p>
               </div>
-              <div class="result-score">
-                <div class="score-circle" [class.good]="sub.percentage >= 70" [class.avg]="sub.percentage >= 40 && sub.percentage < 70" [class.poor]="sub.percentage < 40">
-                  <span>{{ sub.percentage }}%</span>
-                </div>
-                <span class="score-detail">{{ sub.score }}/{{ sub.totalMarks }}</span>
+              <div class="result-status-wrap">
+                <span class="status-badge">Submitted</span>
               </div>
-              <a [routerLink]="['/student/results', sub._id]" class="view-btn">View →</a>
             </div>
           }
         </div>

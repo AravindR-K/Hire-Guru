@@ -1,4 +1,4 @@
-<!-- Take Quiz -->
+<!-- Take Quiz — Full Exam Layout -->
 <div class="quiz-page" #quizContainer>
 
   <!-- ── Loading ─────────────────────────────── -->
@@ -27,15 +27,22 @@
   <!-- ── Active Quiz ────────────────────────── -->
   } @else if (quiz() && currentQuestion()) {
 
-    <!-- Quiz Header -->
-    <div class="quiz-header">
-      <div class="quiz-title-area">
-        <h1>{{ quiz().title }}</h1>
-        <span class="q-counter">Question {{ currentIndex() + 1 }} of {{ questions().length }}</span>
+    <!-- ══ Top Header Bar ══ -->
+    <div class="quiz-topbar">
+      <div class="topbar-left">
+        <div class="quiz-brand">
+          <span class="material-symbols-rounded filled brand-icon">quiz</span>
+          <span class="brand-name">QuizMaster</span>
+        </div>
+        <div class="topbar-divider"></div>
+        <div class="quiz-title-block">
+          <h1 class="quiz-title-text">{{ quiz().title }}</h1>
+          <span class="quiz-subtitle">Online Assessment · {{ questions().length }} Questions</span>
+        </div>
       </div>
 
-      <div class="header-right-cluster">
-        <!-- Violation badge (shows only when there's at least 1 violation) -->
+      <div class="topbar-right">
+        <!-- Violation badge -->
         @if (violationCount() > 0) {
           <div class="violation-badge" [class.critical]="violationCount() >= getMaxViolations() - 1"
                title="Violations detected. {{ getMaxViolations() - violationCount() }} warning(s) remaining.">
@@ -45,7 +52,8 @@
         }
 
         <!-- Fullscreen indicator -->
-        <div class="fullscreen-indicator" [class.active]="isFullscreen()" title="{{ isFullscreen() ? 'Fullscreen active' : 'Not in fullscreen' }}">
+        <div class="fullscreen-indicator" [class.active]="isFullscreen()"
+             title="{{ isFullscreen() ? 'Fullscreen active' : 'Not in fullscreen' }}">
           <span class="material-symbols-rounded">{{ isFullscreen() ? 'fullscreen' : 'fullscreen_exit' }}</span>
         </div>
 
@@ -57,70 +65,181 @@
       </div>
     </div>
 
-    <!-- Progress -->
-    <div class="progress-track"><div class="progress-fill" [style.width.%]="progress()"></div></div>
-
-    @if (error()) {
-      <div class="alert alert-error" style="margin-bottom:16px">
-        <span class="material-symbols-rounded">error</span>{{ error() }}
-      </div>
-    }
-
-    <!-- Question Card -->
-    <div class="question-card card card-padding animate-fade-in">
-      <div class="q-header">
-        <span class="q-badge">Q{{ currentIndex() + 1 }}</span>
-        <span class="q-type badge badge-primary">{{ currentQuestion().type === 'mcq' ? 'Multiple Correct' : 'Single Correct' }}</span>
-      </div>
-      <p class="q-text">{{ currentQuestion().question }}</p>
-      <div class="options-list">
-        @for (option of currentQuestion().options; track option; let i = $index) {
-          <button class="option-btn"
-                  [class.selected]="isSelected(currentQuestion()._id, option)"
-                  (click)="selectOption(currentQuestion()._id, option, currentQuestion().type)">
-            <span class="option-letter">{{ 'ABCD'[i] }}</span>
-            <span class="option-text">{{ option }}</span>
-            @if (isSelected(currentQuestion()._id, option)) {
-              <span class="material-symbols-rounded check-icon">check_circle</span>
-            }
-          </button>
-        }
-      </div>
+    <!-- Progress Bar -->
+    <div class="quiz-progress-bar">
+      <div class="quiz-progress-fill" [style.width.%]="progress()"></div>
     </div>
 
-    <!-- Navigation -->
-    <div class="quiz-nav">
-      <button class="btn btn-outline" (click)="prev()" [disabled]="currentIndex() === 0">
-        <span class="material-symbols-rounded">arrow_back</span> Previous
-      </button>
+    <!-- ══ 3-Column Exam Layout ══ -->
+    <div class="exam-layout">
 
-      <div class="dots-wrapper">
-        <button class="dots-scroll-btn" (click)="scrollDots(-1)" [disabled]="!canScrollLeft()" aria-label="Scroll left">
-          <span class="material-symbols-rounded">chevron_left</span>
-        </button>
-        <div class="question-dots" #dotsContainer (scroll)="updateScrollButtons()">
-          @for (q of questions(); track q._id; let i = $index) {
-            <button class="dot" [class.active]="i === currentIndex()" [class.answered]="isAnswered(i)" (click)="goTo(i)">{{ i + 1 }}</button>
+      <!-- ── Left Panel: Quiz Info ── -->
+      <aside class="exam-left-panel">
+        <div class="left-panel-card">
+          <div class="panel-section-label">Assessment Info</div>
+
+          <div class="info-stat">
+            <div class="info-stat-icon blue">
+              <span class="material-symbols-rounded filled">quiz</span>
+            </div>
+            <div>
+              <div class="info-stat-value">{{ questions().length }}</div>
+              <div class="info-stat-label">Total Questions</div>
+            </div>
+          </div>
+
+          <div class="info-stat">
+            <div class="info-stat-icon green">
+              <span class="material-symbols-rounded filled">check_circle</span>
+            </div>
+            <div>
+              <div class="info-stat-value">{{ getAnsweredCount() }}</div>
+              <div class="info-stat-label">Answered</div>
+            </div>
+          </div>
+
+          <div class="info-stat">
+            <div class="info-stat-icon orange">
+              <span class="material-symbols-rounded filled">pending</span>
+            </div>
+            <div>
+              <div class="info-stat-value">{{ questions().length - getAnsweredCount() }}</div>
+              <div class="info-stat-label">Remaining</div>
+            </div>
+          </div>
+
+          <div class="info-stat">
+            <div class="info-stat-icon purple">
+              <span class="material-symbols-rounded filled">timer</span>
+            </div>
+            <div>
+              <div class="info-stat-value" [class.warn-text]="timeLeft() < 300" [class.danger-text]="timeLeft() < 60">
+                {{ formattedTime() }}
+              </div>
+              <div class="info-stat-label">Time Remaining</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress donut visual -->
+        <div class="left-panel-card progress-card">
+          <div class="panel-section-label">Completion</div>
+          <div class="completion-bar-wrap">
+            <div class="completion-bar-track">
+              <div class="completion-bar-fill" [style.width.%]="(getAnsweredCount() / questions().length) * 100"></div>
+            </div>
+            <span class="completion-pct">{{ getAnsweredCount() }}/{{ questions().length }}</span>
+          </div>
+          <p class="completion-hint">Answer all questions before submitting.</p>
+        </div>
+
+        @if (error()) {
+          <div class="alert alert-error">
+            <span class="material-symbols-rounded">error</span>{{ error() }}
+          </div>
+        }
+      </aside>
+
+      <!-- ── Center: Question Area ── -->
+      <main class="exam-main">
+        <!-- Question Card -->
+        <div class="question-card card card-padding animate-fade-in">
+          <div class="q-header">
+            <span class="q-badge">Q{{ currentIndex() + 1 }}</span>
+            <span class="q-type badge badge-primary">{{ currentQuestion().type === 'mcq' ? 'Multiple Correct' : 'Single Correct' }}</span>
+            <span class="q-counter-inline">{{ currentIndex() + 1 }} of {{ questions().length }}</span>
+          </div>
+          <p class="q-text">{{ currentQuestion().question }}</p>
+          <div class="options-list">
+            @for (option of currentQuestion().options; track option; let i = $index) {
+              <button class="option-btn"
+                      [class.selected]="isSelected(currentQuestion()._id, option)"
+                      (click)="selectOption(currentQuestion()._id, option, currentQuestion().type)">
+                <span class="option-letter">{{ 'ABCD'[i] }}</span>
+                <span class="option-text">{{ option }}</span>
+                @if (isSelected(currentQuestion()._id, option)) {
+                  <span class="material-symbols-rounded check-icon">check_circle</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="quiz-nav">
+          <button class="btn btn-outline" (click)="prev()" [disabled]="currentIndex() === 0">
+            <span class="material-symbols-rounded">arrow_back</span> Previous
+          </button>
+
+          @if (currentIndex() < questions().length - 1) {
+            <button class="btn btn-primary" (click)="next()">
+              Next <span class="material-symbols-rounded">arrow_forward</span>
+            </button>
+          } @else {
+            <button class="btn btn-submit" (click)="submitQuiz()" [disabled]="submitting()">
+              @if (submitting()) { <div class="spinner"></div> } @else {
+                <span class="material-symbols-rounded">send</span> Submit Quiz
+              }
+            </button>
           }
         </div>
-        <button class="dots-scroll-btn" (click)="scrollDots(1)" [disabled]="!canScrollRight()" aria-label="Scroll right">
-          <span class="material-symbols-rounded">chevron_right</span>
-        </button>
-      </div>
+      </main>
 
-      @if (currentIndex() < questions().length - 1) {
-        <button class="btn btn-primary" (click)="next()">Next <span class="material-symbols-rounded">arrow_forward</span></button>
-      } @else {
-        <button class="btn btn-primary" style="background:var(--success)" (click)="submitQuiz()" [disabled]="submitting()">
-          @if (submitting()) { <div class="spinner"></div> } @else { Submit }
-        </button>
-      }
-    </div>
+      <!-- ── Right Panel: Question Navigator ── -->
+      <aside class="exam-right-panel">
+        <div class="right-panel-card">
+          <div class="panel-section-label">Question Navigator</div>
+
+          <!-- Legend -->
+          <div class="nav-legend">
+            <div class="legend-item">
+              <div class="legend-dot answered"></div>
+              <span>Answered ({{ getAnsweredCount() }})</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot active"></div>
+              <span>Current</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot unanswered"></div>
+              <span>Not Answered ({{ questions().length - getAnsweredCount() }})</span>
+            </div>
+          </div>
+
+          <div class="nav-divider"></div>
+
+          <!-- Question Grid -->
+          <div class="panel-section-label" style="margin-top: 4px;">All Questions</div>
+          <div class="question-grid">
+            @for (q of questions(); track q._id; let i = $index) {
+              <button class="grid-dot"
+                [class.active]="i === currentIndex()"
+                [class.answered]="isAnswered(i)"
+                (click)="goTo(i)"
+                [title]="'Question ' + (i + 1)">
+                {{ i + 1 }}
+              </button>
+            }
+          </div>
+
+          <!-- Submit Button -->
+          <div class="right-submit-wrap">
+            <button class="btn btn-submit w-full" (click)="submitQuiz()" [disabled]="submitting()">
+              @if (submitting()) { <div class="spinner"></div> } @else {
+                <span class="material-symbols-rounded">send</span>
+                Submit Quiz
+              }
+            </button>
+          </div>
+        </div>
+      </aside>
+
+    </div><!-- /exam-layout -->
   }
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
-     Anti-Cheat Warning Modal (rendered at page root level)
+     Anti-Cheat Warning Modal
      ══════════════════════════════════════════════════════════ -->
 @if (showWarningModal() && currentWarning()) {
   <div class="ac-overlay" (click)="!currentWarning()!.isAutoSubmit && dismissWarning()">

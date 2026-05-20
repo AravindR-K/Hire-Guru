@@ -38,9 +38,9 @@
       <!-- Navigation -->
       <nav class="sidebar-nav">
         @for (item of navItems(); track item.route) {
-        @if (item.route === '/admin/users' || item.route === '/hr/users') {
+        @if (item.route === '/admin/users' || item.route === '/hr/users' || item.route === '/admin/interviews' || item.route === '/hr/interviews') {
         <a class="nav-item" (click)="handleNavClick(item, $event)" href="javascript:void(0)"
-          [class.active]="router.url.includes('/admin/users') || router.url.includes('/hr/users') || router.url.includes('manage-groups')">
+          [class.active]="(item.route === '/admin/users' || item.route === '/hr/users') ? (router.url.includes('/admin/users') || router.url.includes('/hr/users') || router.url.includes('manage-groups')) : (router.url.includes('individual-interview') || router.url.includes('group-interview'))">
           <span class="material-symbols-rounded nav-icon">{{ item.icon }}</span>
           <span class="nav-label">{{ item.label }}</span>
         </a>
