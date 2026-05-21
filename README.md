@@ -1,4 +1,4 @@
-# 🎓 Hire Guru — Secure Smart Interview & Assessment Portal
+# 🎓 Hire Guru — Secure Interview & Assessment Portal
 
 [![Angular](https://img.shields.io/badge/Angular-18-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)
 [![Node.js](https://img.shields.io/badge/Node.js-24-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
