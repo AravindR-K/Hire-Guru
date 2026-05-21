@@ -65,64 +65,91 @@ Hire Guru implements strict role-based dashboard layouts tailored to each stakeh
 
 ---
 
-## 🛠️ Local Installation & Setup
+## 🛠️ Local Machine Setup & Installation
 
-### 1. Clone the Repository
+Follow these exact steps to configure your local laptop environment after cloning the repository.
+
+### 📋 Prerequisites to Install on Your Laptop
+
+Before running the application, make sure you have the following installed globally on your machine:
+1.  **Node.js (LTS Version 18 or 20+)**
+    *   Download from: [nodejs.org](https://nodejs.org/)
+2.  **MongoDB Community Server (v6.0 or v7.0+)**
+    *   Download from: [mongodb.com](https://www.mongodb.com/try/download/community)
+    *   Ensure your MongoDB service is running locally on default port `27017`.
+3.  **Ollama (Local AI Engine)**
+    *   Download from: [ollama.com](https://ollama.com/)
+    *   After installation, open your terminal/command prompt and pull the default Llama model:
+        ```bash
+        ollama pull llama3.2
+        ```
+    *   Ensure the Ollama application is running in the background (`ollama serve`).
+
+---
+
+### 🚀 Step-by-Step Setup Guide
+
+#### **Step 1: Clone the Repository**
 ```bash
 git clone https://github.com/AravindR-K/Quiz-Master.git
 cd Quiz-Master
 ```
 
-### 2. Backend Configuration
-Open the `Backend` directory and install dependencies:
-```bash
-cd Backend
-npm install
-```
+#### **Step 2: Configure and Run Backend Server**
+1.  Navigate into the `Backend` directory:
+    ```bash
+    cd Backend
+    ```
+2.  Install all backend packages:
+    ```bash
+    npm install
+    ```
+3.  Create a `.env` file in the `Backend` folder to configure local credentials:
+    ```env
+    PORT=3000
+    MONGODB_URI=mongodb://127.0.0.1:27017/hireguru
+    JWT_SECRET=super_secure_hire_guru_jwt_token_secret_key_98765
+    OLLAMA_URL=http://127.0.0.1:11434
+    OLLAMA_MODEL=llama3.2
+    ```
+4.  **Seed the Database**: Populate default administrative, staff, candidate accounts, and default questionnaires:
+    ```bash
+    npm run seed
+    ```
+5.  Start the Backend Node development server:
+    ```bash
+    npm run dev
+    ```
+    *The server will boot and listen on: `http://localhost:3000`*
 
-Create a `.env` file inside the `Backend` folder:
-```env
-PORT=3000
-MONGODB_URI=your_mongodb_connection_uri
-JWT_SECRET=your_secure_jwt_secret_key
-OLLAMA_URL=http://localhost:11434
-```
-
-To seed the initial administrative accounts and sample data:
-```bash
-npm run seed
-```
-
-Start the backend node dev server:
-```bash
-npm run dev
-```
-
-### 3. Frontend Setup
-Open a new terminal session in the project root:
-```bash
-cd Frontend
-npm install
-```
-
-Start the Angular server:
-```bash
-npm run start
-# or: ng serve
-```
-Open [http://localhost:4200/](http://localhost:4200/) in your web browser.
+#### **Step 3: Configure and Run Frontend Client**
+1.  Open a new terminal window or tab, return to the project root, and enter the `Frontend` folder:
+    ```bash
+    cd Frontend
+    ```
+2.  Install all frontend Angular packages:
+    ```bash
+    npm install
+    ```
+3.  Start the Angular local web server:
+    ```bash
+    npm run start
+    ```
+    *The frontend will run and serve on: `http://localhost:4200`*
 
 ---
 
-## 🔑 Seeding / Default Login Credentials
+## 🔑 Default Login Credentials (After Seeding)
 
-If the database seed script is executed successfully, use the following details to log in and inspect the dashboards:
+Once you navigate to `http://localhost:4200/login`, you can inspect each role's dashboard panel using these pre-seeded profiles:
 
-*   **Administrator**: `admin@quizapp.com` / `admin123`
-*   **HR Coordinator**: `hr@quizapp.com` / `hr123`
-*   **Project Manager**: `pm@quizapp.com` / `pm123`
-*   **Interviewer**: `interviewer@quizapp.com` / `interviewer123`
-*   **Sample Candidate**: `candidate@quizapp.com` / `candidate123`
+| Role | Email Address | Password |
+| :--- | :--- | :--- |
+| **Administrator** | `admin@quizapp.com` | `admin123` |
+| **HR Coordinator** | `hr@quizapp.com` | `hr123` |
+| **Project Manager (PM)** | `pm@quizapp.com` | `pm123` |
+| **Interviewer** | `interviewer@quizapp.com` | `interviewer123` |
+| **Candidate (Student)** | `candidate@quizapp.com` | `candidate123` |
 
 ---
 
