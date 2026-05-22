@@ -146,10 +146,6 @@ Once you navigate to `http://localhost:4200/login`, you can inspect each role's 
 | Role | Email Address | Password |
 | :--- | :--- | :--- |
 | **Administrator** | `admin@quizapp.com` | `admin123` |
-| **HR Coordinator** | `hr@quizapp.com` | `hr123` |
-| **Project Manager (PM)** | `pm@quizapp.com` | `pm123` |
-| **Interviewer** | `interviewer@quizapp.com` | `interviewer123` |
-| **Candidate (Student)** | `candidate@quizapp.com` | `candidate123` |
 
 ---
 
