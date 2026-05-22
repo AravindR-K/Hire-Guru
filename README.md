@@ -6,7 +6,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-9.4-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Ollama](https://img.shields.io/badge/Ollama-AI-0052FF?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.com/)
 
-**Hire Guru** (formerly QuizMaster) is a premium, enterprise-grade Interview & Candidate Assessment Portal built on the robust **MEAN stack** (MongoDB, Express, Angular, Node.js). Designed for modern recruitment operations, it combines role-based hiring dashboards with a secure, browser-locked candidate test-taking engine, local AI quiz builders, and digital canvas signature compliance checks.
+**Hire Guru** is a premium, enterprise-grade Interview & Candidate Assessment Portal built on the robust **MEAN stack** (MongoDB, Express, Angular, Node.js). Designed for modern recruitment operations, it combines role-based hiring dashboards with a secure, browser-locked candidate test-taking engine, local AI quiz builders, and digital canvas signature compliance checks.
 
 ---
 
