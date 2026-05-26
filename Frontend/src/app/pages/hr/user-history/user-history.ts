@@ -191,6 +191,17 @@ export class HRUserHistoryComponent implements OnInit {
     const q2Name = q2?.quizId?.title || q2?.title || '';
     const q2Score = (q2?.score != null) ? `${q2.score}/${q2.totalMarks}` : '';
 
+    const _lcm: Record<string, string> = { easy: 'BEG', medium: 'INT', hard: 'ADV' };
+    const makeQuizId = (quiz: any, idx: number): string => {
+      if (!quiz) return '';
+      const qd = quiz.quizId || {};
+      const topic = (qd.category || 'General').replace(/\s+/g, '_');
+      const code = _lcm[(qd.difficulty || 'easy').toLowerCase()] || 'BEG';
+      return `Q_${topic}_${code}_${String(idx + 1).padStart(3, '0')}`;
+    };
+    const q1Id = makeQuizId(q1, 0);
+    const q2Id = makeQuizId(q2, 1);
+
     const evals = interview.evaluations || [];
     const ivEval = evals.find((e: any) => e.evaluatorRole === 'interviewer');
     const pmEval = evals.find((e: any) => e.evaluatorRole === 'pm');
@@ -229,32 +240,117 @@ export class HRUserHistoryComponent implements OnInit {
 <title>ITL Evaluation - ${candidateName}</title><style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Arial,sans-serif;background:#fff;color:#000;padding:24px;font-size:13px;}
-.page-wrap{max-width:780px;margin:0 auto;border:1px solid #ccc;}
+.page-wrap{max-width:820px;margin:0 auto;border:1px solid #bbb;box-shadow: 0 4px 12px rgba(0,0,0,0.1);}
 .header{background:#4472C4;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;}
-.header h1{color:#fff;font-size:16px;font-weight:bold;font-style:italic;text-decoration:underline;}
+.header h1{color:#fff;font-size:24px;font-weight:bold;}
 .logo-wrap img{height:52px;object-fit:contain;}
 .info-table{width:100%;border-collapse:collapse;}
-.info-table td{border:1px solid #bbb;padding:6px 10px;vertical-align:middle;}
-.info-table .label{font-weight:bold;background:#fff;width:160px;white-space:nowrap;}
-.info-table .value{background:#fff;color:#444;font-style:italic;}
-.comments-section{border:1px solid #bbb;border-top:none;padding:10px 16px;}
-.comments-label{font-weight:bold;margin-bottom:6px;}
-.comments-text{min-height:65px;font-size:13px;font-family:Arial,sans-serif;color:#333;line-height:1.5;padding:4px 0;}
-.rec-row{border:1px solid #bbb;border-top:none;padding:8px 16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.info-table td{border:1px solid #bbb;padding:8px 12px;vertical-align:middle;}
+.info-table .label{font-weight:bold;background:#f5f5f5;width:170px;white-space:nowrap;}
+.info-table .value{background:#fff;color:#222;}
+.comments-section{border:1px solid #bbb;border-top:none;padding:12px 16px;background:#fff;}
+.comments-label{font-weight:bold;margin-bottom:6px;color:#111;}
+.comments-text{min-height:55px;font-size:13px;font-family:Arial,sans-serif;color:#333;line-height:1.5;padding:4px 0;}
+.rec-row{border:1px solid #bbb;border-top:none;padding:8px 16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:#fcfcfc;}
 .rec-label{font-weight:bold;white-space:nowrap;}
-.sig-row{border:1px solid #bbb;border-top:none;padding:8px 16px;display:flex;align-items:flex-end;gap:40px;}
-.sig-field{display:flex;align-items:flex-end;gap:8px;}
-.sig-field label{font-weight:bold;white-space:nowrap;}
-.sig-line{border-bottom:1px solid #000;min-width:200px;height:18px;font-style:italic;color:#555;font-size:13px;}
-.sig-line-date{min-width:140px;}
-.actions{margin-top:16px;display:flex;justify-content:flex-end;gap:10px;}
-.btn{font-size:13px;font-family:Arial,sans-serif;padding:7px 18px;border-radius:3px;cursor:pointer;border:1px solid #aaa;}
-.btn-print{background:#4472C4;color:#fff;border-color:#3360b0;}
-@media print{body{padding:0;}.actions{display:none;}}
+
+.sig-row{
+  border:1px solid #bbb;
+  border-top:none;
+  padding:12px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:40px;
+  background:#fff;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.sig-field{
+  display:flex;
+  align-items:flex-end;
+  gap:10px;
+  flex:1;
+}
+
+.sig-field label{
+  font-weight:bold;
+  white-space:nowrap;
+  font-size:13px;
+}
+
+.signature-box{
+  border-bottom:1.5px solid #222;
+  width:180px;          
+  height:30px;          
+  display:flex;
+  justify-content:center;
+  align-items:flex-end;
+  padding-bottom:3px;
+}
+
+.signature-box img{
+  max-height:26px;      
+  max-width:160px;       
+  object-fit:contain;
+}
+
+.date-box{
+  border-bottom:1.5px solid #222;
+  width:140px;         
+  height:24px;          
+  display:flex;
+  align-items:flex-end;
+  padding-bottom:2px;
+  font-style:italic;
+  color:#333;
+}
+
+.actions{margin-top:20px;display:flex;justify-content:center;gap:10px;}
+.btn{font-size:14px;font-family:Arial,sans-serif;padding:8px 24px;border-radius:4px;cursor:pointer;border:1px solid #3360b0;font-weight:bold;}
+.btn-print{background:#4472C4;color:#fff;}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 12mm;
+  }
+  body {
+    padding: 0;
+    font-size: 13.5px;
+    background: #fff;
+  }
+  .page-wrap {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    border: 1px solid #bbb;
+    box-shadow: none;
+  }
+  .info-table td {
+    padding: 7px 10px;
+  }
+  .comments-section {
+    padding: 10px 14px;
+  }
+  .comments-text {
+    min-height: 52px;
+  }
+  .rec-row {
+    padding: 8px 14px;
+  }
+  .sig-row {
+    padding: 10px 14px;
+  }
+  .actions {
+    display: none;
+  }
+}
 </style></head><body>
 <div class="page-wrap">
   <div class="header">
-    <h1>Intern Interview Evaluation Form</h1>
+    <h1>Candidate Evaluation Form</h1>
     <div class="logo-wrap"><img src="${ITL_LOGO}" alt="ITL Logo"/></div>
   </div>
   <table class="info-table"><tbody>
@@ -271,49 +367,77 @@ body{font-family:Arial,sans-serif;background:#fff;color:#000;padding:24px;font-s
       <td class="label"><strong>Interviewer:</strong></td><td class="value">${interviewerNames}</td>
     </tr>
     <tr>
-      <td class="label">General Aptitude Test QP Set</td><td class="value">${q1Name}</td>
+      <td class="label">General Aptitude Test QP ID</td><td class="value">${q1Id}</td>
       <td class="label"><strong>General Aptitude Test Score</strong></td><td class="value">${q1Score}</td>
     </tr>
     <tr>
-      <td class="label">Technical MCQ Test QP Set</td><td class="value">${q2Name}</td>
+      <td class="label">Technical MCQ Test QP ID</td><td class="value">${q2Id}</td>
       <td class="label"><strong>Technical MCQ Test Score</strong></td><td class="value">${q2Score}</td>
     </tr>
   </tbody></table>
+
   <div class="comments-section" style="margin-top:0;">
     <div class="comments-label">Interviewer's Comments (${ivName}):</div>
     <div class="comments-text">${ivEval?.comments || ''}</div>
   </div>
   <div class="rec-row"><span class="rec-label">Recommendation:</span>${buildCheckboxes('rec1', ivEval?.recommendation || '')}</div>
   <div class="sig-row">
-    <div class="sig-field"><label>Evaluator's Signature:</label><div class="sig-line" style="text-align:center;">${getSigHtml(ivEval, ivName)}</div></div>
-    <div class="sig-field"><label>Date:</label><div class="sig-line sig-line-date">${fmtDate(ivEval?.date)}</div></div>
+    <div class="sig-field">
+      <label>Evaluator's Signature:</label>
+      <div class="signature-box">${getSigHtml(ivEval, ivName)}</div>
+    </div>
+    <div class="sig-field" style="flex:0.55;">
+      <label>Date:</label>
+      <div class="date-box">${fmtDate(ivEval?.date)}</div>
+    </div>
   </div>
+
   <div class="comments-section">
     <div class="comments-label">Project Manager Comments (${pmName}):</div>
     <div class="comments-text">${pmEval?.comments || ''}</div>
   </div>
   <div class="rec-row"><span class="rec-label">Recommendation:</span>${buildCheckboxes('rec2', pmEval?.recommendation || '')}</div>
   <div class="sig-row">
-    <div class="sig-field"><label>Evaluator's Signature:</label><div class="sig-line" style="text-align:center;">${getSigHtml(pmEval, pmName)}</div></div>
-    <div class="sig-field"><label>Date:</label><div class="sig-line sig-line-date">${fmtDate(pmEval?.date)}</div></div>
+    <div class="sig-field">
+      <label>Evaluator's Signature:</label>
+      <div class="signature-box">${getSigHtml(pmEval, pmName)}</div>
+    </div>
+    <div class="sig-field" style="flex:0.55;">
+      <label>Date:</label>
+      <div class="date-box">${fmtDate(pmEval?.date)}</div>
+    </div>
   </div>
+
   <div class="comments-section">
     <div class="comments-label">HR Comments (${hrName}):</div>
     <div class="comments-text" style="min-height:52px;">${hrEval?.comments || ''}</div>
   </div>
   <div class="rec-row"><span class="rec-label">Recommendation:</span>${buildCheckboxes('rec3', hrEval?.recommendation || '')}</div>
   <div class="sig-row">
-    <div class="sig-field"><label>Evaluator's Signature:</label><div class="sig-line" style="text-align:center;">${getSigHtml(hrEval, hrName)}</div></div>
-    <div class="sig-field"><label>Date:</label><div class="sig-line sig-line-date">${fmtDate(hrEval?.date)}</div></div>
+    <div class="sig-field">
+      <label>Evaluator's Signature:</label>
+      <div class="signature-box">${getSigHtml(hrEval, hrName)}</div>
+    </div>
+    <div class="sig-field" style="flex:0.55;">
+      <label>Date:</label>
+      <div class="date-box">${fmtDate(hrEval?.date)}</div>
+    </div>
   </div>
-    <div class="comments-section">
+
+  <div class="comments-section">
     <div class="comments-label">Overall Comments (${adminName}):</div>
     <div class="comments-text" style="min-height:52px;">${adminEval?.comments || ''}</div>
   </div>
   <div class="rec-row"><span class="rec-label">Recommendation:</span>${buildCheckboxes('rec-overall', overallRec)}</div>
   <div class="sig-row">
-    <div class="sig-field"><label>Evaluator's Signature:</label><div class="sig-line" style="text-align:center;">${getSigHtml(adminEval, adminName)}</div></div>
-    <div class="sig-field"><label>Date:</label><div class="sig-line sig-line-date">${fmtDate(adminEval?.date)}</div></div>
+    <div class="sig-field">
+      <label>Evaluator's Signature:</label>
+      <div class="signature-box">${getSigHtml(adminEval, adminName)}</div>
+    </div>
+    <div class="sig-field" style="flex:0.55;">
+      <label>Date:</label>
+      <div class="date-box">${fmtDate(adminEval?.date)}</div>
+    </div>
   </div>
 </div>
 <div class="actions">

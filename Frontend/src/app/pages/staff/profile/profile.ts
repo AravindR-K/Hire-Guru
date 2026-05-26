@@ -85,27 +85,72 @@ export class StaffProfileComponent implements OnInit {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please upload an image file (JPG, PNG, GIF, or WebP)');
+      return;
+    }
+
+    // Validate file size (max 5MB before compression)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = () => {
-      const base64String = reader.result as string;
-      this.isUploadingSignature.set(true);
-      
-      this.authService.uploadSignature({ signature: base64String }).subscribe({
-        next: (res) => {
-          this.isUploadingSignature.set(false);
-          if (res.signature) {
-            // Update user signal
-            this.user.update(u => ({ ...u, signature: res.signature }));
-          }
-        },
-        error: (err) => {
-          this.isUploadingSignature.set(false);
-          alert(err.error?.message || 'Error uploading signature');
+    reader.onload = (e: any) => {
+      const img = new Image();
+      img.onload = () => {
+        // Resize to signature-appropriate dimensions and compress as JPEG
+        const MAX_WIDTH = 600;
+        const MAX_HEIGHT = 200;
+        let width = img.width;
+        let height = img.height;
+
+        // Scale down proportionally if needed
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
         }
-      });
+        if (height > MAX_HEIGHT) {
+          width = Math.round((width * MAX_HEIGHT) / height);
+          height = MAX_HEIGHT;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d')!;
+        // White background so transparent PNGs look clean
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Export as JPEG at 80% quality (much smaller than raw PNG base64)
+        const base64String = canvas.toDataURL('image/jpeg', 0.8);
+
+        this.isUploadingSignature.set(true);
+        this.authService.uploadSignature({ signature: base64String }).subscribe({
+          next: (res) => {
+            this.isUploadingSignature.set(false);
+            if (res.signature) {
+              this.user.update(u => ({ ...u, signature: res.signature }));
+            }
+          },
+          error: (err) => {
+            this.isUploadingSignature.set(false);
+            alert(err.error?.message || 'Error uploading signature. Please try again.');
+          }
+        });
+      };
+      img.onerror = () => {
+        alert('Failed to load image. Please try a different file.');
+      };
+      img.src = e.target.result;
     };
     reader.onerror = () => {
-      alert('Failed to read file');
+      alert('Failed to read file. Please try again.');
     };
     reader.readAsDataURL(file);
   }

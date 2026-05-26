@@ -47,6 +47,7 @@
                     <input type="file" accept="image/*" style="display: none;" (change)="uploadSignature($event)">
                   </label>
                 </div>
+                <p style="margin-top: 8px; font-size: 12px; color: #666;">Valid formats: JPG, PNG, GIF, WebP (Max 5MB)</p>
               } @else {
                 <div class="empty-state" style="padding: 40px 20px;">
                   <span class="material-symbols-rounded">draw</span>
@@ -57,6 +58,7 @@
                     @else { <span class="material-symbols-rounded">upload</span> Upload Signature }
                     <input type="file" accept="image/*" style="display: none;" (change)="uploadSignature($event)">
                   </label>
+                  <p style="margin-top: 8px; font-size: 12px; color: #666;">Valid formats: JPG, PNG, GIF, WebP (Max 5MB)</p>
                 </div>
               }
             </div>
