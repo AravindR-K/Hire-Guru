@@ -1,4 +1,4 @@
-# 🎓 Hire Guru — Secure Smart Interview & Assessment Portal
+# 🎓 Hire Guru — Secure Interview & Assessment Portal
 
 [![Angular](https://img.shields.io/badge/Angular-18-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io/)
 [![Node.js](https://img.shields.io/badge/Node.js-24-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
@@ -6,7 +6,7 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-9.4-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 [![Ollama](https://img.shields.io/badge/Ollama-AI-0052FF?style=for-the-badge&logo=ollama&logoColor=white)](https://ollama.com/)
 
-**Hire Guru** (formerly QuizMaster) is a premium, enterprise-grade Interview & Candidate Assessment Portal built on the robust **MEAN stack** (MongoDB, Express, Angular, Node.js). Designed for modern recruitment operations, it combines role-based hiring dashboards with a secure, browser-locked candidate test-taking engine, local AI quiz builders, and digital canvas signature compliance checks.
+**Hire Guru** is a premium, enterprise-grade Interview & Candidate Assessment Portal built on the robust **MEAN stack** (MongoDB, Express, Angular, Node.js). Designed for modern recruitment operations, it combines role-based hiring dashboards with a secure, browser-locked candidate test-taking engine, local AI quiz builders, and digital canvas signature compliance checks.
 
 ---
 
@@ -146,10 +146,6 @@ Once you navigate to `http://localhost:4200/login`, you can inspect each role's 
 | Role | Email Address | Password |
 | :--- | :--- | :--- |
 | **Administrator** | `admin@quizapp.com` | `admin123` |
-| **HR Coordinator** | `hr@quizapp.com` | `hr123` |
-| **Project Manager (PM)** | `pm@quizapp.com` | `pm123` |
-| **Interviewer** | `interviewer@quizapp.com` | `interviewer123` |
-| **Candidate (Student)** | `candidate@quizapp.com` | `candidate123` |
 
 ---
 
