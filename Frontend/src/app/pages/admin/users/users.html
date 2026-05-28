@@ -1,12 +1,17 @@
 <div class="page-container animate-fade-in">
-  <div class="page-header" style="display: flex; align-items: center; gap: 16px;">
-    <button class="icon-btn" (click)="goBack()" style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px; border-radius: 12px; cursor: pointer; color: var(--text-primary); transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='var(--bg-card)'">
-      <span class="material-symbols-rounded">arrow_back</span>
-    </button>
-    <div>
-      <h1 style="margin: 0; font-size: 24px;">Student Users</h1>
-      <p style="margin: 4px 0 0;" class="page-subtitle">View and manage registered students</p>
+  <div class="page-header" style="display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <button class="icon-btn" (click)="goBack()" style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 8px; border-radius: 12px; cursor: pointer; color: var(--text-primary); transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='var(--bg-card)'">
+        <span class="material-symbols-rounded">arrow_back</span>
+      </button>
+      <div>
+        <h1 style="margin: 0; font-size: 24px;">Student Users</h1>
+        <p style="margin: 4px 0 0;" class="page-subtitle">View and manage registered students</p>
+      </div>
     </div>
+    <button class="btn btn-primary" (click)="openCreateModal()">
+      <span class="material-symbols-rounded">person_add</span> Create Student
+    </button>
   </div>
 
     <div class="filter-tabs">
@@ -43,7 +48,10 @@
             
             <div class="status-dot" [class.online]="user.isLoggedIn" title="Online Status"></div>
             
-            <button class="action-btn text-danger ml-auto" (click)="$event.preventDefault(); $event.stopPropagation(); deleteUser(user._id)" title="Delete Student">
+            <button class="action-btn text-primary ml-auto" style="margin-right: 8px;" (click)="$event.preventDefault(); $event.stopPropagation(); openEditModal(user)" title="Edit Student">
+              <span class="material-symbols-rounded">edit</span>
+            </button>
+            <button class="action-btn text-danger" (click)="$event.preventDefault(); $event.stopPropagation(); deleteUser(user._id)" title="Delete Student">
               <span class="material-symbols-rounded">delete</span>
             </button>
             
@@ -52,4 +60,50 @@
         }
       </div>
     }
+
 </div>
+
+<!-- ─── Create / Edit Student Modal ───────────────────────────── -->
+@if (showUserModal()) {
+  <div class="student-modal-overlay" (click)="closeModal()">
+    <div class="student-modal-container" (click)="$event.stopPropagation()">
+      <div class="student-modal-header">
+        <h2>{{ isEditMode() ? 'Edit Student' : 'Create Student' }}</h2>
+        <button class="student-modal-close" (click)="closeModal()">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+
+      <div class="student-modal-body">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input class="form-input" [(ngModel)]="userForm.name" placeholder="Enter student's full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address *</label>
+          <input class="form-input" type="email" [(ngModel)]="userForm.email" placeholder="student@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password {{ isEditMode() ? '(Optional)' : '*' }}</label>
+          <input class="form-input" type="password" [(ngModel)]="userForm.password" [placeholder]="isEditMode() ? 'Leave blank to keep current password' : 'Enter initial password'">
+          @if (isEditMode()) {
+            <small class="form-hint">Change this only if the student forgot their password.</small>
+          }
+        </div>
+      </div>
+
+      <div class="student-modal-footer">
+        <button class="btn btn-outline" (click)="closeModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveUser()" [disabled]="savingUser()">
+          @if (savingUser()) {
+            <div class="spinner spinner-sm"></div> Saving...
+          } @else {
+            <span class="material-symbols-rounded">save</span>
+            {{ isEditMode() ? 'Save Changes' : 'Create Student' }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
